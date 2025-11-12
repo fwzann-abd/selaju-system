@@ -1,6 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\MenuManagementController;
+use App\Http\Controllers\Admin\ModuleManagementController;
+use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,8 +17,29 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
+// Menu API Routes
+Route::prefix('api/menus')->middleware('auth')->group(function () {
+    Route::get('/sidebar', [MenuController::class, 'sidebar']);
+    Route::get('/', [MenuController::class, 'index']);
+    Route::get('/{id}', [MenuController::class, 'show']);
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Keep old paths working: redirect /dashboard and /admin/dashboard -> /admin
+    Route::redirect('/dashboard', '/admin');
+    Route::redirect('/admin/dashboard', '/admin');
+
+    Route::get('/admin', [DashboardController::class, 'index'])->name('dashboard');
+
+    // User Management Routes (now under /admin)
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::resource('users', UserManagementController::class);
+        Route::resource('menus', MenuManagementController::class);
+        Route::resource('modules', ModuleManagementController::class);
+        // Article management
+        Route::resource('article-categories', \App\Http\Controllers\Admin\ArticleCategoryController::class);
+        Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
+    }); 
 });
 
 Route::middleware('auth')->group(function () {

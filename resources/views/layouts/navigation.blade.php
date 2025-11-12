@@ -1,9 +1,27 @@
 <nav x-data="{ open: false }"
     class="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
     <div class="flex items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <!-- Toggle sidebar visibility (hide/show completely) -->
         <button type="button"
-            class="-ml-2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 sm:-ml-3 lg:-ml-5"
-            @click="$store.layout.toggleMobileSidebar()" aria-label="Toggle sidebar">
+            class="hidden lg:block -ml-2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+            @click="$store.layout.toggleSidebarVisibility()"
+            :aria-label="$store.layout.sidebarVisible ? 'Hide sidebar' : 'Show sidebar'"
+            :title="$store.layout.sidebarVisible ? 'Hide sidebar' : 'Show sidebar'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      x-show="$store.layout.sidebarVisible"
+                      d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      x-show="!$store.layout.sidebarVisible"
+                      d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+        </button>
+
+        <!-- Mobile sidebar toggle -->
+        <button type="button"
+            class="-ml-2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 sm:-ml-3 lg:hidden"
+            @click="$store.layout.toggleMobileSidebar()" aria-label="Toggle mobile sidebar">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" />
@@ -17,7 +35,7 @@
                     <span class="text-base font-semibold text-slate-900 dark:text-white">{{ Auth::user()->name }}</span>
                 </div>
             </div>
-            
+
             <div class="flex items-center gap-2">
                 <div class="hidden md:block">
                     <label class="relative block">

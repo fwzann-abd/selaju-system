@@ -17,6 +17,11 @@
         integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+    <!-- jQuery (required by some icon pickers) and FontAwesome IconPicker (CDN) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJ+Y3k5QvQv4qkQ5Q5v5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fontawesome-iconpicker/3.2.0/css/fontawesome-iconpicker.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontawesome-iconpicker/3.2.0/js/fontawesome-iconpicker.min.js" crossorigin="anonymous"></script>
+
     <!-- SweetAlert2 (load early so pages can call Swal) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -27,10 +32,28 @@
 <body class="font-sans antialiased bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-200"
     x-data="{}" x-bind:class="{ 'overflow-hidden': $store.layout.mobileSidebarOpen }"
     x-on:keydown.window.escape="$store.layout.closeMobileSidebar()">
-    <div class="min-h-screen flex">
+    <div class="min-h-screen">
         @include('layouts.sidebar')
 
-        <div class="flex min-h-screen flex-1 flex-col">
+        <!-- Floating sidebar toggle button (when sidebar is hidden) -->
+        <button type="button"
+            x-show="!$store.layout.sidebarVisible"
+            x-transition.opacity
+            class="fixed bottom-6 left-6 z-50 hidden lg:flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition-all hover:bg-indigo-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            @click="$store.layout.showSidebar()"
+            aria-label="Show sidebar"
+            title="Show sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+        </button>
+
+        <div class="flex min-h-screen flex-1 flex-col transition-all duration-200"
+             :class="{
+                'lg:ml-72': $store.layout.sidebarVisible && $store.layout.sidebarExpanded,
+                'lg:ml-20': $store.layout.sidebarVisible && !$store.layout.sidebarExpanded,
+                'lg:ml-0': !$store.layout.sidebarVisible
+             }">
             @include('layouts.navigation')
 
             @isset($header)
