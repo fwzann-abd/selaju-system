@@ -42,9 +42,8 @@
             </form>
         </div>
     </div>
-</x-app-layout>
 
-@push('scripts')
+    @push('scripts')
     {{-- TinyMCE loaded from local npm package --}}
     <script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
 
@@ -105,5 +104,5 @@
             initTinyMCE('tinymce-editor');
         });
     </script>
-@endpush
-                                </div>
+    @endpush
+</x-app-layout>
