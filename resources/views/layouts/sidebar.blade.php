@@ -8,43 +8,63 @@
         $brandInitials = 'SA';
     }
 
-    $menus = [
-        [
-            'icon' => 'home',
-            'label' => 'Dashboard',
-            'href' => route('dashboard'),
-            'active' => ['dashboard'],
-        ],
-        [
-            'icon' => 'clipboard-list',
-            'label' => 'Orders',
-            'children' => [
-                ['label' => 'Semua Pesanan', 'href' => '#', 'active' => []],
-                ['label' => 'Perlu Tindakan', 'href' => '#', 'active' => []],
-            ],
-        ],
-        [
-            'icon' => 'newspaper',
-            'label' => 'Konten',
-            'children' => [
-                ['label' => 'Halaman', 'href' => '#', 'active' => []],
-                ['label' => 'Media', 'href' => '#', 'active' => []],
-            ],
-        ],
-        [
-            'icon' => 'cog',
-            'label' => 'Pengaturan',
-            'href' => route('profile.edit'),
-            'active' => ['profile.*'],
-        ],
-    ];
+    // Get dynamic menus from API
+    $menus = [];
+    try {
+        $response = app('App\Http\Controllers\MenuController')->sidebar(request());
+        $responseData = $response->getData(true);
 
-    $navBaseClasses = 'group flex w-full items-center rounded-xl py-3 text-sm font-medium transition-colors';
+        if ($responseData['success']) {
+            foreach ($responseData['data'] as $menu) {
+                $menuItem = [
+                    'icon' => str_replace('fa-', '', $menu['icon'] ?? 'home'),
+                    'label' => $menu['name'],
+                ];
+
+                if (count($menu['modules']) === 1) {
+                    // Single module - direct link
+                    $module = $menu['modules'][0];
+                    $menuItem['href'] = $module['url'] ?? '#';
+                    $menuItem['active'] = [$module['identifiers'] ?? ''];
+                } elseif (count($menu['modules']) > 1) {
+                    // Multiple modules - dropdown
+                    $menuItem['children'] = [];
+                    foreach ($menu['modules'] as $module) {
+                        $menuItem['children'][] = [
+                            'label' => $module['name'],
+                            'href' => $module['url'] ?? '#',
+                            'active' => [$module['identifiers'] ?? ''],
+                        ];
+                    }
+                }
+
+                $menus[] = $menuItem;
+            }
+        }
+    } catch (\Exception $e) {
+        // Fallback to hardcoded menus if API fails
+        $menus = [
+            [
+                'icon' => 'home',
+                'label' => 'Dashboard',
+                'href' => route('dashboard'),
+                'active' => ['dashboard'],
+            ],
+            [
+                'icon' => 'cog',
+                'label' => 'Pengaturan',
+                'href' => route('profile.edit'),
+                'active' => ['profile.*'],
+            ],
+        ];
+    }
+
+    $navBaseClasses = 'group flex w-full items-center rounded-xl py-3 text-sm font-medium transition-colors cursor-pointer';
     $navExpandedSpacing = 'px-4 gap-3';
     $navCollapsedSpacing = 'px-3 justify-center';
     $navActiveClasses = 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-200';
     $navInactiveClasses = 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800';
-    $childNavBaseClasses = 'flex items-center gap-3 rounded-xl px-4 py-2 text-sm transition-colors';
+    $childNavBaseClasses = 'flex items-center gap-3 rounded-xl px-4 py-2 text-sm transition-colors cursor-pointer';
     $childNavActiveClasses = 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-200';
     $childNavInactiveClasses = 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800';
     $iconBaseClasses = 'h-5 w-5 flex-shrink-0 transition-colors';
@@ -185,8 +205,13 @@
     </aside>
 
     <aside
-        class="hidden h-screen w-20 flex-col border-r border-slate-200 bg-white/90 px-3 py-6 text-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 lg:flex"
-        :class="$store.layout.sidebarExpanded ? 'lg:w-72 lg:px-5' : 'lg:w-20'"
+        class="fixed inset-y-0 left-0 z-40 h-screen w-20 flex-col border-r border-slate-200 bg-white/90 px-3 py-6 text-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/90"
+        :class="{
+            'hidden lg:flex': $store.layout.sidebarVisible,
+            'hidden': !$store.layout.sidebarVisible,
+            'lg:w-72 lg:px-5': $store.layout.sidebarExpanded,
+            'lg:w-20': !$store.layout.sidebarExpanded
+        }"
     >
         <div class="flex items-center justify-between" :class="$store.layout.sidebarExpanded ? '' : 'justify-center'">
             <div class="flex items-center gap-3" :class="$store.layout.sidebarExpanded ? '' : 'justify-center'">

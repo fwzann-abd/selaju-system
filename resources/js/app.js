@@ -6,11 +6,13 @@ window.Alpine = Alpine;
 
 Alpine.store('layout', {
     sidebarExpanded: true,
+    sidebarVisible: true,
     mobileSidebarOpen: false,
     theme: 'light',
 
     init() {
         this.sidebarExpanded = JSON.parse(localStorage.getItem('sidebarExpanded') ?? 'true');
+        this.sidebarVisible = JSON.parse(localStorage.getItem('sidebarVisible') ?? 'true');
         this.persistSidebarState();
 
         const storedTheme = localStorage.getItem('theme');
@@ -30,8 +32,26 @@ Alpine.store('layout', {
         this.mobileSidebarOpen = false;
     },
 
+    hideSidebar() {
+        this.sidebarVisible = false;
+        this.persistSidebarState();
+        this.mobileSidebarOpen = false;
+    },
+
+    showSidebar() {
+        this.sidebarVisible = true;
+        this.persistSidebarState();
+    },
+
+    toggleSidebarVisibility() {
+        this.sidebarVisible = !this.sidebarVisible;
+        this.persistSidebarState();
+        this.mobileSidebarOpen = false;
+    },
+
     persistSidebarState() {
         localStorage.setItem('sidebarExpanded', JSON.stringify(this.sidebarExpanded));
+        localStorage.setItem('sidebarVisible', JSON.stringify(this.sidebarVisible));
     },
 
     toggleMobileSidebar() {
