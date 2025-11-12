@@ -45,8 +45,8 @@
 </x-app-layout>
 
 @push('scripts')
-    {{-- TinyMCE from cdnjs (kept in sync with system-nempogarut) --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+    {{-- TinyMCE loaded from local npm package --}}
+    <script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
 
     <style>
     /* TinyMCE container styling to match dark mode */
