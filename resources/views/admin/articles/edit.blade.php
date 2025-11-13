@@ -44,7 +44,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Content</label>
-                    <textarea id="tinymce-editor" name="content" rows="8" class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">{{ old('content', $article->content ?? 'Example content') }}</textarea>
+                    <textarea id="article-editor" name="content" rows="8" class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">{{ old('content', $article->content ?? 'Example content') }}</textarea>
                 </div>
                 <div class="flex justify-end">
                     <a href="{{ route('admin.articles.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm">Cancel</a>
@@ -55,58 +55,81 @@
     </div>
 
     @push('scripts')
-    {{-- TinyMCE loaded from local npm package --}}
-    <script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/src/lang/en.js"></script>
 
     <style>
-    /* TinyMCE container styling to match dark mode */
-    .tox-tinymce { border-radius: .5rem; }
-    .dark .tox-tinymce { background-color: #0f172a; color: #fff; }
+    .sun-editor {
+        border-radius: .75rem;
+        overflow: hidden;
+    }
+
+    .dark .sun-editor .se-toolbar,
+    .dark .sun-editor .se-toolbar-more-layer,
+    .dark .sun-editor .se-btn-module-border {
+        background-color: #111b2e;
+        color: #f1f5f9;
+        border-color: #1f2b44;
+    }
+
+    .dark .sun-editor .se-wrapper-inner {
+        background-color: #0f172a;
+        color: #f8fafc;
+    }
     </style>
 
     <script>
-        function initTinyMCE(editorId = 'tinymce-editor') {
-            if (typeof tinymce === 'undefined') {
-                return setTimeout(function () { initTinyMCE(editorId); }, 100);
+        function initSunEditor(editorId = 'article-editor') {
+            if (typeof SUNEDITOR === 'undefined') {
+                return setTimeout(function () { initSunEditor(editorId); }, 100);
             }
 
-            const existing = tinymce.get(editorId);
-            if (existing) existing.remove();
+            const textarea = document.getElementById(editorId);
+            if (!textarea) return;
 
-            const dark = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark');
+            if (textarea._sunEditorInstance) {
+                textarea._sunEditorInstance.destroy();
+            }
 
-            tinymce.init({
-                selector: '#' + editorId,
+            const editor = SUNEDITOR.create(textarea, {
+                lang: SUNEDITOR_LANG['en'],
                 height: 420,
-                menubar: false,
-                plugins: 'lists link image media table code advlist autolink charmap preview paste',
-                toolbar: 'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | code',
-                skin: dark ? 'oxide-dark' : 'oxide',
-                content_css: dark ? 'dark' : 'default',
-                relative_urls: false,
-                remove_script_host: false,
-                convert_urls: true,
-                images_upload_handler: function (blobInfo, success, failure) {
-                    const reader = new FileReader();
-                    reader.onload = function () { success(reader.result); };
-                    reader.readAsDataURL(blobInfo.blob());
-                }
+                width: '100%',
+                minHeight: '420px',
+                buttonList: [
+                    ['undo', 'redo'],
+                    ['font', 'fontSize', 'formatBlock'],
+                    ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript', 'removeFormat'],
+                    ['fontColor', 'hiliteColor'],
+                    ['outdent', 'indent', 'align', 'list', 'lineHeight'],
+                    ['link', 'image', 'video', 'audio', 'table', 'codeView'],
+                    ['fullScreen', 'showBlocks', 'preview', 'print']
+                ],
+                imageUploadUrl: '',
             });
 
-            const textarea = document.getElementById(editorId);
-            if (textarea) {
-                const form = textarea.closest('form');
-                if (form && form.dataset.tinymceSync !== 'true') {
-                    form.addEventListener('submit', function () {
-                        if (typeof tinymce !== 'undefined') tinymce.triggerSave();
-                    });
-                    form.dataset.tinymceSync = 'true';
-                }
+            textarea._sunEditorInstance = editor;
+
+            const form = textarea.closest('form');
+            if (form && form.dataset.suneditorSync !== 'true') {
+                form.addEventListener('submit', function () {
+                    textarea.value = editor.getContents(true);
+                });
+                form.dataset.suneditorSync = 'true';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            initTinyMCE('tinymce-editor');
+        function runWhenReady(callback) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', callback, { once: true });
+            } else {
+                callback();
+            }
+        }
+
+        runWhenReady(function () {
+            initSunEditor('article-editor');
         });
     </script>
     @endpush
