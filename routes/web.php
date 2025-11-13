@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
+use App\Http\Controllers\Admin\ParticipantController;
 use App\Http\Controllers\Admin\SchoolController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ArticleController;
@@ -41,6 +42,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('article-categories', \App\Http\Controllers\Admin\ArticleCategoryController::class);
         Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
         Route::resource('schools', SchoolController::class)->except('show');
+        // Participant management
+        Route::resource('participants', ParticipantController::class);
     });
 });
 

@@ -21,7 +21,27 @@
 
     <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <form action="{{ route('admin.schools.update', $school) }}" method="POST"
-              x-data="schoolForm({ initialName: @js(old('name', $school->name)), initialSlug: @js(old('slug', $school->slug)) })"
+              x-data="(function(){ return {
+                  name: @js(old('name', $school->name)),
+                  slug: @js(old('slug', $school->slug)),
+                  slugTouched: (@js(old('slug', $school->slug)) ? true : false),
+                  init() {
+                      if (!this.slug) this.slug = this.slugify(this.name)
+                  },
+                  slugify(value) {
+                      return (value ?? '').toString().toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+                  },
+                  handleNameInput(e) {
+                      this.name = e?.target?.value ?? this.name
+                      if (!this.slugTouched || !this.slug) {
+                          this.slug = this.slugify(this.name)
+                      }
+                  },
+                  handleSlugInput(e) {
+                      this.slug = this.slugify(e?.target?.value ?? '')
+                      this.slugTouched = true
+                  }
+              } })()"
               class="space-y-6">
             @csrf
             @method('PUT')
@@ -29,9 +49,9 @@
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
                     <label for="name" class="text-sm font-semibold text-slate-600 dark:text-slate-200">Nama Sekolah</label>
-                    <input id="name" name="name" type="text" x-model="name" @input="handleNameInput"
-                           required
-                           class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    <input id="name" name="name" type="text" x-model="name" @input="handleNameInput($event)" autocomplete="off"
+                  required
+                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 transition focus:border-indigo-500 focus:bg-white focus:dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                            placeholder="SMKN 1 Selaju">
                     @error('name')
                         <p class="mt-1 text-xs text-[#EF4444]">{{ $message }}</p>
@@ -39,9 +59,9 @@
                 </div>
                 <div>
                     <label for="slug" class="text-sm font-semibold text-slate-600 dark:text-slate-200">Slug</label>
-                    <input id="slug" name="slug" type="text" x-model="slug" @input="handleSlugInput" @focus="slugTouched = true"
-                           required
-                           class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  <input id="slug" name="slug" type="text" x-bind:value="slug" readonly aria-readonly="true" autocomplete="off"
+                  required
+                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 transition focus:border-indigo-500 focus:bg-white focus:dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white cursor-not-allowed"
                            placeholder="smkn-1-selaju">
                     <p class="mt-1 text-xs text-slate-400">Sesuaikan slug bila diperlukan.</p>
                     @error('slug')
@@ -81,9 +101,10 @@
         <script>
             document.addEventListener('alpine:init', () => {
                 Alpine.data('schoolForm', ({ initialName = '', initialSlug = '' } = {}) => ({
-                    name: initialName,
-                    slug: initialSlug,
-                    slugTouched: initialSlug.length > 0,
+                    // ensure initial values are strings; guard against unexpected objects
+                    name: (typeof initialName === 'string' ? initialName : ''),
+                    slug: (typeof initialSlug === 'string' ? initialSlug : ''),
+                    slugTouched: (typeof initialSlug === 'string' ? initialSlug.length > 0 : false),
                     init() {
                         if (!this.slug) {
                             this.slug = this.slugify(this.name)
@@ -97,13 +118,14 @@
                             .replace(/[^a-z0-9]+/g, '-')
                             .replace(/^-+|-+$/g, '')
                     },
-                    handleNameInput() {
+                    handleNameInput(e) {
+                        this.name = e?.target?.value ?? this.name
                         if (!this.slugTouched || !this.slug) {
                             this.slug = this.slugify(this.name)
                         }
                     },
-                    handleSlugInput() {
-                        this.slug = this.slugify(this.slug)
+                    handleSlugInput(e) {
+                        this.slug = this.slugify(e?.target?.value ?? '')
                         this.slugTouched = true
                     }
                 }))
