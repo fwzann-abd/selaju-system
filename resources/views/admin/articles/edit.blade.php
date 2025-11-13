@@ -78,6 +78,18 @@
         fill: #cbd5f5;
     }
 
+    .dark .sun-editor .se-btn-select .txt,
+    .dark .sun-editor .se-btn-select .txt span,
+    .dark .sun-editor .se-btn-select .se-btn-value {
+        color: #f8fafc;
+    }
+
+    .dark .sun-editor .se-btn-select .se-btn-value::after,
+    .dark .sun-editor .se-btn-select .arrow path {
+        stroke: #f8fafc;
+        fill: #f8fafc;
+    }
+
     .dark .sun-editor .se-toolbar button:hover {
         background-color: #273354;
     }
