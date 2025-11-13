@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
 use App\Http\Controllers\Admin\SchoolController;
-use App\Http\Controllers\Admin\SchoolModuleController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\MenuController;
@@ -41,8 +40,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Article management
         Route::resource('article-categories', \App\Http\Controllers\Admin\ArticleCategoryController::class);
         Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
-        Route::get('schools/config', [SchoolModuleController::class, 'index'])->name('schools.config');
-        Route::post('schools/config', [SchoolModuleController::class, 'store'])->name('schools.config.store');
         Route::resource('schools', SchoolController::class)->except('show');
     }); 
 });

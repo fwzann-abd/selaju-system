@@ -39,11 +39,6 @@
                 </div>
             </form>
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('admin.schools.config') }}"
-                   class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                    <i class="fa-solid fa-gear text-xs"></i>
-                    Konfigurasi Module
-                </a>
                 <a href="{{ route('admin.schools.create') }}"
                    class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
                     <i class="fa-solid fa-plus text-xs"></i>
