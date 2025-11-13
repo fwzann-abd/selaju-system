@@ -137,7 +137,7 @@
                                 }
 
                                 const data = await response.json();
-                                this.participantId = data.participant.uuid;
+                                this.participantId = data.participant.id;
                                 this.step = 2;
                                 await this.loadSchools();
                             } catch (error) {
