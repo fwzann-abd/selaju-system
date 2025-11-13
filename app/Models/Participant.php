@@ -11,6 +11,8 @@ class Participant extends Model
     use HasUuids;
 
     public $incrementing = false;
+    // Primary key column is 'uuid' (migration defines uuid primary key)
+    protected $primaryKey = 'uuid';
     protected $keyType = 'string';
 
     protected $fillable = [

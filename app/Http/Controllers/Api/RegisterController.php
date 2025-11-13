@@ -20,13 +20,21 @@ class RegisterController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:participants,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'username' => ['required', 'string', 'max:255', 'unique:participants,username'],
+            'no_telp' => ['nullable', 'string', 'max:20'],
         ]);
+
+        // Generate unique 8-digit nomor_participant
+        do {
+            $nomor = str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+        } while (Participant::where('nomor_participant', $nomor)->exists());
 
         $participant = Participant::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'username' => $validated['username'],
+            'no_telp' => $validated['no_telp'] ?? null,
+            'nomor_participant' => $nomor,
             'is_active' => true,
         ]);
 
