@@ -52,19 +52,36 @@
     .sun-editor {
         border-radius: .75rem;
         overflow: hidden;
+        border: 1px solid #1f2b44;
     }
 
     .dark .sun-editor .se-toolbar,
     .dark .sun-editor .se-toolbar-more-layer,
     .dark .sun-editor .se-btn-module-border {
-        background-color: #111b2e;
-        color: #f1f5f9;
-        border-color: #1f2b44;
+        background-color: #1c2540;
+        color: #f8fafc;
+        border-color: #243152;
+    }
+
+    .dark .sun-editor .se-toolbar button svg path {
+        fill: #cbd5f5;
+    }
+
+    .dark .sun-editor .se-toolbar button:hover {
+        background-color: #273354;
     }
 
     .dark .sun-editor .se-wrapper-inner {
         background-color: #0f172a;
-        color: #f8fafc;
+        color: #e2e8f0;
+    }
+
+    .dark .sun-editor .se-wrapper-inner a {
+        color: #60a5fa;
+    }
+
+    .sun-editor .se-placeholder {
+        color: #a0aec0;
     }
     </style>
 
