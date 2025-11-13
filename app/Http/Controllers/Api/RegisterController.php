@@ -7,6 +7,7 @@ use App\Models\Participant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -21,6 +22,7 @@ class RegisterController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'username' => ['required', 'string', 'max:255', 'unique:participants,username'],
             'no_telp' => ['nullable', 'string', 'max:20'],
+            'birth_date' => ['nullable', 'date'],
         ]);
 
         // Generate unique 8-digit nomor_participant
@@ -34,13 +36,20 @@ class RegisterController extends Controller
             'password' => Hash::make($validated['password']),
             'username' => $validated['username'],
             'no_telp' => $validated['no_telp'] ?? null,
+            'birth_date' => $validated['birth_date'] ?? null,
             'nomor_participant' => $nomor,
             'is_active' => true,
         ]);
 
+        // Create Sanctum personal access token and return plain token to client
+        // Optionally: to enforce single-device login, uncomment the tokens deletion line below
+        // $participant->tokens()->delete();
+        $plainToken = $participant->createToken('default')->plainTextToken;
+
         return response()->json([
             'message' => 'Participant registered successfully. Please select a school.',
             'participant' => $participant,
+            'token' => $plainToken,
         ], 201);
     }
 
