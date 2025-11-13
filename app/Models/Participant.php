@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Participant extends Model
 {
-    use HasUuids;
+    use HasUuids, HasApiTokens;
 
     public $incrementing = false;
     // Primary key column is 'uuid' (migration defines uuid primary key)

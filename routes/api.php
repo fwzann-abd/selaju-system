@@ -11,10 +11,18 @@ Route::middleware('api')->group(function () {
     Route::get('/schools', [SchoolController::class, 'index']);
     Route::patch('/register/{participant}/school', [RegisterController::class, 'updateSchool']);
 
-    // Protected routes (require auth)
+    // Protected routes (require auth) - using Sanctum personal access tokens
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/user', function (Request $request) {
-            return $request->user();
+        Route::get('/me', function (Request $request) {
+            return response()->json($request->user());
+        });
+        // Revoke current access token (logout)
+        Route::post('/logout', function (Request $request) {
+            $user = $request->user();
+            if ($user && $request->user()->currentAccessToken()) {
+                $request->user()->currentAccessToken()->delete();
+            }
+            return response()->json(['message' => 'Logged out'], 200);
         });
     });
 });
