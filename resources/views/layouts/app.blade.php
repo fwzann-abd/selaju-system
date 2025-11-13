@@ -18,7 +18,7 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- jQuery (required by some icon pickers) and FontAwesome IconPicker (CDN) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJ+Y3k5QvQv4qkQ5Q5v5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fontawesome-iconpicker/3.2.0/css/fontawesome-iconpicker.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fontawesome-iconpicker/3.2.0/js/fontawesome-iconpicker.min.js" crossorigin="anonymous"></script>
 
