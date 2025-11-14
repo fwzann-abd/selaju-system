@@ -48,6 +48,10 @@ Route::middleware('api')->group(function () {
     Route::get('/schools', [SchoolController::class, 'index']);
     Route::patch('/register/{participant}/school', [RegisterController::class, 'updateSchool']);
 
+    // Sejajan public endpoints
+    Route::get('/sejajans', [\App\Http\Controllers\Api\SejajanController::class, 'index']);
+    Route::get('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'show']);
+
     // Protected routes (require auth) - using Sanctum personal access tokens
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', function (Request $request) {
@@ -156,5 +160,10 @@ Route::middleware('api')->group(function () {
             $user->markEmailAsVerified();
             return response()->json(['message' => 'Email verified'], 200);
         });
+
+        // Sejajan protected endpoints (create/update/delete owned stores)
+        Route::post('/sejajans', [\App\Http\Controllers\Api\SejajanController::class, 'store']);
+        Route::put('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'update']);
+        Route::delete('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'destroy']);
     });
 });
