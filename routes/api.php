@@ -24,6 +24,11 @@ Route::middleware('api')->group(function () {
             return response()->json(['message' => 'Account is disabled'], 403);
         }
 
+        // Enforce single-session: remove existing tokens for this user then create a new one
+        if (method_exists($user, 'tokens')) {
+            $user->tokens()->delete();
+        }
+
         // Create token
         $token = $user->createToken('default')->plainTextToken;
 
