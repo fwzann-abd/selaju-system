@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Generation;
 use App\Models\Participant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,18 @@ class RegisterController extends Controller
             $nomor = str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
         } while (Participant::where('nomor_participant', $nomor)->exists());
 
+        // Get active generation
+        $activeGeneration = Generation::where('is_active', true)->first();
+        if (!$activeGeneration) {
+            // Fallback: if no active generation exists, create one
+            $activeGeneration = Generation::create([
+                'name' => 'Generasi Saat Ini',
+                'start_years' => date('Y'),
+                'end_years' => date('Y'),
+                'is_active' => true,
+            ]);
+        }
+
         $participant = Participant::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -39,6 +52,7 @@ class RegisterController extends Controller
             'birth_date' => $validated['birth_date'] ?? null,
             'nomor_participant' => $nomor,
             'is_active' => true,
+            'generation_id' => $activeGeneration->id,
         ]);
 
         // Create Sanctum personal access token and return plain token to client

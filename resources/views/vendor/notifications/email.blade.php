@@ -56,7 +56,7 @@
                                 <hr style="border:none;border-top:1px solid #e6eef6;margin:0 0 18px 0;">
 
                                 <p style="margin:18px 0 0 0;color:#94a3b8;font-size:13px;">
-                                    {{ __("If you're having trouble clicking the \"{{ $actionText ?? 'Verify Email Address' }}\" button, copy and paste the URL below into your web browser:") }}
+                                    {{ __('If you\'re having trouble clicking the ":action" button, copy and paste the URL below into your web browser:', ['action' => $actionText ?? 'Verify Email Address']) }}
                                 </p>
 
                                 <p style="word-break:break-all;margin:8px 0 0 0;color:#3b82f6;font-size:13px;">{{ $actionUrl }}</p>

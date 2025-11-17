@@ -27,6 +27,7 @@ class Participant extends Model implements MustVerifyEmail
     // 'uuid' has been removed since we migrated to 'id' primary key
         'nomor_participant',
         'school_id',
+        'generation_id',
         'username',
         'name',
         'birth_date',
