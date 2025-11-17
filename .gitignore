@@ -22,3 +22,8 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Ignore uploaded module assets (user uploads, build artifacts)
+# Keep module assets out of git; if you need the empty folder tracked add a
+# `.gitkeep` file inside `public/assets/modules/` instead of committing assets.
+/public/assets/modules/
