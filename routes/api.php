@@ -165,5 +165,7 @@ Route::middleware('api')->group(function () {
         Route::post('/sejajans', [\App\Http\Controllers\Api\SejajanController::class, 'store']);
         Route::put('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'update']);
         Route::delete('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'destroy']);
+    // Sejajan product endpoints (owner only)
+    Route::post('/sejajans/{sejajan}/products', [\App\Http\Controllers\Api\SejajanProductController::class, 'store']);
     });
 });

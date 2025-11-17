@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Sejajan;
 use Illuminate\Support\Facades\Validator;
+use App\Helpers\Helper;
 
 class SejajanController extends Controller
 {
@@ -20,13 +21,33 @@ class SejajanController extends Controller
         }
 
         $items = $query->get();
-        return response()->json($items);
+
+        // Normalize photo to filename only for each item (in case older records contain full paths)
+        $items->transform(function ($item) {
+            if (!empty($item->photo)) {
+                $item->photo = preg_replace('/.*[\/\\\\]/', '', $item->photo);
+            }
+            return $item;
+        });
+
+        return response()->json([
+            'data' => $items,
+            'path' => Helper::getPhotoBasePath()
+        ]);
     }
 
     public function show(Sejajan $sejajan)
     {
         $sejajan->load('products');
-        return response()->json($sejajan);
+        // Normalize photo to filename only (strip any stored path)
+        if (!empty($sejajan->photo)) {
+            $sejajan->photo = preg_replace('/.*[\/\\\\]/', '', $sejajan->photo);
+        }
+
+        return response()->json([
+            'data' => $sejajan,
+            'path' => Helper::getPhotoBasePath()
+        ]);
     }
 
     public function store(Request $request)
@@ -38,7 +59,7 @@ class SejajanController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:sejajans,slug',
             'description' => 'nullable|string',
-            'photo' => 'nullable|string',
+            'photo' => 'nullable|image|max:2048', // accept uploaded image
             'is_active' => 'nullable|boolean',
         ]);
 
@@ -46,7 +67,7 @@ class SejajanController extends Controller
             return response()->json(['errors' => $v->errors()], 422);
         }
 
-        $data = $v->validated();
+    $data = $v->validated();
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
             // ensure unique
@@ -59,8 +80,32 @@ class SejajanController extends Controller
 
         $data['participant_id'] = $user->getKey();
 
+        // Handle uploaded photo if present
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            // ensure destination exists inside public
+            $dest = public_path('assets/modules/sejajan/mart');
+            if (! \Illuminate\Support\Facades\File::exists($dest)) {
+                \Illuminate\Support\Facades\File::makeDirectory($dest, 0755, true);
+            }
+
+            $filename = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '_', $file->getClientOriginalName());
+            $file->move($dest, $filename);
+            // store only the filename; the accessor will build the full path
+            $data['photo'] = $filename;
+        }
+
         $sejajan = Sejajan::create($data);
-        return response()->json($sejajan, 201);
+
+        // Ensure response contains filename only
+        if (!empty($sejajan->photo)) {
+            $sejajan->photo = preg_replace('/.*[\/\\\\]/', '', $sejajan->photo);
+        }
+
+        return response()->json([
+            'data' => $sejajan,
+            'path' => Helper::getPhotoBasePath()
+        ], 201);
     }
 
     public function update(Request $request, Sejajan $sejajan)
