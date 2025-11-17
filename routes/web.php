@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\GenerationController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
 use App\Http\Controllers\Admin\ParticipantController;
@@ -44,6 +45,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('article-categories', \App\Http\Controllers\Admin\ArticleCategoryController::class);
         Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
         Route::resource('schools', SchoolController::class)->except('show');
+        Route::resource('generations', GenerationController::class)->except('show');
+        Route::patch('generations/{generation}/toggle-active', [GenerationController::class, 'toggleActive'])->name('generations.toggle-active');
         // Participant management
         Route::resource('participants', ParticipantController::class);
     });
