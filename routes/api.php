@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SchoolController;
 
-Route::middleware('api')->group(function () {
+Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(function () {
     // Public routes
     // API login for SPA clients
     Route::post('/login', function (Request $request) {
