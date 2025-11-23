@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SchoolController;
+use App\Http\Controllers\Api\BookController;
 
 Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(function () {
     // Public routes
@@ -168,4 +169,13 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     // Sejajan product endpoints (owner only)
     Route::post('/sejajans/{sejajan}/products', [\App\Http\Controllers\Api\SejajanProductController::class, 'store']);
     });
+
+    
+    // Book endpoints
+Route::get('/books', [BookController::class, 'index']);
+Route::get('/books/{uuid}', [BookController::class, 'show']);
+Route::post('/books', [BookController::class, 'store']);
+Route::put('/books/{uuid}', [BookController::class, 'update']);
+Route::delete('/books/{uuid}', [BookController::class, 'destroy']);
+
 });
