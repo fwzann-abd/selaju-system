@@ -166,8 +166,12 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         Route::post('/sejajans', [\App\Http\Controllers\Api\SejajanController::class, 'store']);
         Route::put('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'update']);
         Route::delete('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'destroy']);
-    // Sejajan product endpoints (owner only)
-    Route::post('/sejajans/{sejajan}/products', [\App\Http\Controllers\Api\SejajanProductController::class, 'store']);
+    // Sejajan product endpoints (owner only) - support slug parameter
+    Route::post('/sejajans/{sejajanSlug}/products', function (\Illuminate\Http\Request $request, $sejajanSlug) {
+        $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+        $request->merge(['sejajan' => $sejajan]);
+        return app(\App\Http\Controllers\Api\SejajanProductController::class)->store($request, $sejajan);
+    });
     });
 
     
