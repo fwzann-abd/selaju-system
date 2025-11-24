@@ -172,6 +172,34 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         $request->merge(['sejajan' => $sejajan]);
         return app(\App\Http\Controllers\Api\SejajanProductController::class)->store($request, $sejajan);
     });
+
+    Route::get('/sejajans/{sejajanSlug}/products/{productId}', function ($sejajanSlug, $productId) {
+        $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+        $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
+        
+        // Normalize photo to filename only
+        if ($product->photo) {
+            $product->photo = preg_replace('/.*[\/\\\\]/', '', $product->photo);
+        }
+        
+        return response()->json([
+            'data' => $product,
+            'path' => \App\Helpers\Helper::getPhotoBasePath(),
+        ]);
+    });
+
+    Route::put('/sejajans/{sejajanSlug}/products/{productId}', function (\Illuminate\Http\Request $request, $sejajanSlug, $productId) {
+        $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+        $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
+        return app(\App\Http\Controllers\Api\SejajanProductController::class)->update($request, $sejajan, $product);
+    });
+
+    Route::delete('/sejajans/{sejajanSlug}/products/{productId}', function ($sejajanSlug, $productId) {
+        $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+        $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
+        $product->delete();
+        return response()->json(['message' => 'Produk berhasil dihapus'], 200);
+    });
     });
 
 
