@@ -34,6 +34,14 @@ class Sejajan extends Model
     }
 
     /**
+     * Categories in this store.
+     */
+    public function categories(): HasMany
+    {
+        return $this->hasMany(SejajanCategory::class);
+    }
+
+    /**
      * Orders placed in this store.
      */
     public function orders(): HasMany
