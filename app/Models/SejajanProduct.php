@@ -11,7 +11,7 @@ class SejajanProduct extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['sejajan_id', 'name', 'slug', 'description', 'price', 'stock', 'photo', 'is_active'];
+    protected $fillable = ['sejajan_id', 'category_id', 'name', 'slug', 'description', 'price', 'stock', 'photo', 'is_active'];
 
     protected $casts = [
         'price' => 'decimal:2',
@@ -24,6 +24,14 @@ class SejajanProduct extends Model
     public function sejajan(): BelongsTo
     {
         return $this->belongsTo(Sejajan::class);
+    }
+
+    /**
+     * The category this product belongs to.
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(SejajanCategory::class, 'category_id');
     }
 
     /**

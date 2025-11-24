@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
 use App\Http\Controllers\Admin\ParticipantController;
 use App\Http\Controllers\Admin\SchoolController;
+use App\Http\Controllers\Admin\SejajanController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\MenuController;
@@ -49,6 +50,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('generations/{generation}/toggle-active', [GenerationController::class, 'toggleActive'])->name('generations.toggle-active');
         // Participant management
         Route::resource('participants', ParticipantController::class);
+        // Sejajan (Shop) management
+        Route::resource('sejajan', SejajanController::class);
     });
 });
 

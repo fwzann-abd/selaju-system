@@ -166,6 +166,14 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         Route::post('/sejajans', [\App\Http\Controllers\Api\SejajanController::class, 'store']);
         Route::put('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'update']);
         Route::delete('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'destroy']);
+
+        // Sejajan category endpoints (owner only)
+        Route::get('/sejajans/{sejajanSlug}/categories', [\App\Http\Controllers\Api\SejajanCategoryController::class, 'index']);
+        Route::post('/sejajans/{sejajanSlug}/categories', [\App\Http\Controllers\Api\SejajanCategoryController::class, 'store']);
+        Route::get('/sejajans/{sejajanSlug}/categories/{categoryId}', [\App\Http\Controllers\Api\SejajanCategoryController::class, 'show']);
+        Route::put('/sejajans/{sejajanSlug}/categories/{categoryId}', [\App\Http\Controllers\Api\SejajanCategoryController::class, 'update']);
+        Route::delete('/sejajans/{sejajanSlug}/categories/{categoryId}', [\App\Http\Controllers\Api\SejajanCategoryController::class, 'destroy']);
+
     // Sejajan product endpoints (owner only) - support slug parameter
     Route::post('/sejajans/{sejajanSlug}/products', function (\Illuminate\Http\Request $request, $sejajanSlug) {
         $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
