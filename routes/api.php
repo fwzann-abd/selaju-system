@@ -174,7 +174,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     });
     });
 
-    
+
     // Book endpoints
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/{uuid}', [BookController::class, 'show']);
