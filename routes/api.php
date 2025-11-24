@@ -176,12 +176,12 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     Route::get('/sejajans/{sejajanSlug}/products/{productId}', function ($sejajanSlug, $productId) {
         $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
         $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
-        
+
         // Normalize photo to filename only
         if ($product->photo) {
             $product->photo = preg_replace('/.*[\/\\\\]/', '', $product->photo);
         }
-        
+
         return response()->json([
             'data' => $product,
             'path' => \App\Helpers\Helper::getPhotoBasePath(),
