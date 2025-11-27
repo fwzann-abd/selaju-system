@@ -16,6 +16,26 @@ use Illuminate\Validation\ValidationException;
 
 class SejajanOrderController extends Controller
 {
+    public function index(Request $request, $sejajanSlug)
+    {
+        $user = $request->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+        if ($sejajan->participant_id !== $user->getKey()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $orders = SejajanOrder::where('sejajan_id', $sejajan->id)
+            ->with(['items.product', 'participant'])
+            ->latest()
+            ->get();
+
+        return response()->json(['data' => $orders]);
+    }
+
     public function store(Request $request)
     {
         $user = $request->user();
@@ -114,8 +134,36 @@ class SejajanOrderController extends Controller
 
             return response()->json([
                 'message' => 'Order berhasil dibuat',
-                'data' => $order->load('items'),
+                'data' => $order->load(['items.product', 'participant']),
             ], 201);
         });
+    }
+
+    public function update(Request $request, $sejajanSlug, $orderId)
+    {
+        $user = $request->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+        if ($sejajan->participant_id !== $user->getKey()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $order = SejajanOrder::where('sejajan_id', $sejajan->id)
+            ->where('id', $orderId)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['pending', 'processing', 'ready', 'completed', 'cancelled'])],
+        ]);
+
+        $order->update(['status' => $validated['status']]);
+
+        return response()->json([
+            'message' => 'Status pesanan diperbarui',
+            'data' => $order->load(['items.product', 'participant']),
+        ]);
     }
 }
