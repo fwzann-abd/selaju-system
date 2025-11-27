@@ -73,7 +73,7 @@
     $currentUrl = url()->current();
 @endphp
 
-<div x-data="{}" x-cloak>
+<div x-data="{ openAccordion: null }" x-cloak>
     <!-- Mobile sidebar -->
     <div
         x-show="$store.layout.mobileSidebarOpen"
@@ -143,20 +143,20 @@
                     @endphp
 
                     @if ($hasChildren)
-                        <div x-data="{ open: {{ $childActive ? 'true' : 'false' }} }" class="space-y-1">
+                        <div x-data="{ menuId: '{{ $loop->index }}' }" class="space-y-1">
                             <button
                                 type="button"
                                 class="{{ $navBaseClasses }} {{ $isActive ? $navActiveClasses : $navInactiveClasses }} px-4 gap-3 justify-between"
-                                @click="open = !open"
+                                @click="openAccordion = openAccordion === menuId ? null : menuId"
                             >
                                 <span class="flex items-center gap-3">
                                     <x-icon :name="$menu['icon']" class="{{ $iconBaseClasses }} {{ $isActive ? $iconActiveClasses : $iconInactiveClasses }}" />
                                     <span>{{ $menu['label'] }}</span>
                                 </span>
-                                <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="openAccordion === menuId ? 'rotate-180' : ''"></i>
                             </button>
 
-                            <div class="space-y-1 pl-11" x-show="open" x-transition.opacity x-transition.duration.150ms>
+                            <div class="space-y-1 pl-11" x-show="openAccordion === menuId" x-transition.opacity x-transition.duration.150ms>
                                 @foreach ($menu['children'] as $child)
                                     @php
                                         $childHref = $child['href'] ?? '#';
@@ -270,7 +270,7 @@
                     @endphp
 
                     @if ($hasChildren)
-                        <div x-data="{ open: {{ $childActive ? 'true' : 'false' }} }" class="space-y-1">
+                        <div x-data="{ menuId: '{{ $loop->index }}' }" class="space-y-1">
                             <button
                                 type="button"
                                 class="{{ $navBaseClasses }} {{ $isActive ? $navActiveClasses : $navInactiveClasses }}"
@@ -279,9 +279,9 @@
                                     if (!$store.layout.sidebarExpanded) {
                                         $store.layout.sidebarExpanded = true;
                                         $store.layout.persistSidebarState();
-                                        open = true;
+                                        openAccordion = menuId;
                                     } else {
-                                        open = !open;
+                                        openAccordion = openAccordion === menuId ? null : menuId;
                                     }
                                 "
                             >
@@ -296,13 +296,13 @@
                                 <i
                                     x-show="$store.layout.sidebarExpanded"
                                     class="fa-solid fa-chevron-down text-xs transition-transform duration-200"
-                                    :class="open ? 'rotate-180' : ''"
+                                    :class="openAccordion === menuId ? 'rotate-180' : ''"
                                 ></i>
                             </button>
 
                             <div
                                 class="space-y-1"
-                                x-show="open && $store.layout.sidebarExpanded"
+                                x-show="openAccordion === menuId && $store.layout.sidebarExpanded"
                                 x-transition.opacity
                             >
                                 @foreach ($menu['children'] as $child)
@@ -345,14 +345,6 @@
             </div>
         </nav>
 
-        <div class="mt-auto rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-800/60">
-            <p class="font-semibold text-slate-900 dark:text-white" x-show="$store.layout.sidebarExpanded">Selaju Insight</p>
-            <p class="mt-1 leading-relaxed text-slate-600 dark:text-slate-300" x-show="$store.layout.sidebarExpanded">
-                Pantau progres dan aktivitas internal dalam satu tampilan terpadu.
-            </p>
-            <div class="flex items-center justify-center" x-show="!$store.layout.sidebarExpanded">
-                <span class="text-lg">📈</span>
-            </div>
-        </div>
+
     </aside>
 </div>
