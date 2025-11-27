@@ -11,7 +11,7 @@ class SejajanOrder extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['sejajan_id', 'participant_id', 'status', 'total_price', 'notes', 'pickup_time'];
+    protected $fillable = ['sejajan_id', 'participant_id', 'status', 'total_price', 'notes', 'pickup_time', 'location_pickup'];
 
     protected $casts = [
         'total_price' => 'decimal:2',

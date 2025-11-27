@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SchoolController;
 use App\Http\Controllers\Api\BookController;
+use App\Http\Controllers\Api\SejajanOrderController;
 
 Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(function () {
     // Public routes
@@ -202,12 +203,14 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         return app(\App\Http\Controllers\Api\SejajanProductController::class)->update($request, $sejajan, $product);
     });
 
-    Route::delete('/sejajans/{sejajanSlug}/products/{productId}', function ($sejajanSlug, $productId) {
-        $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
-        $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
-        $product->delete();
-        return response()->json(['message' => 'Produk berhasil dihapus'], 200);
-    });
+        Route::delete('/sejajans/{sejajanSlug}/products/{productId}', function ($sejajanSlug, $productId) {
+            $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+            $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
+            $product->delete();
+            return response()->json(['message' => 'Produk berhasil dihapus'], 200);
+        });
+
+        Route::post('/sejajans/orders', [SejajanOrderController::class, 'store']);
     });
 
 
