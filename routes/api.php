@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SchoolController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\SejajanOrderController;
+use App\Http\Controllers\Api\SejajanCartController;
 
 Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(function () {
     // Public routes
@@ -52,7 +53,6 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
 
     // Sejajan public endpoints
     Route::get('/sejajans', [\App\Http\Controllers\Api\SejajanController::class, 'index']);
-    Route::get('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'show']);
 
     // Protected routes (require auth) - using Sanctum personal access tokens
     Route::middleware('auth:sanctum')->group(function () {
@@ -166,7 +166,6 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         // Sejajan protected endpoints (create/update/delete owned stores)
         Route::post('/sejajans', [\App\Http\Controllers\Api\SejajanController::class, 'store']);
         Route::put('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'update']);
-        Route::delete('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'destroy']);
 
         // Sejajan category endpoints (owner only)
         Route::get('/sejajans/{sejajanSlug}/categories', [\App\Http\Controllers\Api\SejajanCategoryController::class, 'index']);
@@ -213,7 +212,19 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         Route::post('/sejajans/orders', [SejajanOrderController::class, 'store']);
         Route::get('/sejajans/{sejajanSlug}/orders', [SejajanOrderController::class, 'index']);
         Route::put('/sejajans/{sejajanSlug}/orders/{orderId}', [SejajanOrderController::class, 'update']);
+
+        Route::get('/sejajans/cart', [SejajanCartController::class, 'index']);
+        Route::post('/sejajans/cart', [SejajanCartController::class, 'store']);
+        Route::patch('/sejajans/cart/{itemId}', [SejajanCartController::class, 'update']);
+        Route::delete('/sejajans/cart/{itemId}', [SejajanCartController::class, 'destroy']);
+        Route::delete('/sejajans/cart', [SejajanCartController::class, 'destroyAll']);
+
+        // Keep store deletion below cart routes so '/sejajans/cart' doesn't resolve to slug route
+        Route::delete('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'destroy']);
     });
+
+    // Keep wildcard route last to avoid conflicting with fixed paths like "/sejajans/cart"
+    Route::get('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'show']);
 
 
     // Book endpoints
