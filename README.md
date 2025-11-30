@@ -1,26 +1,31 @@
 # Selaju System API
 
-Backend system for Selaju Apps, built with Laravel. This system handles authentication, user management, role-based access control (RBAC), content management, and dynamic menu generation.
+**Selaju System** adalah backend API untuk ekosistem aplikasi Selaju - platform terintegrasi yang menyediakan berbagai layanan digital untuk kampus dan mahasiswa. System ini dibangun dengan Laravel 12 dan menyediakan berbagai modul seperti marketplace mahasiswa (Sejajan), manajemen konten, sistem autentikasi, dan role-based access control.
 
-## ✨ Features
+Proyek ini merupakan sistem backend yang melayani berbagai aplikasi frontend melalui RESTful API dengan real-time capabilities menggunakan Laravel Reverb untuk notifikasi dan update data secara langsung.
 
-- **Role-Based Access Control (RBAC)**: Fine-grained permissions for Users, Groups, and Modules.
-- **Dynamic Menu System**: Sidebar menus are generated dynamically based on user permissions.
-- **Content Management**: Manage articles and categories.
-- **API-First Design**: Ready for consumption by frontend applications (Nuxt, Vue, etc.).
-- **Secure Authentication**: Token-based authentication (Sanctum).
+## ✨ Fitur Utama
 
-## 🚀 Getting Started
+- **Sejajan Marketplace**: Marketplace khusus mahasiswa dengan fitur toko, produk, keranjang, dan pemesanan real-time
+- **Real-time Notifications**: Notifikasi langsung untuk pesanan baru dan update status menggunakan WebSocket
+- **Authentication & Authorization**: Sistem autentikasi berbasis token (Sanctum) dengan role-based permissions
+- **Content Management**: Manajemen artikel dan kategori konten
+- **Dynamic Menu System**: Sistem menu dinamis berdasarkan permission user
+- **Broadcasting Events**: Laravel Reverb untuk komunikasi real-time antara buyer dan seller
 
-### Prerequisites
+## 🚀 Cara Instalasi
 
-- PHP 8.1+
+### Persyaratan Sistem
+
+- PHP 8.2+
 - Composer
-- MySQL
+- MySQL 8.0+
+- Node.js 18+ (untuk Reverb)
+- Redis (opsional, untuk production)
 
-### Installation
+### Langkah Instalasi
 
-1. **Clone the repository**
+1. **Clone Repository**
    ```bash
    git clone <repository-url>
    cd selaju-system
@@ -31,65 +36,95 @@ Backend system for Selaju Apps, built with Laravel. This system handles authenti
    composer install
    ```
 
-3. **Environment Setup**
-   Copy `.env.example` to `.env` and configure your database credentials.
+3. **Setup Environment**
+   Salin file `.env.example` ke `.env` dan sesuaikan konfigurasi database:
    ```bash
    cp .env.example .env
    php artisan key:generate
    ```
 
-4. **Database Setup**
-   Run migrations and seeders to set up the initial data, including default users, roles, and menus.
+4. **Setup Database**
+   Jalankan migration dan seeder untuk membuat tabel dan data awal:
    ```bash
    php artisan migrate:fresh --seed
    ```
 
-5. **Serve the Application**
+5. **Install Laravel Reverb**
+   Install dan setup Reverb untuk fitur real-time:
    ```bash
-   php artisan serve
+   php artisan install:broadcasting
    ```
 
-## 🔑 Default Credentials
+6. **Jalankan Aplikasi**
+   Jalankan 3 service berikut di terminal terpisah:
+   ```bash
+   # Terminal 1: Laravel Server
+   php artisan serve
+   
+   # Terminal 2: Reverb WebSocket Server
+   php artisan reverb:start
+   
+   # Terminal 3: Queue Worker
+   php artisan queue:work
+   ```
 
-Use the following credentials to log in as a Super Admin:
+## 🔑 Kredensial Default
+
+Gunakan kredensial berikut untuk login sebagai Super Admin:
 
 - **Email**: `dev@gncs.dev`
 - **Password**: `programmer123`
-- **Group**: Super Admin
+- **Role**: Super Admin
 
-## 📡 API Documentation
+## 📡 Dokumentasi API
 
-### Authentication & Menus
+### Endpoint Utama
 
-- `GET /api/menus/sidebar`
-  - **Description**: Main endpoint for fetching the sidebar menu. Returns menus and modules accessible to the authenticated user.
-  - **Auth**: Required
+#### Authentication
+- `POST /api/register` - Registrasi user baru
+- `POST /api/login` - Login dan dapatkan token
+- `POST /api/logout` - Logout user
+- `GET /api/user` - Get data user yang sedang login
 
-### Public Content
+#### Sejajan Marketplace
+- `GET /api/sejajans` - List semua toko
+- `POST /api/sejajans` - Buat toko baru
+- `GET /api/sejajans/my-stores` - Toko milik user
+- `GET /api/sejajans/{slug}` - Detail toko
+- `PUT /api/sejajans/{id}` - Update toko
+- `DELETE /api/sejajans/{id}` - Hapus toko
 
-- `GET /api/articles` - List all articles
-- `GET /api/articles/{slug}` - View article details
-- `GET /api/articles/categories` - List article categories
+#### Products
+- `GET /api/sejajans/{slug}/products` - List produk toko
+- `POST /api/sejajans/{slug}/products` - Tambah produk
+- `PUT /api/sejajans/{slug}/products/{id}` - Update produk
+- `DELETE /api/sejajans/{slug}/products/{id}` - Hapus produk
 
-## 🔐 Permission System
+#### Orders
+- `POST /api/sejajans/orders` - Buat pesanan baru
+- `GET /api/sejajans/my-orders` - Pesanan user (sebagai buyer)
+- `GET /api/sejajans/{slug}/orders` - Pesanan toko (sebagai seller)
+- `PUT /api/sejajans/{slug}/orders/{id}/status` - Update status pesanan
 
-The system uses a 3-tier permission structure:
-1. **User Groups**: Roles like Super Admin, Admin, Editor.
-2. **Modules**: Functional areas of the system (e.g., Dashboard, Articles, Users).
-3. **Module Access**: Specific actions within a module (View, Create, Edit, Delete).
+#### Cart
+- `GET /api/sejajans/cart` - Get keranjang belanja
+- `POST /api/sejajans/cart` - Tambah item ke keranjang
+- `PATCH /api/sejajans/cart/{id}` - Update quantity item
+- `DELETE /api/sejajans/cart/{id}` - Hapus item dari keranjang
 
-### Permission Flow
-1. User logs in.
-2. System fetches User Group.
-3. System retrieves Permissions for that Group.
-4. `GET /api/menus/sidebar` filters menus based on these permissions.
+### Broadcasting Events
 
-## 🎨 Database Structure
+System menggunakan Laravel Reverb untuk real-time notifications:
 
-- **Menus**: Top-level sidebar items.
-- **Modules**: Sub-items or pages.
-- **User Groups**: Roles.
-- **User Group Permissions**: Mapping between Groups and Module Access.
+#### Private Channels
+- `orders.buyer.{userId}` - Channel untuk buyer menerima update pesanan
+- `orders.seller.{userId}` - Channel untuk seller menerima pesanan baru
+
+#### Events
+- `order.new` - Event ketika ada pesanan baru masuk ke toko
+- `order.status.updated` - Event ketika status pesanan diubah
+
+## 📊 Struktur Database
 
 ### Entity Relationship Diagram (ERD)
 
@@ -101,9 +136,24 @@ The system uses a 3-tier permission structure:
 
 ## 🛠 Tech Stack
 
-- **Framework**: Laravel 10/11
-- **Database**: MySQL
-- **Auth**: Laravel Sanctum
+- **Framework**: Laravel 12
+- **Language**: PHP 8.2+
+- **Database**: MySQL 8.0+
+- **Authentication**: Laravel Sanctum (Token-based API authentication)
+- **Real-time**: Laravel Reverb (WebSocket server untuk broadcasting)
+- **ORM**: Eloquent
+- **Caching**: Redis (opsional)
+- **Queue**: Database/Redis driver untuk async job processing
+- **Broadcasting**: Pusher protocol via Reverb
+- **File Storage**: Local filesystem dengan configurable path
+
+### Tools & Development
+- **Package Manager**: Composer
+- **Testing**: PHPUnit
+- **Code Quality**: PHPStan (opsional)
+- **Version Control**: Git
+- **API Pattern**: RESTful API dengan resource controllers
+- **Error Handling**: Global exception handler dengan custom responses
 
 ---
-**Status**: ✅ Active Development
+**Status**: ✅ Active Development | Laravel 12 | PHP 8.2+
