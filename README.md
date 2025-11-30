@@ -91,6 +91,14 @@ The system uses a 3-tier permission structure:
 - **User Groups**: Roles.
 - **User Group Permissions**: Mapping between Groups and Module Access.
 
+### Entity Relationship Diagram (ERD)
+
+![ERD](erd.png)
+
+### UML Diagram
+
+![UML](uml.png)
+
 ## 🛠 Tech Stack
 
 - **Framework**: Laravel 10/11
