@@ -8,56 +8,65 @@
         $brandInitials = 'SA';
     }
 
-    // Get dynamic menus from API
-    $menus = [];
-    try {
-        $response = app('App\Http\Controllers\MenuController')->sidebar(request());
-        $responseData = $response->getData(true);
-
-        if ($responseData['success']) {
-            foreach ($responseData['data'] as $menu) {
-                $menuItem = [
-                    'icon' => str_replace('fa-', '', $menu['icon'] ?? 'home'),
-                    'label' => $menu['name'],
-                ];
-
-                if (count($menu['modules']) === 1) {
-                    // Single module - direct link
-                    $module = $menu['modules'][0];
-                    $menuItem['href'] = $module['url'] ?? '#';
-                    $menuItem['active'] = [$module['identifiers'] ?? ''];
-                } elseif (count($menu['modules']) > 1) {
-                    // Multiple modules - dropdown
-                    $menuItem['children'] = [];
-                    foreach ($menu['modules'] as $module) {
-                        $menuItem['children'][] = [
-                            'label' => $module['name'],
-                            'href' => $module['url'] ?? '#',
-                            'active' => [$module['identifiers'] ?? ''],
-                        ];
-                    }
-                }
-
-                $menus[] = $menuItem;
-            }
-        }
-    } catch (\Exception $e) {
-        // Fallback to hardcoded menus if API fails
-        $menus = [
-            [
-                'icon' => 'home',
-                'label' => 'Dashboard',
-                'href' => route('dashboard'),
-                'active' => ['dashboard'],
+    // Hardcoded menu structure
+    $menus = [
+        [
+            'icon' => 'home',
+            'label' => 'Dashboard',
+            'href' => route('dashboard'),
+            'active' => ['dashboard'],
+        ],
+        [
+            'icon' => 'users',
+            'label' => 'Pengguna',
+            'children' => [
+                [
+                    'label' => 'Daftar Pengguna',
+                    'href' => route('admin.participants.index'),
+                    'active' => ['admin.participants.index', 'admin.participants.show'],
+                ],
             ],
-            [
-                'icon' => 'cog',
-                'label' => 'Pengaturan',
-                'href' => route('profile.edit'),
-                'active' => ['profile.*'],
+        ],
+        [
+            'icon' => 'store',
+            'label' => 'Sejajan',
+            'children' => [
+                [
+                    'label' => 'Daftar Toko',
+                    'href' => route('admin.sejajan.index'),
+                    'active' => ['admin.sejajan.index', 'admin.sejajan.show'],
+                ],
             ],
-        ];
-    }
+        ],
+        [
+            'icon' => 'newspaper',
+            'label' => 'Artikel',
+            'children' => [
+                [
+                    'label' => 'Kategori',
+                    'href' => route('admin.article-categories.index'),
+                    'active' => ['admin.article-categories.*'],
+                ],
+                [
+                    'label' => 'Daftar Artikel',
+                    'href' => route('admin.articles.index'),
+                    'active' => ['admin.articles.*'],
+                ],
+            ],
+        ],
+        [
+            'icon' => 'building',
+            'label' => 'Sekolah',
+            'href' => route('admin.schools.index'),
+            'active' => ['admin.schools.*'],
+        ],
+        [
+            'icon' => 'cog',
+            'label' => 'Pengaturan',
+            'href' => route('profile.edit'),
+            'active' => ['profile.*'],
+        ],
+    ];
 
     $navBaseClasses = 'group flex w-full items-center rounded-xl py-3 text-sm font-medium transition-colors cursor-pointer';
     $navExpandedSpacing = 'px-4 gap-3';
