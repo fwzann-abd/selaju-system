@@ -7,6 +7,8 @@ use App\Models\Sejajan;
 use App\Models\SejajanOrder;
 use App\Models\SejajanOrderItem;
 use App\Models\SejajanProduct;
+use App\Events\NewOrderReceived;
+use App\Events\OrderStatusUpdated;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -148,9 +150,13 @@ class SejajanOrderController extends Controller
                 $order->update(['notes' => $extraNotes]);
             }
 
+            // Broadcast new order event
+            $order->load(['items.product', 'participant', 'sejajan']);
+            broadcast(new NewOrderReceived($order))->toOthers();
+
             return response()->json([
                 'message' => 'Order berhasil dibuat',
-                'data' => $order->load(['items.product', 'participant']),
+                'data' => $order,
             ], 201);
         });
     }
@@ -177,9 +183,13 @@ class SejajanOrderController extends Controller
 
         $order->update(['status' => $validated['status']]);
 
+        // Broadcast status update event
+        $order->load(['items.product', 'participant', 'sejajan']);
+        broadcast(new OrderStatusUpdated($order))->toOthers();
+
         return response()->json([
             'message' => 'Status pesanan diperbarui',
-            'data' => $order->load(['items.product', 'participant']),
+            'data' => $order,
         ]);
     }
 }
