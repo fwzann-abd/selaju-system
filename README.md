@@ -1,12 +1,12 @@
 # Selaju System API
 
-**Selaju System** adalah backend API untuk ekosistem aplikasi Selaju - platform terintegrasi yang menyediakan berbagai layanan digital untuk kampus dan mahasiswa. System ini dibangun dengan Laravel 12 dan menyediakan berbagai modul seperti marketplace mahasiswa (Sejajan), manajemen konten, sistem autentikasi, dan role-based access control.
+**Selaju System** adalah backend API untuk ekosistem aplikasi Selaju - platform terintegrasi yang menyediakan berbagai layanan digital untuk kampus dan pelajar. System ini dibangun dengan Laravel 12 dan menyediakan berbagai modul seperti marketplace pelajar (Sejajan), manajemen konten, sistem autentikasi, dan role-based access control.
 
 Proyek ini merupakan sistem backend yang melayani berbagai aplikasi frontend melalui RESTful API dengan real-time capabilities menggunakan Laravel Reverb untuk notifikasi dan update data secara langsung.
 
 ## ✨ Fitur Utama
 
-- **Sejajan Marketplace**: Marketplace khusus mahasiswa dengan fitur toko, produk, keranjang, dan pemesanan real-time
+- **Sejajan Marketplace**: Marketplace khusus pelajar dengan fitur toko, produk, keranjang, dan pemesanan real-time
 - **Real-time Notifications**: Notifikasi langsung untuk pesanan baru dan update status menggunakan WebSocket
 - **Authentication & Authorization**: Sistem autentikasi berbasis token (Sanctum) dengan role-based permissions
 - **Content Management**: Manajemen artikel dan kategori konten
@@ -20,8 +20,8 @@ Proyek ini merupakan sistem backend yang melayani berbagai aplikasi frontend mel
 - PHP 8.2+
 - Composer
 - MySQL 8.0+
-- Node.js 18+ (untuk Reverb)
-- Redis (opsional, untuk production)
+- Node.js 18+
+- Code Editor
 
 ### Langkah Instalasi
 
@@ -59,7 +59,7 @@ Proyek ini merupakan sistem backend yang melayani berbagai aplikasi frontend mel
    Jalankan 3 service berikut di terminal terpisah:
    ```bash
    # Terminal 1: Laravel Server
-   php artisan serve
+   composer run dev
    
    # Terminal 2: Reverb WebSocket Server
    php artisan reverb:start
@@ -150,7 +150,6 @@ System menggunakan Laravel Reverb untuk real-time notifications:
 ### Tools & Development
 - **Package Manager**: Composer
 - **Testing**: PHPUnit
-- **Code Quality**: PHPStan (opsional)
 - **Version Control**: Git
 - **API Pattern**: RESTful API dengan resource controllers
 - **Error Handling**: Global exception handler dengan custom responses
