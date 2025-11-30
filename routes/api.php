@@ -210,6 +210,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         });
 
         Route::post('/sejajans/orders', [SejajanOrderController::class, 'store']);
+        Route::get('/sejajans/my-orders', [SejajanOrderController::class, 'myOrders']);
         Route::get('/sejajans/{sejajanSlug}/orders', [SejajanOrderController::class, 'index']);
         Route::put('/sejajans/{sejajanSlug}/orders/{orderId}', [SejajanOrderController::class, 'update']);
 
