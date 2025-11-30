@@ -83,10 +83,6 @@ class SejajanOrderController extends Controller
             return response()->json(['message' => 'Alamat diperlukan untuk pengantaran'], 422);
         }
 
-        if ($data['delivery_method'] === 'pickup' && empty($data['location_pickup'])) {
-            return response()->json(['message' => 'Lokasi penjemputan diperlukan'], 422);
-        }
-
         return DB::transaction(function () use ($data, $user) {
             $sejajan = Sejajan::findOrFail($data['sejajan_id']);
 
@@ -152,13 +148,50 @@ class SejajanOrderController extends Controller
 
             // Broadcast new order event
             $order->load(['items.product', 'participant', 'sejajan']);
-            broadcast(new NewOrderReceived($order))->toOthers();
+            \Log::info('Broadcasting new order', [
+                'order_id' => $order->id,
+                'seller_channel' => 'orders.seller.' . $order->sejajan->participant_id,
+                'buyer_id' => $order->participant_id,
+            ]);
+            broadcast(new NewOrderReceived($order));
 
             return response()->json([
                 'message' => 'Order berhasil dibuat',
                 'data' => $order,
             ], 201);
         });
+    }
+
+    public function updateStatus(Request $request, $sejajanSlug, $orderId)
+    {
+        $user = $request->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+        if ($sejajan->participant_id !== $user->getKey()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $order = SejajanOrder::where('sejajan_id', $sejajan->id)
+            ->where('id', $orderId)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['pending', 'processing', 'ready', 'completed', 'cancelled'])],
+        ]);
+
+        $order->update(['status' => $validated['status']]);
+
+        // Broadcast status update event
+        $order->load(['items.product', 'participant', 'sejajan']);
+        broadcast(new OrderStatusUpdated($order))->toOthers();
+
+        return response()->json([
+            'message' => 'Status pesanan diperbarui',
+            'data' => $order,
+        ]);
     }
 
     public function update(Request $request, $sejajanSlug, $orderId)
