@@ -36,6 +36,29 @@ class SejajanController extends Controller
         ]);
     }
 
+    public function myStores(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+
+        $stores = Sejajan::where('participant_id', $user->getKey())
+            ->withCount('products')
+            ->get();
+
+        // Normalize photo to filename only
+        $stores->transform(function ($item) {
+            if (!empty($item->photo)) {
+                $item->photo = preg_replace('/.*[\/\\\\]/', '', $item->photo);
+            }
+            return $item;
+        });
+
+        return response()->json([
+            'data' => $stores,
+            'path' => Helper::getPhotoBasePath()
+        ]);
+    }
+
     public function show(Sejajan $sejajan)
     {
         $sejajan->load('products');

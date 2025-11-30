@@ -164,6 +164,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         });
 
         // Sejajan protected endpoints (create/update/delete owned stores)
+        Route::get('/sejajans/my-stores', [\App\Http\Controllers\Api\SejajanController::class, 'myStores']);
         Route::post('/sejajans', [\App\Http\Controllers\Api\SejajanController::class, 'store']);
         Route::put('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'update']);
 
