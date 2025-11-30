@@ -36,6 +36,22 @@ class SejajanOrderController extends Controller
         return response()->json(['data' => $orders]);
     }
 
+    public function myOrders(Request $request)
+    {
+        $user = $request->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        // Get orders where the authenticated user is the buyer (participant_id)
+        $orders = SejajanOrder::where('participant_id', $user->getKey())
+            ->with(['items.product', 'sejajan'])
+            ->latest()
+            ->get();
+
+        return response()->json(['data' => $orders]);
+    }
+
     public function store(Request $request)
     {
         $user = $request->user();
