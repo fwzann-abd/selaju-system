@@ -143,7 +143,7 @@ class SejajanController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'slug' => 'sometimes|nullable|string|max:255|unique:sejajans,slug,' . $sejajan->id . ',id',
             'description' => 'nullable|string',
-            'photo' => 'nullable|string',
+            'photo' => 'nullable|image|max:2048',
             'is_active' => 'nullable|boolean',
         ]);
 
@@ -151,8 +151,43 @@ class SejajanController extends Controller
             return response()->json(['errors' => $v->errors()], 422);
         }
 
-        $sejajan->update($v->validated());
-        return response()->json($sejajan->fresh());
+        $data = $v->validated();
+
+        // Handle uploaded photo if present
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            // ensure destination exists inside public
+            $dest = public_path('assets/modules/sejajan/mart');
+            if (! \Illuminate\Support\Facades\File::exists($dest)) {
+                \Illuminate\Support\Facades\File::makeDirectory($dest, 0755, true);
+            }
+
+            // Delete old photo if exists
+            if (!empty($sejajan->photo)) {
+                $oldPath = $dest . '/' . preg_replace('/.*[\/\\\\]/', '', $sejajan->photo);
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
+            }
+
+            $filename = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '_', $file->getClientOriginalName());
+            $file->move($dest, $filename);
+            // store only the filename
+            $data['photo'] = $filename;
+        }
+
+        $sejajan->update($data);
+        
+        // Normalize photo to filename only
+        $updated = $sejajan->fresh();
+        if (!empty($updated->photo)) {
+            $updated->photo = preg_replace('/.*[\/\\\\]/', '', $updated->photo);
+        }
+
+        return response()->json([
+            'data' => $updated,
+            'path' => Helper::getPhotoBasePath()
+        ]);
     }
 
     public function destroy(Request $request, Sejajan $sejajan)
