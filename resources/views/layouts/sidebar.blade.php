@@ -39,6 +39,22 @@
             ],
         ],
         [
+            'icon' => 'book',
+            'label' => 'Perpossagar',
+            'children' => [
+                [
+                    'label' => 'Kategori Buku',
+                    'href' => route('admin.perpossagar-categories.index'),
+                    'active' => ['admin.perpossagar-categories.*'],
+                ],
+                [
+                    'label' => 'Daftar Buku',
+                    'href' => route('admin.perpossagar-books.index'),
+                    'active' => ['admin.perpossagar-books.*'],
+                ],
+            ],
+        ],
+        [
             'icon' => 'newspaper',
             'label' => 'Artikel',
             'children' => [

@@ -4,26 +4,26 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Book;
+use App\Models\PerpossagarBook;
 use Illuminate\Support\Str;
 
 class BookController extends Controller
 {
     public function index()
     {
-        return Book::with(['author', 'categories', 'reviews'])->get();
+        return PerpossagarBook::with(['author', 'categories', 'reviews'])->get();
     }
 
     public function show($uuid)
     {
-        return Book::with(['author', 'categories', 'reviews'])
+        return PerpossagarBook::with(['author', 'categories', 'reviews'])
             ->where('uuid', $uuid)->firstOrFail();
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'author_id'     => 'required|exists:authors,uuid',
+            'author_id'     => 'required|exists:perpossagar_authors,uuid',
             'title'         => 'required|string|max:255',
             'subtitle'      => 'nullable|string|max:255',
             'desc'          => 'nullable|string',
@@ -32,10 +32,10 @@ class BookController extends Controller
             'color_hex'     => 'nullable|string|max:10',
             'filename'      => 'nullable|string',
             'categories'    => 'nullable|array',
-            'categories.*'  => 'exists:books_category,uuid'
+            'categories.*'  => 'exists:perpossagar_book_categories,uuid'
         ]);
 
-        $book = Book::create([
+        $book = PerpossagarBook::create([
             'uuid'        => Str::uuid(),
             'author_id'   => $validated['author_id'],
             'title'       => $validated['title'],
@@ -59,10 +59,10 @@ class BookController extends Controller
 
     public function update(Request $request, $uuid)
     {
-        $book = Book::where('uuid', $uuid)->firstOrFail();
+        $book = PerpossagarBook::where('uuid', $uuid)->firstOrFail();
 
         $validated = $request->validate([
-            'author_id'     => 'sometimes|exists:authors,uuid',
+            'author_id'     => 'sometimes|exists:perpossagar_authors,uuid',
             'title'         => 'sometimes|string|max:255',
             'subtitle'      => 'nullable|string|max:255',
             'desc'          => 'nullable|string',
@@ -71,7 +71,7 @@ class BookController extends Controller
             'color_hex'     => 'nullable|string|max:10',
             'filename'      => 'nullable|string',
             'categories'    => 'nullable|array',
-            'categories.*'  => 'exists:books_category,uuid'
+            'categories.*'  => 'exists:perpossagar_book_categories,uuid'
         ]);
 
         // Hanya update field yang ada
@@ -90,7 +90,7 @@ class BookController extends Controller
 
     public function destroy($uuid)
     {
-        $book = Book::where('uuid', $uuid)->firstOrFail();
+        $book = PerpossagarBook::where('uuid', $uuid)->firstOrFail();
         $book->delete();
 
         return response()->json(['message' => 'Deleted']);
