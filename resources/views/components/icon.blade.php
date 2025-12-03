@@ -5,6 +5,7 @@
         'home' => 'fa-solid fa-house',
         'users' => 'fa-solid fa-users',
         'store' => 'fa-solid fa-store',
+        'book' => 'fa-solid fa-book',
         'building' => 'fa-solid fa-building',
         'newspaper' => 'fa-regular fa-newspaper',
         'plus' => 'fa-solid fa-plus',

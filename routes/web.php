@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\ParticipantController;
 use App\Http\Controllers\Admin\SchoolController;
 use App\Http\Controllers\Admin\SejajanController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\PerpossagarCategoryController;
+use App\Http\Controllers\Admin\PerpossagarBookController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProfileController;
@@ -52,6 +54,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('participants', ParticipantController::class);
         // Sejajan (Shop) management
         Route::resource('sejajan', SejajanController::class);
+        // Perpossagar (Library) management
+        Route::resource('perpossagar-categories', PerpossagarCategoryController::class);
+        Route::resource('perpossagar-books', PerpossagarBookController::class);
     });
 });
 
