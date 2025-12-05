@@ -9,8 +9,8 @@ use App\Models\PerpossagarCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Image\Image;
 
@@ -118,14 +118,16 @@ class PerpossagarBookController extends Controller
             'is_approved' => $data['is_approved'] ?? false,
         ];
 
-        // Handle photo upload
+        // Handle photo upload (save directly under public/assets/modules/perpossagar/books/image)
         if ($request->hasFile('photo')) {
             $photoFile = $request->file('photo');
             $filename = Str::random(20).'.jpg';
 
-            $path = 'perpossagar/books';
-            $fullPath = storage_path('app/public/'.$path);
-            Storage::disk('public')->makeDirectory($path, 0755, true);
+            $path = 'perpossagar/books/image';
+            $fullPath = public_path('assets/modules/'.$path);
+            if (! File::exists($fullPath)) {
+                File::makeDirectory($fullPath, 0755, true);
+            }
 
             $destinationPath = $fullPath.'/'.$filename;
 
@@ -138,18 +140,32 @@ class PerpossagarBookController extends Controller
             $bookData['photo'] = 'assets/modules/'.$path.'/'.$filename;
         }
 
-        // Handle PDF upload
+        // Handle PDF upload (save directly under public/assets/modules/perpossagar/books/pdf)
         if ($request->hasFile('filename')) {
-            $pdfPath = $request->file('filename')->store('perpossagar/books/pdf', 'public');
-            // Log mime/size for debugging
-            try {
-                $mime = $request->file('filename')->getClientMimeType();
-                $size = $request->file('filename')->getSize();
-                Log::info('PerpossagarBookController::store - PDF uploaded', ['mime' => $mime, 'size' => $size]);
-            } catch (\Throwable $e) {
-                Log::debug('PerpossagarBookController::store - unable to read pdf mime/size', ['exception' => $e->getMessage()]);
+            $pdfFile = $request->file('filename');
+            $pdfFilename = Str::random(20).'.'.$pdfFile->getClientOriginalExtension();
+
+            $pdfPath = 'perpossagar/books/pdf';
+            $pdfFullPath = public_path('assets/modules/'.$pdfPath);
+            if (! File::exists($pdfFullPath)) {
+                File::makeDirectory($pdfFullPath, 0755, true);
             }
-            $bookData['filename'] = 'assets/modules/'.$pdfPath;
+
+            try {
+                $pdfFile->move($pdfFullPath, $pdfFilename);
+                $bookData['filename'] = 'assets/modules/'.$pdfPath.'/'.$pdfFilename;
+
+                // Log mime/size for debugging
+                try {
+                    $mime = $pdfFile->getClientMimeType();
+                    $size = $pdfFile->getSize();
+                    Log::info('PerpossagarBookController::store - PDF uploaded', ['mime' => $mime, 'size' => $size]);
+                } catch (\Throwable $e) {
+                    Log::debug('PerpossagarBookController::store - unable to read pdf mime/size', ['exception' => $e->getMessage()]);
+                }
+            } catch (\Throwable $e) {
+                Log::error('PerpossagarBookController::store - failed to move uploaded PDF', ['exception' => $e->getMessage()]);
+            }
         }
 
         $book = PerpossagarBook::create($bookData);
@@ -219,22 +235,24 @@ class PerpossagarBookController extends Controller
             $data['slug'] = $slug;
         }
 
-        // Handle photo upload
+        // Handle photo upload (save directly under public/assets/modules/perpossagar/books/image)
         if ($request->hasFile('photo')) {
             // Delete old photo if exists
             if ($book->photo) {
-                $oldPhotoPath = str_replace('assets/modules/', '', $book->photo);
-                if (Storage::disk('public')->exists($oldPhotoPath)) {
-                    Storage::disk('public')->delete($oldPhotoPath);
+                $oldPhotoFull = public_path($book->photo);
+                if (File::exists($oldPhotoFull)) {
+                    File::delete($oldPhotoFull);
                 }
             }
 
             $photoFile = $request->file('photo');
             $filename = Str::random(20).'.jpg';
 
-            $path = 'perpossagar/books';
-            $fullPath = storage_path('app/public/'.$path);
-            Storage::disk('public')->makeDirectory($path, 0755, true);
+            $path = 'perpossagar/books/image';
+            $fullPath = public_path('assets/modules/'.$path);
+            if (! File::exists($fullPath)) {
+                File::makeDirectory($fullPath, 0755, true);
+            }
 
             $destinationPath = $fullPath.'/'.$filename;
 
@@ -247,17 +265,31 @@ class PerpossagarBookController extends Controller
             $data['photo'] = 'assets/modules/'.$path.'/'.$filename;
         }
 
-        // Handle PDF upload
+        // Handle PDF upload (save directly under public/assets/modules/perpossagar/books/pdf)
         if ($request->hasFile('filename')) {
             // Delete old PDF if exists
             if ($book->filename) {
-                $oldPdfPath = str_replace('assets/modules/', '', $book->filename);
-                if (Storage::disk('public')->exists($oldPdfPath)) {
-                    Storage::disk('public')->delete($oldPdfPath);
+                $oldPdfFull = public_path($book->filename);
+                if (File::exists($oldPdfFull)) {
+                    File::delete($oldPdfFull);
                 }
             }
-            $pdfPath = $request->file('filename')->store('perpossagar/books/pdf', 'public');
-            $data['filename'] = 'assets/modules/'.$pdfPath;
+
+            $pdfFile = $request->file('filename');
+            $pdfFilename = Str::random(20).'.'.$pdfFile->getClientOriginalExtension();
+
+            $pdfPath = 'perpossagar/books/pdf';
+            $pdfFullPath = public_path('assets/modules/'.$pdfPath);
+            if (! File::exists($pdfFullPath)) {
+                File::makeDirectory($pdfFullPath, 0755, true);
+            }
+
+            try {
+                $pdfFile->move($pdfFullPath, $pdfFilename);
+                $data['filename'] = 'assets/modules/'.$pdfPath.'/'.$pdfFilename;
+            } catch (\Throwable $e) {
+                Log::error('PerpossagarBookController::update - failed to move uploaded PDF', ['exception' => $e->getMessage()]);
+            }
         }
 
         $book->update($data);
