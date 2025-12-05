@@ -3,50 +3,54 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PerpossagarAuthor;
 use App\Models\PerpossagarBook;
 use App\Models\PerpossagarCategory;
-use App\Models\PerpossagarAuthor;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use Intervention\Image\Laravel\Facades\Image;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Spatie\Image\Image;
 
 class PerpossagarBookController extends Controller
 {
     public function index()
     {
         $books = PerpossagarBook::with(['author', 'categories'])->orderBy('created_at', 'desc')->paginate(15);
+
         return view('admin.perpossagar.books.index', compact('books'));
     }
 
     public function create()
     {
         $categories = PerpossagarCategory::orderBy('name')->get();
+
         return view('admin.perpossagar.books.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
         // quick pre-check for upload errors so we can return a clearer message
-        if ($request->hasFile('filename') && !$request->file('filename')->isValid()) {
+        if ($request->hasFile('filename') && ! $request->file('filename')->isValid()) {
             $err = $request->file('filename')->getError();
             Log::warning('PerpossagarBookController::store - filename upload invalid', [
                 'error' => $err,
                 'name' => $request->file('filename')->getClientOriginalName() ?? null,
             ]);
-            return back()->withInput()->withErrors(['filename' => 'File upload failed (code: ' . $err . ').']);
+
+            return back()->withInput()->withErrors(['filename' => 'File upload failed (code: '.$err.').']);
         }
 
-        if ($request->hasFile('photo') && !$request->file('photo')->isValid()) {
+        if ($request->hasFile('photo') && ! $request->file('photo')->isValid()) {
             $err = $request->file('photo')->getError();
             Log::warning('PerpossagarBookController::store - photo upload invalid', [
                 'error' => $err,
                 'name' => $request->file('photo')->getClientOriginalName() ?? null,
             ]);
-            return back()->withInput()->withErrors(['photo' => 'Image upload failed (code: ' . $err . ').']);
+
+            return back()->withInput()->withErrors(['photo' => 'Image upload failed (code: '.$err.').']);
         }
 
         $data = $request->validate([
@@ -87,7 +91,7 @@ class PerpossagarBookController extends Controller
                 $authorUuid = $author->uuid;
             } else {
                 // no participant found; allow admin to provide an author_name instead
-                if (!empty($data['author_name'])) {
+                if (! empty($data['author_name'])) {
                     $authorName = trim($data['author_name']);
                 } else {
                     return back()->withInput()->withErrors(['author' => 'No participant record found for the current user. Please provide an author name or create a participant entry.']);
@@ -99,7 +103,7 @@ class PerpossagarBookController extends Controller
         $base = $slug;
         $i = 1;
         while (PerpossagarBook::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $i++;
+            $slug = $base.'-'.$i++;
         }
         $bookData = [
             'uuid' => Str::uuid(),
@@ -117,27 +121,21 @@ class PerpossagarBookController extends Controller
         // Handle photo upload
         if ($request->hasFile('photo')) {
             $photoFile = $request->file('photo');
-            $filename = Str::random(20) . '.' . $photoFile->getClientOriginalExtension();
-
-            // Compress image to 200KB
-            $image = Image::read($photoFile)
-                ->scale(800, 1000)
-                ->toJpeg(quality: 75);
-
-            // Ensure file size is under 200KB
-            $quality = 75;
-            while ($image->toJpeg(quality: $quality)->filesize() > 204800 && $quality > 20) {
-                $quality -= 5;
-                $image = Image::read($photoFile)
-                    ->scale(800, 1000)
-                    ->toJpeg(quality: $quality);
-            }
+            $filename = Str::random(20).'.jpg';
 
             $path = 'perpossagar/books';
+            $fullPath = storage_path('app/public/'.$path);
             Storage::disk('public')->makeDirectory($path, 0755, true);
-            Storage::disk('public')->put($path . '/' . $filename, (string) $image);
 
-            $bookData['photo'] = 'assets/modules/' . $path . '/' . $filename;
+            $destinationPath = $fullPath.'/'.$filename;
+
+            // Use Spatie Image to resize and compress
+            Image::load($photoFile->getRealPath())
+                ->width(800)
+                ->height(1000)
+                ->save($destinationPath);
+
+            $bookData['photo'] = 'assets/modules/'.$path.'/'.$filename;
         }
 
         // Handle PDF upload
@@ -151,13 +149,13 @@ class PerpossagarBookController extends Controller
             } catch (\Throwable $e) {
                 Log::debug('PerpossagarBookController::store - unable to read pdf mime/size', ['exception' => $e->getMessage()]);
             }
-            $bookData['filename'] = 'assets/modules/' . $pdfPath;
+            $bookData['filename'] = 'assets/modules/'.$pdfPath;
         }
 
         $book = PerpossagarBook::create($bookData);
 
         // Attach categories
-        if (!empty($data['categories'])) {
+        if (! empty($data['categories'])) {
             $book->categories()->sync($data['categories']);
         }
 
@@ -168,6 +166,7 @@ class PerpossagarBookController extends Controller
     {
         $book = PerpossagarBook::where('uuid', $id)->with(['author', 'categories'])->firstOrFail();
         $categories = PerpossagarCategory::orderBy('name')->get();
+
         return view('admin.perpossagar.books.edit', compact('book', 'categories'));
     }
 
@@ -176,22 +175,24 @@ class PerpossagarBookController extends Controller
         $book = PerpossagarBook::where('uuid', $id)->firstOrFail();
 
         // quick pre-check for upload errors so we can return a clearer message
-        if ($request->hasFile('filename') && !$request->file('filename')->isValid()) {
+        if ($request->hasFile('filename') && ! $request->file('filename')->isValid()) {
             $err = $request->file('filename')->getError();
             Log::warning('PerpossagarBookController::update - filename upload invalid', [
                 'error' => $err,
                 'name' => $request->file('filename')->getClientOriginalName() ?? null,
             ]);
-            return back()->withInput()->withErrors(['filename' => 'File upload failed (code: ' . $err . ').']);
+
+            return back()->withInput()->withErrors(['filename' => 'File upload failed (code: '.$err.').']);
         }
 
-        if ($request->hasFile('photo') && !$request->file('photo')->isValid()) {
+        if ($request->hasFile('photo') && ! $request->file('photo')->isValid()) {
             $err = $request->file('photo')->getError();
             Log::warning('PerpossagarBookController::update - photo upload invalid', [
                 'error' => $err,
                 'name' => $request->file('photo')->getClientOriginalName() ?? null,
             ]);
-            return back()->withInput()->withErrors(['photo' => 'Image upload failed (code: ' . $err . ').']);
+
+            return back()->withInput()->withErrors(['photo' => 'Image upload failed (code: '.$err.').']);
         }
 
         $data = $request->validate([
@@ -213,7 +214,7 @@ class PerpossagarBookController extends Controller
             $base = $slug;
             $i = 1;
             while (PerpossagarBook::where('slug', $slug)->where('uuid', '!=', $book->uuid)->exists()) {
-                $slug = $base . '-' . $i++;
+                $slug = $base.'-'.$i++;
             }
             $data['slug'] = $slug;
         }
@@ -229,27 +230,21 @@ class PerpossagarBookController extends Controller
             }
 
             $photoFile = $request->file('photo');
-            $filename = Str::random(20) . '.' . $photoFile->getClientOriginalExtension();
-
-            // Compress image to 200KB
-            $image = Image::read($photoFile)
-                ->scale(800, 1000)
-                ->toJpeg(quality: 75);
-
-            // Ensure file size is under 200KB
-            $quality = 75;
-            while ($image->toJpeg(quality: $quality)->filesize() > 204800 && $quality > 20) {
-                $quality -= 5;
-                $image = Image::read($photoFile)
-                    ->scale(800, 1000)
-                    ->toJpeg(quality: $quality);
-            }
+            $filename = Str::random(20).'.jpg';
 
             $path = 'perpossagar/books';
+            $fullPath = storage_path('app/public/'.$path);
             Storage::disk('public')->makeDirectory($path, 0755, true);
-            Storage::disk('public')->put($path . '/' . $filename, (string) $image);
 
-            $data['photo'] = 'assets/modules/' . $path . '/' . $filename;
+            $destinationPath = $fullPath.'/'.$filename;
+
+            // Use Spatie Image to resize and compress
+            Image::load($photoFile->getRealPath())
+                ->width(800)
+                ->height(1000)
+                ->save($destinationPath);
+
+            $data['photo'] = 'assets/modules/'.$path.'/'.$filename;
         }
 
         // Handle PDF upload
@@ -262,7 +257,7 @@ class PerpossagarBookController extends Controller
                 }
             }
             $pdfPath = $request->file('filename')->store('perpossagar/books/pdf', 'public');
-            $data['filename'] = 'assets/modules/' . $pdfPath;
+            $data['filename'] = 'assets/modules/'.$pdfPath;
         }
 
         $book->update($data);
