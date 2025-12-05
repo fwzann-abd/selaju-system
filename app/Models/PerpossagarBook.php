@@ -2,26 +2,42 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class PerpossagarBook extends Model
 {
     use HasFactory;
+
     public $incrementing = false;
+
     protected $keyType = 'string';
+
+    protected $primaryKey = 'uuid';
+
     protected $table = 'perpossagar_books';
 
     protected $fillable = [
-        'uuid','author_id','author_name','title','slug','subtitle','desc','language',
-        'photo','color_hex','filename','is_approved','published_at'
+        'uuid', 'author_id', 'author_name', 'title', 'slug', 'subtitle', 'desc', 'language',
+        'photo', 'color_hex', 'filename', 'is_approved', 'published_at',
     ];
 
-    public function author() {
+    public function author()
+    {
         return $this->belongsTo(PerpossagarAuthor::class, 'author_id', 'uuid');
     }
 
-    public function categories() {
+    /**
+     * Return the display name for the author.
+     * If `author` relation exists, use that name; otherwise fall back to `author_name` column.
+     */
+    public function getAuthorDisplayNameAttribute(): ?string
+    {
+        return $this->author?->name ?? $this->author_name ?? null;
+    }
+
+    public function categories()
+    {
         return $this->belongsToMany(PerpossagarCategory::class,
             'perpossagar_book_categories_pivots',
             'book_id',
@@ -31,8 +47,8 @@ class PerpossagarBook extends Model
         );
     }
 
-    public function reviews() {
+    public function reviews()
+    {
         return $this->hasMany(PerpossagarBookReview::class, 'book_id', 'uuid');
     }
 }
-

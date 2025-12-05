@@ -75,7 +75,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                                {{ $book->author?->participant->name ?? '—' }}
+                                {{ $book->author_display_name ?? '—' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
                                 @if($book->categories->count() > 0)
