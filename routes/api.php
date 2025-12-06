@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SchoolController;
-use App\Http\Controllers\Api\BookController;
-use App\Http\Controllers\Api\SejajanOrderController;
 use App\Http\Controllers\Api\SejajanCartController;
+use App\Http\Controllers\Api\SejajanOrderController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(function () {
     // Public routes
@@ -54,6 +54,12 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     // Sejajan public endpoints
     Route::get('/sejajans', [\App\Http\Controllers\Api\SejajanController::class, 'index']);
 
+    // Perpossagar public endpoints
+    Route::get('/perpossagar/categories', [\App\Http\Controllers\Api\PerpossagarCategoryController::class, 'index']);
+    Route::get('/perpossagar/categories/{uuid}', [\App\Http\Controllers\Api\PerpossagarCategoryController::class, 'show']);
+    Route::get('/perpossagar/books', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'index']);
+    Route::get('/perpossagar/books/{uuid}', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'show']);
+
     // Protected routes (require auth) - using Sanctum personal access tokens
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', function (Request $request) {
@@ -62,6 +68,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
             if ($user) {
                 $user->load('school');
             }
+
             return response()->json($user);
         });
         // Revoke current access token (logout)
@@ -70,33 +77,39 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
             if ($user && $request->user()->currentAccessToken()) {
                 $request->user()->currentAccessToken()->delete();
             }
+
             return response()->json(['message' => 'Logged out'], 200);
         });
         // Update authenticated participant profile
         Route::patch('/me', function (Request $request) {
             $user = $request->user();
-            if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+            if (! $user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
 
             $validated = $request->validate([
-                'username' => ['required', 'string', 'max:50', 'unique:participants,username,' . $user->id . ',id'],
+                'username' => ['required', 'string', 'max:50', 'unique:participants,username,'.$user->id.',id'],
                 'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:participants,email,' . $user->id . ',id'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:participants,email,'.$user->id.',id'],
                 'no_telp' => ['nullable', 'string', 'max:20'],
                 'birth_date' => ['nullable', 'date'],
             ]);
 
             $user->update($validated);
             $user->load('school');
+
             return response()->json($user->fresh());
         });
 
         // Check username availability for the authenticated user (exclude their own username)
         Route::get('/username/check', function (Request $request) {
             $user = $request->user();
-            if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+            if (! $user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
 
             $username = $request->query('username');
-            if (!$username) {
+            if (! $username) {
                 return response()->json(['available' => false, 'message' => 'username is required'], 400);
             }
 
@@ -104,19 +117,22 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
                 ->where('id', '!=', $user->id)
                 ->exists();
 
-            return response()->json(['available' => !$exists]);
+            return response()->json(['available' => ! $exists]);
         });
 
         // Send email verification link for authenticated user (for token-based clients)
         Route::post('/email/verification-notification', function (Request $request) {
             $user = $request->user();
-            if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+            if (! $user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
 
             if ($user->hasVerifiedEmail()) {
                 return response()->json(['message' => 'Already verified'], 200);
             }
 
             $user->sendEmailVerificationNotification();
+
             return response()->json(['status' => 'verification-link-sent']);
         });
 
@@ -124,10 +140,14 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         // Expects { verify_url: 'http://.../verify-email/{id}/{hash}?expires=...&signature=...' }
         Route::post('/email/verify', function (Request $request) {
             $user = $request->user();
-            if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+            if (! $user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
 
             $verifyUrl = $request->input('verify_url');
-            if (!$verifyUrl) return response()->json(['message' => 'verify_url is required'], 400);
+            if (! $verifyUrl) {
+                return response()->json(['message' => 'verify_url is required'], 400);
+            }
 
             try {
                 // Create a request object from the signed url so URL::hasValidSignature can validate it
@@ -137,7 +157,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
             }
 
             // Validate signature & expiration
-            if (!\Illuminate\Support\Facades\URL::hasValidSignature($fakeRequest)) {
+            if (! \Illuminate\Support\Facades\URL::hasValidSignature($fakeRequest)) {
                 return response()->json(['message' => 'Invalid or expired verification link'], 400);
             }
 
@@ -160,6 +180,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
             }
 
             $user->markEmailAsVerified();
+
             return response()->json(['message' => 'Email verified'], 200);
         });
 
@@ -175,38 +196,41 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         Route::put('/sejajans/{sejajanSlug}/categories/{categoryId}', [\App\Http\Controllers\Api\SejajanCategoryController::class, 'update']);
         Route::delete('/sejajans/{sejajanSlug}/categories/{categoryId}', [\App\Http\Controllers\Api\SejajanCategoryController::class, 'destroy']);
 
-    // Sejajan product endpoints (owner only) - support slug parameter
-    Route::post('/sejajans/{sejajanSlug}/products', function (\Illuminate\Http\Request $request, $sejajanSlug) {
-        $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
-        $request->merge(['sejajan' => $sejajan]);
-        return app(\App\Http\Controllers\Api\SejajanProductController::class)->store($request, $sejajan);
-    });
+        // Sejajan product endpoints (owner only) - support slug parameter
+        Route::post('/sejajans/{sejajanSlug}/products', function (\Illuminate\Http\Request $request, $sejajanSlug) {
+            $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+            $request->merge(['sejajan' => $sejajan]);
 
-    Route::get('/sejajans/{sejajanSlug}/products/{productId}', function ($sejajanSlug, $productId) {
-        $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
-        $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
+            return app(\App\Http\Controllers\Api\SejajanProductController::class)->store($request, $sejajan);
+        });
 
-        // Normalize photo to filename only
-        if ($product->photo) {
-            $product->photo = preg_replace('/.*[\/\\\\]/', '', $product->photo);
-        }
+        Route::get('/sejajans/{sejajanSlug}/products/{productId}', function ($sejajanSlug, $productId) {
+            $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+            $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
 
-        return response()->json([
-            'data' => $product,
-            'path' => \App\Helpers\Helper::getPhotoBasePath(),
-        ]);
-    });
+            // Normalize photo to filename only
+            if ($product->photo) {
+                $product->photo = preg_replace('/.*[\/\\\\]/', '', $product->photo);
+            }
 
-    Route::put('/sejajans/{sejajanSlug}/products/{productId}', function (\Illuminate\Http\Request $request, $sejajanSlug, $productId) {
-        $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
-        $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
-        return app(\App\Http\Controllers\Api\SejajanProductController::class)->update($request, $sejajan, $product);
-    });
+            return response()->json([
+                'data' => $product,
+                'path' => \App\Helpers\Helper::getPhotoBasePath(),
+            ]);
+        });
+
+        Route::put('/sejajans/{sejajanSlug}/products/{productId}', function (\Illuminate\Http\Request $request, $sejajanSlug, $productId) {
+            $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+            $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
+
+            return app(\App\Http\Controllers\Api\SejajanProductController::class)->update($request, $sejajan, $product);
+        });
 
         Route::delete('/sejajans/{sejajanSlug}/products/{productId}', function ($sejajanSlug, $productId) {
             $sejajan = \App\Models\Sejajan::where('slug', $sejajanSlug)->firstOrFail();
             $product = \App\Models\SejajanProduct::where('sejajan_id', $sejajan->id)->findOrFail($productId);
             $product->delete();
+
             return response()->json(['message' => 'Produk berhasil dihapus'], 200);
         });
 
@@ -229,12 +253,11 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     // Keep wildcard route last to avoid conflicting with fixed paths like "/sejajans/cart"
     Route::get('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'show']);
 
-
     // Book endpoints
-Route::get('/books', [BookController::class, 'index']);
-Route::get('/books/{uuid}', [BookController::class, 'show']);
-Route::post('/books', [BookController::class, 'store']);
-Route::put('/books/{uuid}', [BookController::class, 'update']);
-Route::delete('/books/{uuid}', [BookController::class, 'destroy']);
+    Route::get('/books', [BookController::class, 'index']);
+    Route::get('/books/{uuid}', [BookController::class, 'show']);
+    Route::post('/books', [BookController::class, 'store']);
+    Route::put('/books/{uuid}', [BookController::class, 'update']);
+    Route::delete('/books/{uuid}', [BookController::class, 'destroy']);
 
 });
