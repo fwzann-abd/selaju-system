@@ -73,8 +73,18 @@
         [
             'icon' => 'building',
             'label' => 'Sekolah',
-            'href' => route('admin.schools.index'),
-            'active' => ['admin.schools.*'],
+            'children' => [
+                [
+                    'label' => 'Daftar Sekolah',
+                    'href' => route('admin.schools.index'),
+                    'active' => ['admin.schools.*'],
+                ],
+                [
+                    'label' => 'Daftar Siswa',
+                    'href' => route('admin.students.index'),
+                    'active' => ['admin.students.*'],
+                ],
+            ],
         ],
         [
             'icon' => 'cog',
