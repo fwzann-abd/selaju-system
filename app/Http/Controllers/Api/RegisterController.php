@@ -5,19 +5,55 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Generation;
 use App\Models\Participant;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
+    /**
+     * Check if NISN exists and is available for registration.
+     */
+    public function checkNisn(Request $request)
+    {
+        $validated = $request->validate([
+            'nisn' => ['required', 'string'],
+        ]);
+
+        $student = Student::where('nisn', $validated['nisn'])->first();
+
+        if (! $student) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'NISN tidak ditemukan. Hubungi admin sekolah Anda.',
+            ], 404);
+        }
+
+        if ($student->isRegistered()) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'NISN sudah terdaftar.',
+            ], 422);
+        }
+
+        return response()->json([
+            'valid' => true,
+            'message' => 'NISN valid. Silakan lanjutkan pendaftaran.',
+            'student' => [
+                'nama' => $student->nama,
+                'school' => $student->school->name ?? null,
+            ],
+        ], 200);
+    }
+
     /**
      * Register a new participant.
      */
     public function register(Request $request)
     {
         $validated = $request->validate([
+            'nisn' => ['required', 'string', 'exists:students,nisn'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:participants,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -26,6 +62,15 @@ class RegisterController extends Controller
             'birth_date' => ['nullable', 'date'],
         ]);
 
+        // Verify NISN is not already registered
+        $student = Student::where('nisn', $validated['nisn'])->first();
+        if (! $student) {
+            return response()->json(['message' => 'NISN tidak ditemukan'], 404);
+        }
+        if ($student->isRegistered()) {
+            return response()->json(['message' => 'NISN sudah terdaftar'], 422);
+        }
+
         // Generate unique 8-digit nomor_participant
         do {
             $nomor = str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
@@ -33,7 +78,7 @@ class RegisterController extends Controller
 
         // Get active generation
         $activeGeneration = Generation::where('is_active', true)->first();
-        if (!$activeGeneration) {
+        if (! $activeGeneration) {
             // Fallback: if no active generation exists, create one
             $activeGeneration = Generation::create([
                 'name' => 'Generasi Saat Ini',
@@ -53,7 +98,11 @@ class RegisterController extends Controller
             'nomor_participant' => $nomor,
             'is_active' => true,
             'generation_id' => $activeGeneration->id,
+            'school_id' => $student->school_id,
         ]);
+
+        // Link student to the participant
+        $student->update(['user_id' => $participant->id]);
 
         // Create Sanctum personal access token and return plain token to client
         // Optionally: to enforce single-device login, uncomment the tokens deletion line below

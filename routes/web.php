@@ -5,17 +5,15 @@ use App\Http\Controllers\Admin\GenerationController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
 use App\Http\Controllers\Admin\ParticipantController;
+use App\Http\Controllers\Admin\PerpossagarBookController;
+use App\Http\Controllers\Admin\PerpossagarCategoryController;
 use App\Http\Controllers\Admin\SchoolController;
 use App\Http\Controllers\Admin\SejajanController;
+use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\UserManagementController;
-use App\Http\Controllers\Admin\PerpossagarCategoryController;
-use App\Http\Controllers\Admin\PerpossagarBookController;
-use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -52,6 +50,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('generations/{generation}/toggle-active', [GenerationController::class, 'toggleActive'])->name('generations.toggle-active');
         // Participant management
         Route::resource('participants', ParticipantController::class);
+        // Student management
+        // Custom import form route must be registered before resource routes
+        Route::get('students/import', [StudentController::class, 'showImportForm'])->name('students.import.form');
+        Route::resource('students', StudentController::class);
+        Route::get('students-template/download', [StudentController::class, 'downloadTemplate'])->name('students.template');
+        Route::post('students-import', [StudentController::class, 'import'])->name('students.import');
+        Route::get('students-export', [StudentController::class, 'export'])->name('students.export');
         // Sejajan (Shop) management
         Route::resource('sejajan', SejajanController::class);
         // Perpossagar (Library) management

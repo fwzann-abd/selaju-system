@@ -42,11 +42,12 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
                 'name' => $user->name,
                 'email' => $user->email,
                 'username' => $user->username,
-                'email_verified_at' => $user->email_verified_at,
+                'email_verified_at                                                                                      ' => $user->email_verified_at,
             ],
         ]);
     });
 
+    Route::post('/check-nisn', [RegisterController::class, 'checkNisn']);
     Route::post('/register', [RegisterController::class, 'register']);
     Route::get('/schools', [SchoolController::class, 'index']);
     Route::patch('/register/{participant}/school', [RegisterController::class, 'updateSchool']);
@@ -249,11 +250,9 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         Route::delete('/sejajans/cart/{itemId}', [SejajanCartController::class, 'destroy']);
         Route::delete('/sejajans/cart', [SejajanCartController::class, 'destroyAll']);
 
-        // Keep store deletion below cart routes so '/sejajans/cart' doesn't resolve to slug route
         Route::delete('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'destroy']);
     });
 
-    // Keep wildcard route last to avoid conflicting with fixed paths like "/sejajans/cart"
     Route::get('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'show']);
 
     // Book endpoints
