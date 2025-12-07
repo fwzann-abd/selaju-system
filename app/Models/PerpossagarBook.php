@@ -19,7 +19,7 @@ class PerpossagarBook extends Model
 
     protected $fillable = [
         'uuid', 'author_id', 'author_name', 'title', 'slug', 'subtitle', 'desc', 'language',
-        'photo', 'color_hex', 'filename', 'is_approved', 'published_at',
+        'photo', 'color_hex', 'filename', 'is_approved', 'published_at', 'is_hero', 'hero_order', 'read_count',
     ];
 
     public function author()
