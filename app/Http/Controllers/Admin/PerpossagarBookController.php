@@ -63,6 +63,8 @@ class PerpossagarBookController extends Controller
             'filename' => 'nullable|mimes:pdf|max:51200',
             'author_name' => 'nullable|string|max:255',
             'is_approved' => 'sometimes|boolean',
+            'is_hero' => 'sometimes|boolean',
+            'hero_order' => 'nullable|integer|min:0',
             'categories' => 'required|array|min:1',
             'categories.*' => 'uuid|exists:perpossagar_book_categories,uuid',
         ]);
@@ -175,6 +177,13 @@ class PerpossagarBookController extends Controller
             $book->categories()->sync($data['categories']);
         }
 
+        // Handle hero settings
+        if (isset($data['is_hero'])) {
+            $book->is_hero = $data['is_hero'];
+            $book->hero_order = $data['hero_order'] ?? null;
+            $book->save();
+        }
+
         return redirect()->route('admin.perpossagar-books.index')->with('success', 'Buku berhasil ditambahkan.');
     }
 
@@ -220,6 +229,8 @@ class PerpossagarBookController extends Controller
             'photo' => 'nullable|mimes:jpeg,jpg,png,gif,webp|max:5120',
             'filename' => 'nullable|mimes:pdf|max:51200',
             'is_approved' => 'sometimes|boolean',
+            'is_hero' => 'sometimes|boolean',
+            'hero_order' => 'nullable|integer|min:0',
             'categories' => 'required|array|min:1',
             'categories.*' => 'uuid|exists:perpossagar_book_categories,uuid',
         ]);
@@ -297,6 +308,13 @@ class PerpossagarBookController extends Controller
         // Sync categories
         if (isset($data['categories'])) {
             $book->categories()->sync($data['categories']);
+        }
+
+        // Handle hero settings
+        if (isset($data['is_hero'])) {
+            $book->is_hero = $data['is_hero'];
+            $book->hero_order = $data['hero_order'] ?? null;
+            $book->save();
         }
 
         return redirect()->route('admin.perpossagar-books.index')->with('success', 'Buku berhasil diperbarui.');

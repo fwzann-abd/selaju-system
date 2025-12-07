@@ -58,7 +58,10 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     Route::get('/perpossagar/categories', [\App\Http\Controllers\Api\PerpossagarCategoryController::class, 'index']);
     Route::get('/perpossagar/categories/{uuid}', [\App\Http\Controllers\Api\PerpossagarCategoryController::class, 'show']);
     Route::get('/perpossagar/books', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'index']);
+    Route::get('/perpossagar/books/hero', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'hero']);
+    Route::get('/perpossagar/books/popular', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'popular']);
     Route::get('/perpossagar/books/{uuid}', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'show']);
+    Route::post('/perpossagar/books/{uuid}/read', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'incrementReadCount']);
 
     // Protected routes (require auth) - using Sanctum personal access tokens
     Route::middleware('auth:sanctum')->group(function () {
