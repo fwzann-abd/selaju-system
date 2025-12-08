@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->nullable()->constrained('participants')->onDelete('cascade');
+            $table->uuid('user_id')->nullable();
             $table->foreignUuid('school_id')->constrained('schools')->onDelete('cascade');
             $table->string('nama');
             $table->string('nipd')->nullable();
@@ -21,6 +21,7 @@ return new class extends Migration
             $table->enum('jk', ['L', 'P']);
             $table->timestamps();
 
+            $table->foreign('user_id')->references('uuid')->on('participants')->onDelete('cascade');
             $table->index('nisn');
             $table->index('school_id');
         });

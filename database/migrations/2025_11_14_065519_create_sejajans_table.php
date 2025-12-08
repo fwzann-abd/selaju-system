@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->foreign('participant_id')->references('id')->on('participants')->onDelete('cascade');
+            $table->foreign('participant_id')->references('uuid')->on('participants')->onDelete('cascade');
         });
     }
 

@@ -16,11 +16,14 @@ return new class extends Migration
             $table->string('nomor_participant')->unique()->nullable();
             $table->uuid('school_id')->nullable();
             $table->foreign('school_id')->references('id')->on('schools')->onDelete('set null');
+            $table->uuid('generation_id')->nullable();
+            $table->foreign('generation_id')->references('id')->on('generations')->onDelete('cascade');
             $table->string('username')->unique();
             $table->string('name');
             $table->date('birth_date')->nullable();
             $table->string('no_telp')->nullable();
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('photo')->nullable();
             $table->string('password');
             $table->boolean('is_active')->default(true);

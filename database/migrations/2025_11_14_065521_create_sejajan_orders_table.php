@@ -19,10 +19,11 @@ return new class extends Migration
             $table->decimal('total_price', 12, 2)->default(0);
             $table->text('notes')->nullable();
             $table->timestamp('pickup_time')->nullable();
+            $table->string('location_pickup')->nullable();
             $table->timestamps();
 
             $table->foreign('sejajan_id')->references('id')->on('sejajans')->onDelete('cascade');
-            $table->foreign('participant_id')->references('id')->on('participants')->onDelete('cascade');
+            $table->foreign('participant_id')->references('uuid')->on('participants')->onDelete('cascade');
         });
     }
 

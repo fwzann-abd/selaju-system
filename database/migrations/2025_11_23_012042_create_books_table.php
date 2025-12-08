@@ -9,35 +9,35 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void
-{
-    Schema::create('books', function (Blueprint $table) {
-        $table->uuid('uuid')->primary();
-        $table->uuid('author_id');
+    public function up(): void
+    {
+        Schema::create('perpossagar_books', function (Blueprint $table) {
+            $table->uuid('uuid')->primary();
+            $table->uuid('author_id')->nullable();
 
-        $table->string('title');
-        $table->string('slug')->unique();
-        $table->string('subtitle')->nullable();
-        $table->text('desc')->nullable();
-        $table->string('language')->nullable();
-        $table->string('photo')->nullable();
-        $table->string('color_hex', 10)->nullable();
-        $table->string('filename')->nullable();
-        $table->boolean('is_approved')->default(false);
-        $table->timestamp('published_at')->nullable();
+            $table->string('title');
+            $table->string('slug')->unique();
+            $table->string('subtitle')->nullable();
+            $table->text('desc')->nullable();
+            $table->string('language')->nullable();
+            $table->string('photo')->nullable();
+            $table->string('color_hex', 10)->nullable();
+            $table->string('filename')->nullable();
+            $table->boolean('is_approved')->default(false);
+            $table->boolean('is_hero')->default(false);
+            $table->integer('hero_order')->nullable();
+            $table->bigInteger('read_count')->default(0);
+            $table->string('author_name')->nullable();
+            $table->timestamp('published_at')->nullable();
 
-        $table->timestamps();
+            $table->timestamps();
 
-        $table->foreign('author_id')->references('uuid')->on('authors')->cascadeOnDelete();
-    });
-}
+            $table->foreign('author_id')->references('uuid')->on('perpossagar_authors')->cascadeOnDelete();
+        });
+    }
 
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('books');
+        Schema::dropIfExists('perpossagar_books');
     }
 };

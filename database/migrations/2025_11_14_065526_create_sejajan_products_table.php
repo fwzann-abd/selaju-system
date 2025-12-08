@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('sejajan_products', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('sejajan_id')->index();
+            $table->uuid('category_id')->nullable()->index();
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('sejajan_id')->references('id')->on('sejajans')->onDelete('cascade');
+            $table->foreign('category_id')->references('id')->on('sejajan_categories')->onDelete('set null');
             $table->unique(['sejajan_id', 'slug']);
         });
     }

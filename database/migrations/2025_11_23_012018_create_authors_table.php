@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('authors', function (Blueprint $table) {
+        Schema::create('perpossagar_authors', function (Blueprint $table) {
             $table->uuid('uuid')->primary();
             $table->uuid('participant_id');
             $table->timestamp('author_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('participant_id')->references('id')->on('participants')->cascadeOnDelete();
+            $table->foreign('participant_id')->references('uuid')->on('participants')->cascadeOnDelete();
         });
     }
-
 
     /**
      * Reverse the migrations.
