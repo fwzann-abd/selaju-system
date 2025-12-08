@@ -9,25 +9,24 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up(): void
-{
-    Schema::create('books_categories_pivots', function (Blueprint $table) {
-        $table->uuid('uuid')->primary();
-        $table->uuid('category_id');
-        $table->uuid('book_id');
-        $table->timestamps();
+    public function up(): void
+    {
+        Schema::create('perpossagar_book_categories_pivots', function (Blueprint $table) {
+            $table->uuid('uuid')->primary();
+            $table->uuid('category_id');
+            $table->uuid('book_id');
+            $table->timestamps();
 
-        $table->foreign('category_id')->references('uuid')->on('books_category')->cascadeOnDelete();
-        $table->foreign('book_id')->references('uuid')->on('books')->cascadeOnDelete();
-    });
-}
-
+            $table->foreign('category_id')->references('uuid')->on('perpossagar_book_categories')->cascadeOnDelete();
+            $table->foreign('book_id')->references('uuid')->on('perpossagar_books')->cascadeOnDelete();
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('books_categories_pivots');
+        Schema::dropIfExists('perpossagar_book_categories_pivots');
     }
 };

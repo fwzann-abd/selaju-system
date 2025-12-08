@@ -16,7 +16,7 @@ return new class extends Migration
             $table->integer('qty')->default(1);
             $table->timestamps();
 
-            $table->foreign('participant_id')->references('id')->on('participants')->onDelete('cascade');
+            $table->foreign('participant_id')->references('uuid')->on('participants')->onDelete('cascade');
             $table->foreign('sejajan_id')->references('id')->on('sejajans')->onDelete('cascade');
             $table->foreign('sejajan_product_id')->references('id')->on('sejajan_products')->onDelete('cascade');
             $table->unique(['participant_id', 'sejajan_product_id']);

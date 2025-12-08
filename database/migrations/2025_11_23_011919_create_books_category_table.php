@@ -9,20 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
- public function up(): void
-{
-    Schema::create('books_category', function (Blueprint $table) {
-        $table->uuid('uuid')->primary();
-        $table->string('name');
-        $table->timestamps();
-    });
-}
+    public function up(): void
+    {
+        Schema::create('perpossagar_book_categories', function (Blueprint $table) {
+            $table->uuid('uuid')->primary();
+            $table->string('name');
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('books_category');
+        Schema::dropIfExists('perpossagar_book_categories');
     }
 };
