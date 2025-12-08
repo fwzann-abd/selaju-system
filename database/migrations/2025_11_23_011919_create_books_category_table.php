@@ -12,8 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
-
         Schema::create('perpossagar_book_categories', function (Blueprint $table) {
             $table->uuid('uuid')->primary();
             $table->string('name');
