@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PerpossagarAuthor;
 use App\Models\PerpossagarBook;
+use App\Models\PerpossagarBookLanguage;
 use App\Models\PerpossagarCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,9 @@ class PerpossagarBookController extends Controller
 {
     public function index()
     {
-        $books = PerpossagarBook::with(['author', 'categories'])->orderBy('created_at', 'desc')->paginate(15);
+        $books = PerpossagarBook::with(['author', 'categories', 'languageOption'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
 
         return view('admin.perpossagar.books.index', compact('books'));
     }
@@ -26,8 +29,9 @@ class PerpossagarBookController extends Controller
     public function create()
     {
         $categories = PerpossagarCategory::orderBy('name')->get();
+        $languages = PerpossagarBookLanguage::orderBy('name')->get();
 
-        return view('admin.perpossagar.books.create', compact('categories'));
+        return view('admin.perpossagar.books.create', compact('categories', 'languages'));
     }
 
     public function store(Request $request)
@@ -57,7 +61,7 @@ class PerpossagarBookController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'desc' => 'nullable|string',
-            'language' => 'nullable|string|max:50',
+            'language_id' => 'required|uuid|exists:perpossagar_book_langs,uuid',
             'color_hex' => 'nullable|string|regex:/^#[0-9A-F]{6}$/i',
             'photo' => 'nullable|mimes:jpeg,jpg,png,gif,webp|max:5120',
             'filename' => 'nullable|mimes:pdf|max:51200',
@@ -107,6 +111,8 @@ class PerpossagarBookController extends Controller
         while (PerpossagarBook::where('slug', $slug)->exists()) {
             $slug = $base.'-'.$i++;
         }
+        $language = PerpossagarBookLanguage::where('uuid', $data['language_id'])->firstOrFail();
+
         $bookData = [
             'uuid' => Str::uuid(),
             'author_id' => $authorUuid, // may be null if admin provided author_name
@@ -115,7 +121,8 @@ class PerpossagarBookController extends Controller
             'subtitle' => $data['subtitle'] ?? null,
             'slug' => $slug,
             'desc' => $data['desc'] ?? null,
-            'language' => $data['language'] ?? 'id',
+            'language_id' => $language?->uuid,
+            'language' => $language?->slug,
             'color_hex' => $data['color_hex'] ?? '#000000',
             'is_approved' => $data['is_approved'] ?? false,
         ];
@@ -189,10 +196,13 @@ class PerpossagarBookController extends Controller
 
     public function edit($id)
     {
-        $book = PerpossagarBook::where('uuid', $id)->with(['author', 'categories'])->firstOrFail();
+        $book = PerpossagarBook::where('uuid', $id)
+            ->with(['author', 'categories', 'languageOption'])
+            ->firstOrFail();
         $categories = PerpossagarCategory::orderBy('name')->get();
+        $languages = PerpossagarBookLanguage::orderBy('name')->get();
 
-        return view('admin.perpossagar.books.edit', compact('book', 'categories'));
+        return view('admin.perpossagar.books.edit', compact('book', 'categories', 'languages'));
     }
 
     public function update(Request $request, $id)
@@ -224,7 +234,7 @@ class PerpossagarBookController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'desc' => 'nullable|string',
-            'language' => 'nullable|string|max:50',
+            'language_id' => 'required|uuid|exists:perpossagar_book_langs,uuid',
             'color_hex' => 'nullable|string|regex:/^#[0-9A-F]{6}$/i',
             'photo' => 'nullable|mimes:jpeg,jpg,png,gif,webp|max:5120',
             'filename' => 'nullable|mimes:pdf|max:51200',
@@ -234,6 +244,8 @@ class PerpossagarBookController extends Controller
             'categories' => 'required|array|min:1',
             'categories.*' => 'uuid|exists:perpossagar_book_categories,uuid',
         ]);
+
+        $language = PerpossagarBookLanguage::where('uuid', $data['language_id'])->firstOrFail();
 
         // Update slug if title changed
         if (($data['title'] ?? null) && $data['title'] !== $book->title) {
@@ -303,7 +315,10 @@ class PerpossagarBookController extends Controller
             }
         }
 
-        $book->update($data);
+        $book->update(array_merge($data, [
+            'language_id' => $language?->uuid,
+            'language' => $language?->slug,
+        ]));
 
         // Sync categories
         if (isset($data['categories'])) {
@@ -326,5 +341,57 @@ class PerpossagarBookController extends Controller
         $book->delete();
 
         return redirect()->route('admin.perpossagar-books.index')->with('success', 'Buku berhasil dihapus.');
+    }
+
+    public function heroSettings()
+    {
+        $books = PerpossagarBook::with(['categories', 'languageOption'])
+            ->where('is_approved', true)
+            ->orderByDesc('is_hero')
+            ->orderBy('hero_order')
+            ->orderBy('title')
+            ->get();
+
+        $currentHeroes = $books->where('is_hero', true)->count();
+
+        return view('admin.perpossagar.books.hero', compact('books', 'currentHeroes'));
+    }
+
+    public function updateHero(Request $request)
+    {
+        $validated = $request->validate([
+            'hero_books' => ['nullable', 'array', 'max:5'],
+            'hero_books.*' => ['uuid', 'exists:perpossagar_books,uuid'],
+            'hero_orders' => ['nullable', 'array'],
+            'hero_orders.*' => ['nullable', 'integer', 'min:1', 'max:20'],
+        ]);
+
+        $selected = collect($validated['hero_books'] ?? [])
+            ->unique()
+            ->take(5)
+            ->values();
+
+        $orders = collect($validated['hero_orders'] ?? []);
+
+        DB::transaction(function () use ($selected, $orders) {
+            PerpossagarBook::query()->update(['is_hero' => false, 'hero_order' => null]);
+
+            $orderedHeroes = $selected
+                ->map(fn ($uuid) => [
+                    'uuid' => $uuid,
+                    'order' => (int) ($orders->get($uuid, null) ?? 999),
+                ])
+                ->sortBy('order')
+                ->values();
+
+            foreach ($orderedHeroes as $index => $hero) {
+                PerpossagarBook::where('uuid', $hero['uuid'])->update([
+                    'is_hero' => true,
+                    'hero_order' => $index + 1,
+                ]);
+            }
+        });
+
+        return redirect()->route('admin.perpossagar-books.hero')->with('success', 'Pengaturan hero berhasil diperbarui.');
     }
 }

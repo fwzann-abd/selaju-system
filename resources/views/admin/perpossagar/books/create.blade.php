@@ -310,17 +310,30 @@
 
             <!-- Language Field -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <label for="language" class="block text-sm font-medium text-slate-900 dark:text-white mb-2">
-                    Bahasa (Opsional)
+                <label for="language_id" class="block text-sm font-medium text-slate-900 dark:text-white mb-2">
+                    Bahasa Buku <span class="text-red-500">*</span>
                 </label>
-                <input
-                    type="text"
-                    id="language"
-                    name="language"
-                    value="{{ old('language', 'id') }}"
-                    placeholder="Contoh: id, en, jv"
-                    class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:ring-indigo-900"
-                />
+                <select
+                    id="language_id"
+                    name="language_id"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-slate-900 transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:ring-indigo-900"
+                    required
+                >
+                    <option value="" disabled {{ old('language_id') ? '' : 'selected' }}>Pilih bahasa buku...</option>
+                    @foreach($languages as $language)
+                        <option value="{{ $language->uuid }}" {{ old('language_id') === $language->uuid ? 'selected' : '' }}>
+                            {{ $language->name }} ({{ $language->slug }})
+                        </option>
+                    @endforeach
+                </select>
+                @error('language_id')
+                    <p class="mt-2 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                @enderror
+                @if($languages->isEmpty())
+                    <p class="mt-2 text-sm text-red-500 dark:text-red-400">
+                        Belum ada bahasa buku. <a href="{{ route('admin.perpossagar-book-langs.create') }}" class="font-medium hover:underline">Tambah bahasa baru</a>
+                    </p>
+                @endif
             </div>
 
             <!-- Color Field -->

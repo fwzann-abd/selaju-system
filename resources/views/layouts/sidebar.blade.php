@@ -48,9 +48,24 @@
                     'active' => ['admin.perpossagar-categories.*'],
                 ],
                 [
+                    'label' => 'Bahasa Buku',
+                    'href' => route('admin.perpossagar-book-langs.index'),
+                    'active' => ['admin.perpossagar-book-langs.*'],
+                ],
+                [
                     'label' => 'Daftar Buku',
                     'href' => route('admin.perpossagar-books.index'),
-                    'active' => ['admin.perpossagar-books.*'],
+                    'active' => [
+                        'admin.perpossagar-books.index',
+                        'admin.perpossagar-books.create',
+                        'admin.perpossagar-books.edit',
+                        'admin.perpossagar-books.show',
+                    ],
+                ],
+                [
+                    'label' => 'Setting Hero',
+                    'href' => route('admin.perpossagar-books.hero'),
+                    'active' => ['admin.perpossagar-books.hero', 'admin.perpossagar-books.hero.update'],
                 ],
             ],
         ],

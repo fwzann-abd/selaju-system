@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
 use App\Http\Controllers\Admin\ParticipantController;
 use App\Http\Controllers\Admin\PerpossagarBookController;
+use App\Http\Controllers\Admin\PerpossagarBookLanguageController;
 use App\Http\Controllers\Admin\PerpossagarCategoryController;
 use App\Http\Controllers\Admin\SchoolController;
 use App\Http\Controllers\Admin\SejajanController;
@@ -62,6 +63,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('sejajan', SejajanController::class);
         // Perpossagar (Library) management
         Route::resource('perpossagar-categories', PerpossagarCategoryController::class);
+        Route::resource('perpossagar-book-langs', PerpossagarBookLanguageController::class)->except(['show']);
+        Route::get('perpossagar-books/hero', [PerpossagarBookController::class, 'heroSettings'])->name('perpossagar-books.hero');
+        Route::post('perpossagar-books/hero', [PerpossagarBookController::class, 'updateHero'])->name('perpossagar-books.hero.update');
         Route::resource('perpossagar-books', PerpossagarBookController::class);
     });
 });
