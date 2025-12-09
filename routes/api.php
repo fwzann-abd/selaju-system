@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\BookController;
+use App\Http\Controllers\Api\PerpossagarBookLanguageController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SchoolController;
 use App\Http\Controllers\Api\SejajanCartController;
@@ -58,11 +59,15 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     // Perpossagar public endpoints
     Route::get('/perpossagar/categories', [\App\Http\Controllers\Api\PerpossagarCategoryController::class, 'index']);
     Route::get('/perpossagar/categories/{uuid}', [\App\Http\Controllers\Api\PerpossagarCategoryController::class, 'show']);
+    Route::get('/perpossagar/book-langs', [PerpossagarBookLanguageController::class, 'index']);
     Route::get('/perpossagar/books', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'index']);
     Route::get('/perpossagar/books/hero', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'hero']);
     Route::get('/perpossagar/books/popular', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'popular']);
-    Route::get('/perpossagar/books/{uuid}', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'show']);
-    Route::post('/perpossagar/books/{uuid}/read', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'incrementReadCount']);
+    Route::get('/perpossagar/books/community', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'community']);
+    Route::get('/perpossagar/books/{uuid}', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'show'])
+        ->whereUuid('uuid');
+    Route::post('/perpossagar/books/{uuid}/read', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'incrementReadCount'])
+        ->whereUuid('uuid');
 
     // Protected routes (require auth) - using Sanctum personal access tokens
     Route::middleware('auth:sanctum')->group(function () {
@@ -194,6 +199,9 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
                 'token' => $token,
             ], 200);
         });
+
+        Route::get('/perpossagar/books/mine', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'mine']);
+        Route::post('/perpossagar/books', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'store']);
 
         // Sejajan protected endpoints (create/update/delete owned stores)
         Route::get('/sejajans/my-stores', [\App\Http\Controllers\Api\SejajanController::class, 'myStores']);

@@ -18,7 +18,7 @@ class PerpossagarBook extends Model
     protected $table = 'perpossagar_books';
 
     protected $fillable = [
-        'uuid', 'author_id', 'author_name', 'title', 'slug', 'subtitle', 'desc', 'language',
+        'uuid', 'author_id', 'language_id', 'author_name', 'title', 'slug', 'subtitle', 'desc', 'language',
         'photo', 'color_hex', 'filename', 'is_approved', 'published_at', 'is_hero', 'hero_order', 'read_count',
     ];
 
@@ -45,6 +45,11 @@ class PerpossagarBook extends Model
             'uuid',
             'uuid'
         );
+    }
+
+    public function languageOption()
+    {
+        return $this->belongsTo(PerpossagarBookLanguage::class, 'language_id', 'uuid');
     }
 
     public function reviews()
