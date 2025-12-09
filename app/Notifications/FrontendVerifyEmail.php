@@ -10,6 +10,16 @@ use Illuminate\Support\Carbon;
 class FrontendVerifyEmail extends BaseVerifyEmail
 {
     /**
+     * Get the notification's subject.
+     */
+    public function toMail($notifiable)
+    {
+        return parent::toMail($notifiable)
+            ->subject('Verifikasi Email Anda - Selaju')
+            ->action('Verifikasi Email', $this->verificationUrl($notifiable));
+    }
+
+    /**
      * Build a verification URL that points to the frontend and contains the
      * signed backend verification URL as a query parameter (verify_url).
      *

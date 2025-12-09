@@ -36,27 +36,27 @@
 
                         <tr>
                             <td style="padding:24px 32px 0 32px;">
-                                <h1 style="margin:0 0 12px 0;font-size:20px;line-height:1.25;color:#0f172a;font-weight:700;">{{ __('Hello!') }}</h1>
-                                <p style="margin:0 0 18px 0;color:#6b7280;">{{ __('Please click the button below to verify your email address.') }}</p>
+                                <h1 style="margin:0 0 12px 0;font-size:20px;line-height:1.25;color:#0f172a;font-weight:700;">Halo! 👋</h1>
+                                <p style="margin:0 0 18px 0;color:#6b7280;line-height:1.6;">Terima kasih sudah mendaftar di Selaju! Untuk menyelesaikan pendaftaran, silakan klik tombol di bawah ini untuk memverifikasi email Anda.</p>
 
                                 @isset($actionText)
                                     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0 24px 0;width:100%;">
                                         <tr>
                                             <td align="center">
-                                                <a href="{{ $actionUrl }}" style="display:inline-block;padding:10px 18px;border-radius:6px;color:#fff;text-decoration:none;{{ $style }}">{{ $actionText }}</a>
+                                                <a href="{{ $actionUrl }}" style="display:inline-block;padding:12px 28px;border-radius:6px;color:#fff;text-decoration:none;font-weight:600;{{ $style }}">{{ $actionText }}</a>
                                             </td>
                                         </tr>
                                     </table>
                                 @endisset
 
-                                <p style="margin:0 0 18px 0;color:#6b7280;">{{ __('If you did not create an account, no further action is required.') }}</p>
+                                <p style="margin:0 0 18px 0;color:#6b7280;line-height:1.6;">Jika Anda tidak membuat akun ini, abaikan email ini dan tidak ada tindakan yang diperlukan.</p>
 
-                                <p style="margin:0 0 28px 0;color:#6b7280;">{{ __('Regards,') }}<br>{{ config('app.name') }}</p>
+                                <p style="margin:0 0 28px 0;color:#6b7280;line-height:1.6;">Semangat! 🚀<br><strong>{{ config('app.name') }}</strong></p>
 
                                 <hr style="border:none;border-top:1px solid #e6eef6;margin:0 0 18px 0;">
 
                                 <p style="margin:18px 0 0 0;color:#94a3b8;font-size:13px;">
-                                    {{ __('If you\'re having trouble clicking the ":action" button, copy and paste the URL below into your web browser:', ['action' => $actionText ?? 'Verify Email Address']) }}
+                                    Jika tombol di atas tidak berfungsi, salin dan tempel URL berikut ke browser Anda:
                                 </p>
 
                                 <p style="word-break:break-all;margin:8px 0 0 0;color:#3b82f6;font-size:13px;">{{ $actionUrl }}</p>
@@ -65,7 +65,7 @@
 
                         <tr>
                             <td style="padding:16px 32px 24px 32px;background-color:#f8fafc;color:#94a3b8;font-size:12px;text-align:center;">
-                                &copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('All rights reserved.') }}
+                                &copy; {{ date('Y') }} {{ config('app.name') }}. Semua hak dilindungi.
                             </td>
                         </tr>
                     </table>
