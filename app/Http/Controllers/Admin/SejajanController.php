@@ -72,7 +72,7 @@ class SejajanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'participant_id' => 'required|exists:participants,id|unique:sejajans,participant_id',
+            'participant_id' => 'required|exists:participants,uuid|unique:sejajans,participant_id',
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:sejajans,slug',
             'description' => 'nullable|string',
@@ -153,7 +153,7 @@ class SejajanController extends Controller
     public function update(Request $request, Sejajan $sejajan)
     {
         $validated = $request->validate([
-            'participant_id' => 'required|exists:participants,id|unique:sejajans,participant_id,' . $sejajan->id,
+            'participant_id' => 'required|exists:participants,uuid|unique:sejajans,participant_id,' . $sejajan->id,
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:sejajans,slug,' . $sejajan->id,
             'description' => 'nullable|string',

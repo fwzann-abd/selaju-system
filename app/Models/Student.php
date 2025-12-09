@@ -16,7 +16,7 @@ class Student extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'user_id',
+        'participant_id',
         'school_id',
         'nama',
         'nipd',
@@ -29,7 +29,7 @@ class Student extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(Participant::class, 'user_id');
+        return $this->belongsTo(Participant::class, 'participant_id');
     }
 
     /**
@@ -45,6 +45,6 @@ class Student extends Model
      */
     public function isRegistered(): bool
     {
-        return ! is_null($this->user_id);
+        return ! is_null($this->participant_id);
     }
 }
