@@ -43,6 +43,7 @@ class RegisterController extends Controller
             'student' => [
                 'nama' => $student->nama,
                 'school' => $student->school->name ?? null,
+                'school_id' => $student->school_id,
             ],
         ], 200);
     }
@@ -102,16 +103,19 @@ class RegisterController extends Controller
         ]);
 
         // Link student to the participant
-        $student->update(['user_id' => $participant->id]);
+        $student->update(['participant_id' => $participant->getKey()]);
 
         // Create Sanctum personal access token and return plain token to client
         // Optionally: to enforce single-device login, uncomment the tokens deletion line below
         // $participant->tokens()->delete();
         $plainToken = $participant->createToken('default')->plainTextToken;
 
+        $participantArray = $participant->toArray();
+        $participantArray['id'] = $participant->getKey();
+
         return response()->json([
-            'message' => 'Participant registered successfully. Please select a school.',
-            'participant' => $participant,
+            'message' => 'Participant registered successfully.',
+            'participant' => $participantArray,
             'token' => $plainToken,
         ], 201);
     }
