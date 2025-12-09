@@ -33,6 +33,9 @@
                         </option>
                     @endforeach
                 </select>
+                <div id="selectedCategories" class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-4 text-sm text-slate-500 transition dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300">
+                    Belum ada kategori yang dipilih.
+                </div>
                 @error('categories')
                     <p class="mt-2 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                 @enderror
@@ -66,16 +69,18 @@
                         padding: 0.25rem;
                     }
                     .ts-wrapper.multi .ts-control > div {
-                        background-color: rgb(99, 102, 241);
-                        color: white;
-                        border: none;
-                        border-radius: 0.375rem;
-                        padding: 0.25rem 0.5rem;
-                        font-size: 0.875rem;
+                        background-color: rgb(238, 242, 255);
+                        color: rgb(67, 56, 202);
+                        border: 1px solid rgb(199, 210, 254);
+                        border-radius: 9999px;
+                        padding: 0.15rem 0.55rem 0.15rem 0.65rem;
+                        font-size: 0.85rem;
                         margin: 0.25rem;
                     }
                     .ts-wrapper.multi .ts-control > div.active {
                         background-color: rgb(79, 70, 229);
+                        color: white;
+                        border-color: rgb(99, 102, 241);
                     }
                     .ts-dropdown {
                         border: 1px solid rgb(203, 213, 225);
@@ -103,8 +108,9 @@
                         box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
                     }
                     .dark .ts-wrapper.multi .ts-control > div {
-                        background-color: rgb(99, 102, 241);
-                        color: white;
+                        background-color: rgba(99, 102, 241, 0.25);
+                        color: rgb(224, 231, 255);
+                        border: 1px solid rgba(99, 102, 241, 0.5);
                     }
                     .dark .ts-dropdown {
                         border-color: rgb(71, 85, 105);
@@ -118,14 +124,121 @@
                         background-color: rgb(99, 102, 241);
                         color: white;
                     }
+                    .selected-category-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.4rem;
+                        border-radius: 0.75rem;
+                        padding: 0.35rem 0.85rem;
+                        background: white;
+                        color: rgb(30, 41, 59);
+                        border: 1px solid rgba(99, 102, 241, 0.2);
+                    }
+                    .selected-category-badge button {
+                        border: none;
+                        background: rgba(99, 102, 241, 0.15);
+                        color: rgb(67, 56, 202);
+                        width: 1.35rem;
+                        height: 1.35rem;
+                        border-radius: 9999px;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 0.85rem;
+                        transition: background-color 0.15s ease;
+                    }
+                    .selected-category-badge button:hover {
+                        background: rgb(99, 102, 241);
+                        color: white;
+                    }
+                    .dark .selected-category-badge {
+                        background: rgba(15, 23, 42, 0.6);
+                        color: rgb(226, 232, 240);
+                        border-color: rgba(99, 102, 241, 0.45);
+                    }
+                    .dark .selected-category-badge button {
+                        background: rgba(99, 102, 241, 0.35);
+                        color: white;
+                    }
                 </style>
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        new TomSelect('#categories', {
+                        const selectEl = document.getElementById('categories');
+                        const selectedContainer = document.getElementById('selectedCategories');
+
+                        if (!selectEl || !selectedContainer) {
+                            return;
+                        }
+
+                        const categorySelect = new TomSelect(selectEl, {
                             create: false,
                             placeholder: 'Pilih satu atau lebih kategori...',
                             allowEmptyOption: false,
                             maxItems: null,
+                            plugins: {
+                                remove_button: {
+                                    title: 'Hapus kategori',
+                                },
+                            },
+                            render: {
+                                option: function(data, escape) {
+                                    return `<div class="flex items-center justify-between gap-3">${escape(data.text)}<span class="text-xs text-slate-400">Pilih</span></div>`;
+                                },
+                                item: function(data, escape) {
+                                    return `<div class="flex items-center gap-2">${escape(data.text)}</div>`;
+                                }
+                            }
+                        });
+
+                        const renderSelectedBadges = () => {
+                            const valuesRaw = categorySelect.getValue();
+                            const values = Array.isArray(valuesRaw)
+                                ? valuesRaw
+                                : (valuesRaw ? [valuesRaw] : []);
+
+                            selectedContainer.innerHTML = '';
+
+                            if (!values.length) {
+                                selectedContainer.innerHTML = '<p class="text-sm text-slate-500 dark:text-slate-400">Belum ada kategori yang dipilih.</p>';
+                                return;
+                            }
+
+                            const stack = document.createElement('div');
+                            stack.className = 'flex flex-wrap gap-3';
+
+                            values.forEach(value => {
+                                const option = categorySelect.options[value];
+                                if (!option) return;
+                                const badge = document.createElement('span');
+                                badge.className = 'selected-category-badge';
+                                badge.innerHTML = `
+                                    <span>${option.text}</span>
+                                    <button type="button" data-remove-category="${value}" aria-label="Hapus kategori ${option.text}">
+                                        &times;
+                                    </button>
+                                `;
+                                stack.appendChild(badge);
+                            });
+
+                            selectedContainer.appendChild(stack);
+                        };
+
+                        renderSelectedBadges();
+
+                        categorySelect.on('item_add', renderSelectedBadges);
+                        categorySelect.on('item_remove', renderSelectedBadges);
+                        categorySelect.on('clear', renderSelectedBadges);
+
+                        selectedContainer.addEventListener('click', (event) => {
+                            const target = event.target.closest('[data-remove-category]');
+                            if (!target) {
+                                return;
+                            }
+
+                            const value = target.dataset.removeCategory;
+                            if (value) {
+                                categorySelect.removeItem(value);
+                            }
                         });
                     });
                 </script>
