@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\School;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -225,9 +227,9 @@ class StudentController extends Controller
     }
 
     /**
-     * Import students from Excel file.
+     * Preview Excel file before actual import so admins can review the data.
      */
-    public function import(Request $request)
+    public function previewImport(Request $request)
     {
         $request->validate([
             'school_id' => ['required', 'uuid', 'exists:schools,id'],
@@ -240,26 +242,14 @@ class StudentController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray();
 
-            // Detect header row and whether there's a leading "No" column
-            $headers = array_map(function ($v) {
-                return strtolower(trim((string) $v));
-            }, $rows[0] ?? []);
+            [$rows, $offset, $startingRow] = $this->extractDataRows($rows);
 
-            $hasNumberColumn = isset($headers[0]) && in_array($headers[0], ['no', 'no.', 'nomor']);
-            $offset = $hasNumberColumn ? 1 : 0;
-            $startingRow = $hasNumberColumn ? 8 : 2; // for accurate error messages
-
-            // Remove header row
-            array_shift($rows);
-
-            $imported = 0;
-            $skipped = 0;
+            $validRows = [];
             $errors = [];
 
             foreach ($rows as $index => $row) {
                 $rowNumber = $index + $startingRow;
 
-                // Skip empty rows
                 if (empty(array_filter($row))) {
                     continue;
                 }
@@ -272,37 +262,155 @@ class StudentController extends Controller
                     'jk' => strtoupper(trim($row[$offset + 3] ?? '')),
                 ];
 
-                // Validate row data
                 $validator = Validator::make($data, [
                     'nama' => ['required', 'string', 'max:255'],
                     'nipd' => ['nullable', 'string', 'max:255'],
-                    'nisn' => ['required', 'string', 'max:255', 'unique:students,nisn'],
+                    'nisn' => ['required', 'string', 'max:255'],
                     'jk' => ['required', 'in:L,P'],
                 ]);
 
                 if ($validator->fails()) {
-                    $skipped++;
                     $errors[] = "Baris {$rowNumber}: ".implode(', ', $validator->errors()->all());
-
                     continue;
                 }
 
-                Student::create($data);
-                $imported++;
+                $validRows[] = [
+                    'row_number' => $rowNumber,
+                    'nama' => $data['nama'],
+                    'nipd' => $data['nipd'],
+                    'nisn' => $data['nisn'],
+                    'jk' => $data['jk'],
+                ];
             }
 
-            $message = "Import selesai. Berhasil: {$imported}, Dilewati: {$skipped}";
-            if (! empty($errors)) {
-                $message .= "\n\nError:\n".implode("\n", array_slice($errors, 0, 10));
-                if (count($errors) > 10) {
-                    $message .= "\n... dan ".(count($errors) - 10).' error lainnya.';
-                }
+            if (empty($validRows)) {
+                return response()->json([
+                    'message' => 'Tidak ada data valid yang dapat dipreview. Periksa kembali file Anda.',
+                    'errors' => $errors,
+                ], 422);
             }
 
-            return back()->with($skipped > 0 ? 'warning' : 'success', $message);
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengimpor data: '.$e->getMessage());
+            $token = (string) Str::uuid();
+            Cache::put('student-import-'.$token, [
+                'rows' => $validRows,
+                'school_id' => $request->school_id,
+                'filename' => $file->getClientOriginalName(),
+            ], now()->addMinutes(30));
+
+            return response()->json([
+                'token' => $token,
+                'rows' => $validRows,
+                'errors' => $errors,
+                'summary' => [
+                    'valid' => count($validRows),
+                    'invalid' => count($errors),
+                ],
+                'filename' => $file->getClientOriginalName(),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Gagal membaca file: '.$e->getMessage(),
+            ], 422);
         }
+    }
+
+    private function extractDataRows(array $rows): array
+    {
+        $headerIndex = null;
+        $headers = [];
+
+        foreach ($rows as $index => $row) {
+            $normalized = array_map(static function ($value) {
+                return strtolower(trim((string) $value));
+            }, $row);
+
+            if (in_array('nama', $normalized, true)) {
+                $headerIndex = $index;
+                $headers = $normalized;
+                break;
+            }
+        }
+
+        if ($headerIndex === null) {
+            throw new \RuntimeException('Struktur file tidak dikenali. Gunakan template import terbaru.');
+        }
+
+        $hasNumberColumn = isset($headers[0]) && in_array($headers[0], ['no', 'no.', 'nomor']);
+        $offset = $hasNumberColumn ? 1 : 0;
+        $startingRow = $headerIndex + 2;
+        $dataRows = array_slice($rows, $headerIndex + 1);
+
+        return [$dataRows, $offset, $startingRow];
+    }
+
+    /**
+     * Import students from Excel file.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'import_token' => ['required', 'string'],
+        ]);
+
+        $token = $request->input('import_token');
+        $payload = Cache::pull('student-import-'.$token);
+
+        if (! $payload) {
+            return back()->with('error', 'Sesi import tidak ditemukan atau telah kedaluwarsa. Silakan ulangi proses preview.');
+        }
+
+        $rows = $payload['rows'] ?? [];
+        $schoolId = $payload['school_id'] ?? null;
+
+        if (! $schoolId || empty($rows)) {
+            return back()->with('error', 'Data import tidak valid atau kosong.');
+        }
+
+        if (! School::where('id', $schoolId)->exists()) {
+            return back()->with('error', 'Sekolah tujuan sudah tidak tersedia. Silakan ulangi proses import.');
+        }
+
+        $imported = 0;
+        $skipped = 0;
+        $errors = [];
+
+        foreach ($rows as $row) {
+            $data = [
+                'school_id' => $schoolId,
+                'nama' => $row['nama'] ?? '',
+                'nipd' => $row['nipd'] ?? null,
+                'nisn' => $row['nisn'] ?? '',
+                'jk' => $row['jk'] ?? '',
+            ];
+
+            $validator = Validator::make($data, [
+                'nama' => ['required', 'string', 'max:255'],
+                'nipd' => ['nullable', 'string', 'max:255'],
+                'nisn' => ['required', 'string', 'max:255', 'unique:students,nisn'],
+                'jk' => ['required', 'in:L,P'],
+            ]);
+
+            if ($validator->fails()) {
+                $skipped++;
+                $rowNumber = $row['row_number'] ?? '-';
+                $errors[] = "Baris {$rowNumber}: ".implode(', ', $validator->errors()->all());
+                continue;
+            }
+
+            Student::create($data);
+            $imported++;
+        }
+
+        $message = "Import selesai. Berhasil: {$imported}, Dilewati: {$skipped}";
+        if (! empty($errors)) {
+            $message .= "\n\nError:\n".implode("\n", array_slice($errors, 0, 10));
+            if (count($errors) > 10) {
+                $message .= "\n... dan ".(count($errors) - 10).' error lainnya.';
+            }
+        }
+
+        return redirect()->route('admin.students.index')
+            ->with($skipped > 0 ? 'warning' : 'success', $message);
     }
 
     /**

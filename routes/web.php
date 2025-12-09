@@ -53,6 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Student management
         // Custom import form route must be registered before resource routes
         Route::get('students/import', [StudentController::class, 'showImportForm'])->name('students.import.form');
+        Route::post('students-import/preview', [StudentController::class, 'previewImport'])->name('students.import.preview');
         Route::resource('students', StudentController::class);
         Route::get('students-template/download', [StudentController::class, 'downloadTemplate'])->name('students.template');
         Route::post('students-import', [StudentController::class, 'import'])->name('students.import');
