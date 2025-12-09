@@ -180,12 +180,19 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
             }
 
             if ($user->hasVerifiedEmail()) {
-                return response()->json(['message' => 'Already verified'], 200);
+                return response()->json(['message' => 'Already verified', 'status' => 'already_verified'], 200);
             }
 
             $user->markEmailAsVerified();
 
-            return response()->json(['message' => 'Email verified'], 200);
+            // Generate token for auto-login
+            $token = $user->createToken('email-verification')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Email verified',
+                'status' => 'verified',
+                'token' => $token,
+            ], 200);
         });
 
         // Sejajan protected endpoints (create/update/delete owned stores)
