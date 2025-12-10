@@ -15,6 +15,10 @@
             @csrf
             @method('PUT')
 
+            @php
+                $selectedCategories = collect(old('categories', $book->categories->pluck('uuid')->toArray()));
+            @endphp
+
             <!-- Categories Field (REQUIRED) -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <label for="categories" class="block text-sm font-medium text-slate-900 dark:text-white mb-2">
@@ -29,7 +33,7 @@
                     data-placeholder="Pilih satu atau lebih kategori..."
                 >
                     @foreach($categories as $category)
-                        <option value="{{ $category->uuid }}" {{ $book->categories->contains($category->uuid) ? 'selected' : '' }}>
+                        <option value="{{ $category->uuid }}" {{ $selectedCategories->contains($category->uuid) ? 'selected' : '' }}>
                             {{ $category->name }}
                         </option>
                     @endforeach
