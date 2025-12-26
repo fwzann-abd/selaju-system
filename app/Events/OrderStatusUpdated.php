@@ -5,7 +5,6 @@ namespace App\Events;
 use App\Models\SejajanOrder;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -33,9 +32,9 @@ class OrderStatusUpdated implements ShouldBroadcastNow
     {
         return [
             // Buyer channel - untuk yang order
-            new PrivateChannel('orders.buyer.' . $this->order->participant_id),
+            new PrivateChannel('orders.buyer.'.$this->order->participant_id),
             // Seller channel - untuk owner toko
-            new PrivateChannel('orders.seller.' . $this->order->sejajan->participant_id),
+            new PrivateChannel('orders.seller.'.$this->order->sejajan->participant_id),
         ];
     }
 

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Participant;
 use App\Models\School;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class ParticipantController extends Controller
 {
@@ -124,8 +124,8 @@ class ParticipantController extends Controller
     public function update(Request $request, Participant $participant)
     {
         $validated = $request->validate([
-            'username' => ['required', 'string', 'max:255', 'unique:accounts,username,' . $participant->uuid . ',uuid'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:accounts,email,' . $participant->uuid . ',uuid'],
+            'username' => ['required', 'string', 'max:255', 'unique:accounts,username,'.$participant->uuid.',uuid'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:accounts,email,'.$participant->uuid.',uuid'],
             'no_telp' => ['nullable', 'string', 'max:20'],
             'birth_date' => ['nullable', 'date'],
             'school_id' => ['nullable', 'uuid', 'exists:schools,id'],

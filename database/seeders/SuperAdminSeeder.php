@@ -18,11 +18,11 @@ class SuperAdminSeeder extends Seeder
     public function run(): void
     {
         User::create([
-              'id' => (string) Str::uuid(),
-              'name' => 'Super Admin',
-              'email' => 'dev@gncs.dev',
-              'password' => Hash::make('programmer123'),
-              'email_verified_at' => now(),
+            'id' => (string) Str::uuid(),
+            'name' => 'Super Admin',
+            'email' => 'dev@gncs.dev',
+            'password' => Hash::make('programmer123'),
+            'email_verified_at' => now(),
         ]);
     }
 }

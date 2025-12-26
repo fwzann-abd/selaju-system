@@ -91,11 +91,6 @@ class GenerationController extends Controller
 
         $data['is_active'] = $request->has('is_active');
 
-        // If setting this generation as active, deactivate all others
-        if ($data['is_active']) {
-            Generation::where('id', '!=', $generation->id)->update(['is_active' => false]);
-        }
-
         $generation->update($data);
 
         return redirect()
@@ -114,19 +109,25 @@ class GenerationController extends Controller
 
     public function toggleActive(Generation $generation)
     {
-        // If generation is not active, set it as active and deactivate others
-        if (!$generation->is_active) {
-            Generation::where('id', '!=', $generation->id)->update(['is_active' => false]);
-            $generation->update(['is_active' => true]);
-            $message = 'Generasi berhasil diaktifkan.';
-        } else {
-            // If already active, deactivate it
-            $generation->update(['is_active' => false]);
-            $message = 'Generasi berhasil dinonaktifkan.';
-        }
+        // Simple toggle: allow multiple generations to be active
+        $generation->update(['is_active' => ! $generation->is_active]);
+
+        $message = $generation->is_active ? 'Generasi berhasil diaktifkan.' : 'Generasi berhasil dinonaktifkan.';
 
         return redirect()
             ->route('admin.generations.index')
             ->with('success', $message);
+    }
+
+    public function setAsCurrent(Generation $generation)
+    {
+        // Set this generation as current (default for registrations)
+        // Deactivate current for all others
+        Generation::where('id', '!=', $generation->id)->update(['is_current' => false]);
+        $generation->update(['is_current' => true]);
+
+        return redirect()
+            ->route('admin.generations.index')
+            ->with('success', 'Generasi "'.$generation->name.'" berhasil diset sebagai generasi saat ini.');
     }
 }

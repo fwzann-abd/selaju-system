@@ -16,7 +16,7 @@ class MenuController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized',
@@ -26,7 +26,7 @@ class MenuController extends Controller
         // Get user group
         $userGroup = $user->userGroup;
 
-        if (!$userGroup) {
+        if (! $userGroup) {
             return response()->json([
                 'success' => false,
                 'message' => 'User tidak memiliki group',
@@ -47,7 +47,7 @@ class MenuController extends Controller
                     return $userGroup->permissions()
                         ->whereHas('moduleAccess', function ($query) use ($module) {
                             $query->where('module_id', $module->id)
-                                  ->where('identifiers', 'LIKE', $module->identifiers . '-view');
+                                ->where('identifiers', 'LIKE', $module->identifiers.'-view');
                         })
                         ->where('status', true)
                         ->exists();

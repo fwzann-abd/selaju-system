@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use App\Models\Sejajan;
-use Illuminate\Support\Facades\Validator;
 use App\Helpers\Helper;
+use App\Http\Controllers\Controller;
+use App\Models\Sejajan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class SejajanController extends Controller
 {
@@ -24,22 +24,25 @@ class SejajanController extends Controller
 
         // Normalize photo to filename only for each item (in case older records contain full paths)
         $items->transform(function ($item) {
-            if (!empty($item->photo)) {
+            if (! empty($item->photo)) {
                 $item->photo = preg_replace('/.*[\/\\\\]/', '', $item->photo);
             }
+
             return $item;
         });
 
         return response()->json([
             'data' => $items,
-            'path' => Helper::getPhotoBasePath()
+            'path' => Helper::getPhotoBasePath(),
         ]);
     }
 
     public function myStores(Request $request)
     {
         $user = $request->user();
-        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
 
         $stores = Sejajan::where('participant_id', $user->getKey())
             ->withCount('products')
@@ -47,15 +50,16 @@ class SejajanController extends Controller
 
         // Normalize photo to filename only
         $stores->transform(function ($item) {
-            if (!empty($item->photo)) {
+            if (! empty($item->photo)) {
                 $item->photo = preg_replace('/.*[\/\\\\]/', '', $item->photo);
             }
+
             return $item;
         });
 
         return response()->json([
             'data' => $stores,
-            'path' => Helper::getPhotoBasePath()
+            'path' => Helper::getPhotoBasePath(),
         ]);
     }
 
@@ -63,20 +67,22 @@ class SejajanController extends Controller
     {
         $sejajan->load('products');
         // Normalize photo to filename only (strip any stored path)
-        if (!empty($sejajan->photo)) {
+        if (! empty($sejajan->photo)) {
             $sejajan->photo = preg_replace('/.*[\/\\\\]/', '', $sejajan->photo);
         }
 
         return response()->json([
             'data' => $sejajan,
-            'path' => Helper::getPhotoBasePath()
+            'path' => Helper::getPhotoBasePath(),
         ]);
     }
 
     public function store(Request $request)
     {
         $user = $request->user();
-        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
 
         $v = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -90,14 +96,14 @@ class SejajanController extends Controller
             return response()->json(['errors' => $v->errors()], 422);
         }
 
-    $data = $v->validated();
+        $data = $v->validated();
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
             // ensure unique
             $orig = $data['slug'];
             $i = 1;
             while (Sejajan::where('slug', $data['slug'])->exists()) {
-                $data['slug'] = $orig . '-' . $i++;
+                $data['slug'] = $orig.'-'.$i++;
             }
         }
 
@@ -112,7 +118,7 @@ class SejajanController extends Controller
                 \Illuminate\Support\Facades\File::makeDirectory($dest, 0755, true);
             }
 
-            $filename = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '_', $file->getClientOriginalName());
+            $filename = time().'_'.preg_replace('/[^A-Za-z0-9\._-]/', '_', $file->getClientOriginalName());
             $file->move($dest, $filename);
             // store only the filename; the accessor will build the full path
             $data['photo'] = $filename;
@@ -121,27 +127,29 @@ class SejajanController extends Controller
         $sejajan = Sejajan::create($data);
 
         // Ensure response contains filename only
-        if (!empty($sejajan->photo)) {
+        if (! empty($sejajan->photo)) {
             $sejajan->photo = preg_replace('/.*[\/\\\\]/', '', $sejajan->photo);
         }
 
         return response()->json([
             'data' => $sejajan,
-            'path' => Helper::getPhotoBasePath()
+            'path' => Helper::getPhotoBasePath(),
         ], 201);
     }
 
     public function update(Request $request, Sejajan $sejajan)
     {
         $user = $request->user();
-        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
         if ($sejajan->participant_id !== $user->getKey()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
         $v = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|nullable|string|max:255|unique:sejajans,slug,' . $sejajan->id . ',id',
+            'slug' => 'sometimes|nullable|string|max:255|unique:sejajans,slug,'.$sejajan->id.',id',
             'description' => 'nullable|string',
             'photo' => 'nullable|image|max:2048',
             'is_active' => 'nullable|boolean',
@@ -163,42 +171,45 @@ class SejajanController extends Controller
             }
 
             // Delete old photo if exists
-            if (!empty($sejajan->photo)) {
-                $oldPath = $dest . '/' . preg_replace('/.*[\/\\\\]/', '', $sejajan->photo);
+            if (! empty($sejajan->photo)) {
+                $oldPath = $dest.'/'.preg_replace('/.*[\/\\\\]/', '', $sejajan->photo);
                 if (file_exists($oldPath)) {
                     @unlink($oldPath);
                 }
             }
 
-            $filename = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '_', $file->getClientOriginalName());
+            $filename = time().'_'.preg_replace('/[^A-Za-z0-9\._-]/', '_', $file->getClientOriginalName());
             $file->move($dest, $filename);
             // store only the filename
             $data['photo'] = $filename;
         }
 
         $sejajan->update($data);
-        
+
         // Normalize photo to filename only
         $updated = $sejajan->fresh();
-        if (!empty($updated->photo)) {
+        if (! empty($updated->photo)) {
             $updated->photo = preg_replace('/.*[\/\\\\]/', '', $updated->photo);
         }
 
         return response()->json([
             'data' => $updated,
-            'path' => Helper::getPhotoBasePath()
+            'path' => Helper::getPhotoBasePath(),
         ]);
     }
 
     public function destroy(Request $request, Sejajan $sejajan)
     {
         $user = $request->user();
-        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
         if ($sejajan->participant_id !== $user->getKey()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
         $sejajan->delete();
+
         return response()->json(['message' => 'Deleted']);
     }
 }

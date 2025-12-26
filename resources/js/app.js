@@ -199,6 +199,7 @@ document.addEventListener('alpine:init', () => {
 
             const formData = new FormData();
             formData.append('school_id', this.schoolId);
+            formData.append('generation_id', document.querySelector('input[name="generation_id"]')?.value || '');
             formData.append('file', fileInput.files[0]);
 
             try {
@@ -248,6 +249,12 @@ document.addEventListener('alpine:init', () => {
             }
 
             this.isUploading = true;
+
+            // Reset the uploading state after form submission
+            // The form will naturally redirect on success
+            setTimeout(() => {
+                this.isUploading = false;
+            }, 1000);
         },
     }));
 });

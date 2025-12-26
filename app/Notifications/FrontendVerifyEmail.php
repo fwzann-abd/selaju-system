@@ -3,9 +3,9 @@
 namespace App\Notifications;
 
 use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\URL;
 
 class FrontendVerifyEmail extends BaseVerifyEmail
 {
@@ -40,6 +40,6 @@ class FrontendVerifyEmail extends BaseVerifyEmail
 
         $frontend = env('FRONTEND_URL', 'http://localhost:3000');
 
-        return rtrim($frontend, '/') . '/verify-email?verify_url=' . urlencode($signedUrl);
+        return rtrim($frontend, '/').'/verify-email?verify_url='.urlencode($signedUrl);
     }
 }

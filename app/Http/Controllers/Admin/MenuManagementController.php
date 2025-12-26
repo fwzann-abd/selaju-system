@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
-use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -86,7 +85,7 @@ class MenuManagementController extends Controller
     public function update(Request $request, Menu $menu)
     {
         $request->validate([
-            'code' => 'required|string|max:255|unique:menus,code,' . $menu->id,
+            'code' => 'required|string|max:255|unique:menus,code,'.$menu->id,
             'name' => 'required|string|max:255',
             'icon' => 'required|string|max:255',
             'row_order' => 'required|integer',

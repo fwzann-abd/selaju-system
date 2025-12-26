@@ -15,6 +15,7 @@ class ArticleCategory extends Model
      * Primary key is UUID string
      */
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [

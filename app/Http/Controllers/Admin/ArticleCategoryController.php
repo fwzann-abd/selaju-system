@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\ArticleCategory;
+use Illuminate\Http\Request;
 
 class ArticleCategoryController extends Controller
 {
     public function index()
     {
         $categories = ArticleCategory::orderBy('name')->get();
+
         return view('admin.article-categories.index', compact('categories'));
     }
 

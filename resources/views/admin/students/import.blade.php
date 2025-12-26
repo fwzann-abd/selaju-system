@@ -28,6 +28,14 @@
 
             <div class="grid grid-cols-1 gap-6">
                 <div>
+                    <label for="generation_id" class="text-sm font-semibold text-slate-600 dark:text-slate-200">Generasi Saat Ini</label>
+                    <input type="hidden" name="generation_id" value="{{ $currentGeneration?->id }}">
+                    <div class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                        {{ $currentGeneration?->name ?? 'Tidak ada generasi yang aktif' }}
+                    </div>
+                </div>
+
+                <div>
                     <label for="school_id" class="text-sm font-semibold text-slate-600 dark:text-slate-200">Sekolah</label>
                     <select id="school_id" name="school_id" required x-model="schoolId"
                         class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">

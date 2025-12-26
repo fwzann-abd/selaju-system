@@ -2,23 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class Account extends Model implements MustVerifyEmail
 {
-    use HasUuids, HasApiTokens, Notifiable;
+    use HasApiTokens, HasUuids, Notifiable;
 
     protected $table = 'accounts';
+
     public $incrementing = false;
+
     protected $primaryKey = 'uuid';
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -97,7 +99,7 @@ class Account extends Model implements MustVerifyEmail
     {
         // Use a frontend-friendly verification notification that points to the
         // SPA and includes the signed backend verify URL as a query parameter.
-        $this->notify(new \App\Notifications\FrontendVerifyEmail());
+        $this->notify(new \App\Notifications\FrontendVerifyEmail);
     }
 
     /**
@@ -114,6 +116,7 @@ class Account extends Model implements MustVerifyEmail
     public function hasReachedMaxDevices(): bool
     {
         $maxDevices = config('auth.max_devices_per_account', 4);
+
         return $this->activeDeviceSessions()->count() >= $maxDevices;
     }
 

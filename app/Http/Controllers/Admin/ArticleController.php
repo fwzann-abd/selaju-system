@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\ArticleCategory;
 use App\Models\Article;
+use App\Models\ArticleCategory;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class ArticleController extends Controller
@@ -13,12 +13,14 @@ class ArticleController extends Controller
     public function index()
     {
         $articles = Article::with('category')->orderBy('created_at', 'desc')->paginate(15);
+
         return view('admin.articles.index', compact('articles'));
     }
 
     public function create()
     {
         $categories = ArticleCategory::orderBy('name')->get();
+
         return view('admin.articles.create', compact('categories'));
     }
 
@@ -36,7 +38,7 @@ class ArticleController extends Controller
         $base = $slug;
         $i = 1;
         while (Article::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $i++;
+            $slug = $base.'-'.$i++;
         }
 
         $article = Article::create(array_merge($data, ['slug' => $slug]));
@@ -47,6 +49,7 @@ class ArticleController extends Controller
     public function show($id)
     {
         $article = Article::find($id);
+
         return view('admin.articles.show', compact('article'));
     }
 
@@ -54,6 +57,7 @@ class ArticleController extends Controller
     {
         $article = Article::find($id);
         $categories = ArticleCategory::orderBy('name')->get();
+
         return view('admin.articles.edit', compact('article', 'categories'));
     }
 
@@ -75,7 +79,7 @@ class ArticleController extends Controller
             $base = $slug;
             $i = 1;
             while (Article::where('slug', $slug)->where('id', '!=', $article->id)->exists()) {
-                $slug = $base . '-' . $i++;
+                $slug = $base.'-'.$i++;
             }
             $data['slug'] = $slug;
         }
@@ -89,7 +93,7 @@ class ArticleController extends Controller
     {
         $article = Article::findOrFail($id);
         $article->delete();
+
         return redirect()->route('admin.articles.index')->with('success', 'Article deleted.');
     }
 }
-

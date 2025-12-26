@@ -195,7 +195,7 @@ class SejajanOrderController extends Controller
     private function addDeliveryAddress(SejajanOrder $order, array $data): void
     {
         if ($data['delivery_method'] === 'delivery' && ! empty($data['address'])) {
-            $notes = trim(($order->notes ? $order->notes . PHP_EOL : '') . 'Alamat: ' . $data['address']);
+            $notes = trim(($order->notes ? $order->notes.PHP_EOL : '').'Alamat: '.$data['address']);
             $order->update(['notes' => $notes]);
         }
     }
@@ -209,7 +209,7 @@ class SejajanOrderController extends Controller
 
         Log::info('Broadcasting new order', [
             'order_id' => $order->id,
-            'seller_channel' => 'orders.seller.' . $order->sejajan->participant_id,
+            'seller_channel' => 'orders.seller.'.$order->sejajan->participant_id,
             'buyer_id' => $order->participant_id,
         ]);
 

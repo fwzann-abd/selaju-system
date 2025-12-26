@@ -12,6 +12,7 @@ class PerpossagarBookLanguageController extends Controller
     public function index()
     {
         $languages = PerpossagarBookLanguage::orderBy('name')->paginate(20);
+
         return view('admin.perpossagar.languages.index', compact('languages'));
     }
 
@@ -39,6 +40,7 @@ class PerpossagarBookLanguageController extends Controller
     public function edit(string $id)
     {
         $language = PerpossagarBookLanguage::where('uuid', $id)->firstOrFail();
+
         return view('admin.perpossagar.languages.edit', compact('language'));
     }
 
@@ -48,7 +50,7 @@ class PerpossagarBookLanguageController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
-            'slug' => ['required', 'string', 'max:20', 'unique:perpossagar_book_langs,slug,' . $language->uuid . ',uuid'],
+            'slug' => ['required', 'string', 'max:20', 'unique:perpossagar_book_langs,slug,'.$language->uuid.',uuid'],
         ]);
 
         $language->update($data);

@@ -109,6 +109,7 @@ class SchoolController extends Controller
     private function formatSlug(string $value): string
     {
         $slug = Str::slug($value);
+
         return $slug !== '' ? $slug : Str::uuid()->toString();
     }
 }

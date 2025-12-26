@@ -41,7 +41,7 @@ class SejajanCategoryController extends Controller
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('sejajan_categories')->where('sejajan_id', $sejajan->id)
+                Rule::unique('sejajan_categories')->where('sejajan_id', $sejajan->id),
             ],
             'description' => 'nullable|string',
             'order' => 'nullable|integer|min:0',
@@ -96,7 +96,7 @@ class SejajanCategoryController extends Controller
                 'max:255',
                 Rule::unique('sejajan_categories')
                     ->where('sejajan_id', $sejajan->id)
-                    ->ignore($category->id)
+                    ->ignore($category->id),
             ],
             'description' => 'nullable|string',
             'order' => 'nullable|integer|min:0',

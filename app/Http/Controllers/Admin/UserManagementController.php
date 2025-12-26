@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\UserGroup;
 use App\Models\Module;
 use App\Models\ModuleAccess;
+use App\Models\User;
+use App\Models\UserGroup;
 use App\Models\UserGroupPermission;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -123,7 +123,7 @@ class UserManagementController extends Controller
     {
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'user_group_id' => 'required|exists:user_groups,id',
             'permissions' => 'sometimes|array',
         ];

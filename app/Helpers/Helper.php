@@ -7,7 +7,7 @@ class Helper
     /**
      * Get the full web URL for a Sejajan store photo.
      *
-     * @param string|null $filename The photo filename (e.g., '1763351816_1761729372932.jpg')
+     * @param  string|null  $filename  The photo filename (e.g., '1763351816_1761729372932.jpg')
      * @return string|null The full URL or null if filename is empty
      */
     public static function getPhotoPath($filename)
@@ -17,7 +17,8 @@ class Helper
         }
 
         $appUrl = config('app.url');
-        return rtrim($appUrl, '/') . '/assets/modules/sejajan/mart/' . $filename;
+
+        return rtrim($appUrl, '/').'/assets/modules/sejajan/mart/'.$filename;
     }
 
     /**
@@ -28,6 +29,7 @@ class Helper
     public static function getPhotoBasePath()
     {
         $appUrl = config('app.url');
-        return rtrim($appUrl, '/') . '/assets/modules/sejajan/mart/';
+
+        return rtrim($appUrl, '/').'/assets/modules/sejajan/mart/';
     }
 }

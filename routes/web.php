@@ -49,6 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('schools', SchoolController::class)->except('show');
         Route::resource('generations', GenerationController::class)->except('show');
         Route::patch('generations/{generation}/toggle-active', [GenerationController::class, 'toggleActive'])->name('generations.toggle-active');
+        Route::patch('generations/{generation}/set-as-current', [GenerationController::class, 'setAsCurrent'])->name('generations.set-as-current');
         // Participant management
         Route::resource('participants', ParticipantController::class);
         // Student management

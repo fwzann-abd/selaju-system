@@ -12,6 +12,7 @@ class PerpossagarCategoryController extends Controller
     public function index()
     {
         $categories = PerpossagarCategory::orderBy('name')->paginate(15);
+
         return view('admin.perpossagar.categories.index', compact('categories'));
     }
 
@@ -37,6 +38,7 @@ class PerpossagarCategoryController extends Controller
     public function edit($id)
     {
         $category = PerpossagarCategory::where('uuid', $id)->firstOrFail();
+
         return view('admin.perpossagar.categories.edit', compact('category'));
     }
 
@@ -45,7 +47,7 @@ class PerpossagarCategoryController extends Controller
         $category = PerpossagarCategory::where('uuid', $id)->firstOrFail();
 
         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:perpossagar_book_categories,name,' . $category->uuid . ',uuid',
+            'name' => 'required|string|max:255|unique:perpossagar_book_categories,name,'.$category->uuid.',uuid',
         ]);
 
         $category->update($data);
