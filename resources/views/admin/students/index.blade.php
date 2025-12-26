@@ -40,7 +40,7 @@
             <form action="{{ route('admin.students.index') }}" method="GET" class="w-full md:max-w-lg">
                 <div class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus-within:border-indigo-500 dark:border-slate-700 dark:bg-slate-900">
                     <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
-                    <input type="text" name="q" value="{{ $search }}" placeholder="Cari nama, nisn atau nipd"
+                    <input type="text" name="q" value="{{ $search }}" placeholder="Cari nama, national_id atau student_number"
                            class="w-full border-none bg-transparent text-sm text-slate-700 placeholder-slate-400 focus:ring-0 dark:text-slate-200"
                            autocomplete="off">
                     <select name="school_id" class="ml-2 rounded-md border border-slate-200 bg-transparent px-2 py-1 text-sm dark:border-slate-700">
@@ -96,9 +96,9 @@
                     <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
                         @forelse($students as $student)
                             <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
-                                <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $student->nama }}</td>
-                                <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $student->nisn }}</td>
-                                <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $student->nipd ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $student->name }}</td>
+                                <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $student->national_id }}</td>
+                                <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $student->student_number ?? '-' }}</td>
                                 <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $student->school->name ?? '-' }}</td>
                                 <td class="px-6 py-4 text-sm text-slate-700">{{ $student->isRegistered() ? 'Terdaftar' : 'Belum Terdaftar' }}</td>
                                 <td class="px-6 py-4">

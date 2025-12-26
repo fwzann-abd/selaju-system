@@ -32,7 +32,7 @@ class StudentController extends Controller
             ->when($schoolId, function ($query) use ($schoolId) {
                 $query->where('school_id', $schoolId);
             })
-            ->with(['school:id,name', 'user:id,name,email'])
+            ->with(['school:id,name', 'account:uuid,name'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -324,7 +324,8 @@ class StudentController extends Controller
                 return strtolower(trim((string) $value));
             }, $row);
 
-            if (in_array('nama', $normalized, true)) {
+            // Support both old 'nama' and new 'name' column names for backward compatibility
+            if (in_array('name', $normalized, true) || in_array('nama', $normalized, true)) {
                 $headerIndex = $index;
                 $headers = $normalized;
                 break;
@@ -432,11 +433,12 @@ class StudentController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
 
         // Set headers
-        $sheet->setCellValue('A1', 'Nama');
-        $sheet->setCellValue('B1', 'Student Number');
-        $sheet->setCellValue('C1', 'National ID');
-        $sheet->setCellValue('D1', 'Jenis Kelamin');
-        $sheet->setCellValue('E1', 'Sekolah');
+        $sheet->setCellValue('A1', 'name');
+        $sheet->setCellValue('B1', 'student_number');
+        $sheet->setCellValue('C1', 'national_id');
+        $sheet->setCellValue('D1', 'gender');
+        $sheet->setCellValue('E1', 'school');
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
         $sheet->setCellValue('F1', 'Status');
 
         // Style headers
