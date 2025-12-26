@@ -16,20 +16,20 @@ class Student extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'participant_id',
+        'account_id',
         'school_id',
-        'nama',
-        'nipd',
-        'nisn',
-        'jk',
+        'name',
+        'student_number',
+        'national_id',
+        'gender',
     ];
 
     /**
-     * Get the participant (user) associated with this student (if registered)
+     * Get the account (user) associated with this student (if registered)
      */
-    public function user(): BelongsTo
+    public function account(): BelongsTo
     {
-        return $this->belongsTo(Participant::class, 'participant_id');
+        return $this->belongsTo(Account::class, 'account_id', 'uuid');
     }
 
     /**
@@ -41,10 +41,10 @@ class Student extends Model
     }
 
     /**
-     * Check if student has registered (has user_id)
+     * Check if student has registered (has account_id)
      */
     public function isRegistered(): bool
     {
-        return ! is_null($this->participant_id);
+        return ! is_null($this->account_id);
     }
 }

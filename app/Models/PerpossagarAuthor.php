@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-use App\Models\Participant;
-
 class PerpossagarAuthor extends Model
 {
     use HasFactory;
@@ -15,11 +13,11 @@ class PerpossagarAuthor extends Model
     protected $keyType = 'string';
     protected $table = 'perpossagar_authors';
 
-    protected $fillable = ['uuid','participant_id','author_at'];
+    protected $fillable = ['uuid','account_id','author_at'];
 
-    public function participant(): BelongsTo
+    public function account(): BelongsTo
     {
-        return $this->belongsTo(Participant::class, 'participant_id', 'uuid');
+        return $this->belongsTo(Account::class, 'account_id', 'uuid');
     }
 
     public function books() {

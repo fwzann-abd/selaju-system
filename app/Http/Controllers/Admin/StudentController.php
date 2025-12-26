@@ -25,9 +25,9 @@ class StudentController extends Controller
 
         $students = Student::query()
             ->when($search, function ($query) use ($search) {
-                $query->where('nama', 'like', "%{$search}%")
-                    ->orWhere('nisn', 'like', "%{$search}%")
-                    ->orWhere('nipd', 'like', "%{$search}%");
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('national_id', 'like', "%{$search}%")
+                    ->orWhere('student_number', 'like', "%{$search}%");
             })
             ->when($schoolId, function ($query) use ($schoolId) {
                 $query->where('school_id', $schoolId);
@@ -97,10 +97,10 @@ class StudentController extends Controller
     {
         $validated = $request->validate([
             'school_id' => ['required', 'uuid', 'exists:schools,id'],
-            'nama' => ['required', 'string', 'max:255'],
-            'nipd' => ['nullable', 'string', 'max:255'],
-            'nisn' => ['required', 'string', 'max:255', 'unique:students,nisn'],
-            'jk' => ['required', 'in:L,P'],
+            'name' => ['required', 'string', 'max:255'],
+            'student_number' => ['nullable', 'string', 'max:255'],
+            'national_id' => ['required', 'string', 'max:255', 'unique:students,national_id'],
+            'gender' => ['required', 'in:L,P'],
         ]);
 
         Student::create($validated);
@@ -146,10 +146,10 @@ class StudentController extends Controller
     {
         $validated = $request->validate([
             'school_id' => ['required', 'uuid', 'exists:schools,id'],
-            'nama' => ['required', 'string', 'max:255'],
-            'nipd' => ['nullable', 'string', 'max:255'],
-            'nisn' => ['required', 'string', 'max:255', 'unique:students,nisn,'.$student->id],
-            'jk' => ['required', 'in:L,P'],
+            'name' => ['required', 'string', 'max:255'],
+            'student_number' => ['nullable', 'string', 'max:255'],
+            'national_id' => ['required', 'string', 'max:255', 'unique:students,national_id,'.$student->id],
+            'gender' => ['required', 'in:L,P'],
         ]);
 
         $student->update($validated);
@@ -183,9 +183,9 @@ class StudentController extends Controller
 
         // Add notes section (rows 1-5)
         $sheet->setCellValue('A1', 'Catatan:');
-        $sheet->setCellValue('A2', '- jk: L (Laki-laki) atau P (Perempuan)');
-        $sheet->setCellValue('A3', '- nipd: boleh kosong');
-        $sheet->setCellValue('A4', '- nisn: wajib diisi dan unik');
+        $sheet->setCellValue('A2', '- gender: L (Laki-laki) atau P (Perempuan)');
+        $sheet->setCellValue('A3', '- student_number: boleh kosong');
+        $sheet->setCellValue('A4', '- national_id: wajib diisi dan unik');
         $sheet->getStyle('A1')->getFont()->setBold(true);
         $sheet->getStyle('A2:A4')->getFont()->setItalic(true);
 
@@ -195,10 +195,10 @@ class StudentController extends Controller
 
         // Set headers (row 7) - include No column for reference
         $sheet->setCellValue('A7', 'No');
-        $sheet->setCellValue('B7', 'nama');
-        $sheet->setCellValue('C7', 'nipd');
-        $sheet->setCellValue('D7', 'nisn');
-        $sheet->setCellValue('E7', 'jk');
+        $sheet->setCellValue('B7', 'name');
+        $sheet->setCellValue('C7', 'student_number');
+        $sheet->setCellValue('D7', 'national_id');
+        $sheet->setCellValue('E7', 'gender');
         $sheet->getStyle('A7:E7')->getFont()->setBold(true);
 
         // Add example data (row 8)
@@ -256,17 +256,17 @@ class StudentController extends Controller
 
                 $data = [
                     'school_id' => $request->school_id,
-                    'nama' => trim($row[$offset + 0] ?? ''),
-                    'nipd' => ! empty($row[$offset + 1]) ? trim($row[$offset + 1]) : null,
-                    'nisn' => trim($row[$offset + 2] ?? ''),
-                    'jk' => strtoupper(trim($row[$offset + 3] ?? '')),
+                    'name' => trim($row[$offset + 0] ?? ''),
+                    'student_number' => ! empty($row[$offset + 1]) ? trim($row[$offset + 1]) : null,
+                    'national_id' => trim($row[$offset + 2] ?? ''),
+                    'gender' => strtoupper(trim($row[$offset + 3] ?? '')),
                 ];
 
                 $validator = Validator::make($data, [
-                    'nama' => ['required', 'string', 'max:255'],
-                    'nipd' => ['nullable', 'string', 'max:255'],
-                    'nisn' => ['required', 'string', 'max:255'],
-                    'jk' => ['required', 'in:L,P'],
+                    'name' => ['required', 'string', 'max:255'],
+                    'student_number' => ['nullable', 'string', 'max:255'],
+                    'national_id' => ['required', 'string', 'max:255'],
+                    'gender' => ['required', 'in:L,P'],
                 ]);
 
                 if ($validator->fails()) {
@@ -276,10 +276,10 @@ class StudentController extends Controller
 
                 $validRows[] = [
                     'row_number' => $rowNumber,
-                    'nama' => $data['nama'],
-                    'nipd' => $data['nipd'],
-                    'nisn' => $data['nisn'],
-                    'jk' => $data['jk'],
+                    'name' => $data['name'],
+                    'student_number' => $data['student_number'],
+                    'national_id' => $data['national_id'],
+                    'gender' => $data['gender'],
                 ];
             }
 
@@ -377,17 +377,17 @@ class StudentController extends Controller
         foreach ($rows as $row) {
             $data = [
                 'school_id' => $schoolId,
-                'nama' => $row['nama'] ?? '',
-                'nipd' => $row['nipd'] ?? null,
-                'nisn' => $row['nisn'] ?? '',
-                'jk' => $row['jk'] ?? '',
+                'name' => $row['name'] ?? '',
+                'student_number' => $row['student_number'] ?? null,
+                'national_id' => $row['national_id'] ?? '',
+                'gender' => $row['gender'] ?? '',
             ];
 
             $validator = Validator::make($data, [
-                'nama' => ['required', 'string', 'max:255'],
-                'nipd' => ['nullable', 'string', 'max:255'],
-                'nisn' => ['required', 'string', 'max:255', 'unique:students,nisn'],
-                'jk' => ['required', 'in:L,P'],
+                'name' => ['required', 'string', 'max:255'],
+                'student_number' => ['nullable', 'string', 'max:255'],
+                'national_id' => ['required', 'string', 'max:255', 'unique:students,national_id'],
+                'gender' => ['required', 'in:L,P'],
             ]);
 
             if ($validator->fails()) {
@@ -433,8 +433,8 @@ class StudentController extends Controller
 
         // Set headers
         $sheet->setCellValue('A1', 'Nama');
-        $sheet->setCellValue('B1', 'NIPD');
-        $sheet->setCellValue('C1', 'NISN');
+        $sheet->setCellValue('B1', 'Student Number');
+        $sheet->setCellValue('C1', 'National ID');
         $sheet->setCellValue('D1', 'Jenis Kelamin');
         $sheet->setCellValue('E1', 'Sekolah');
         $sheet->setCellValue('F1', 'Status');
@@ -445,10 +445,10 @@ class StudentController extends Controller
         // Add data
         $row = 2;
         foreach ($students as $student) {
-            $sheet->setCellValue('A'.$row, $student->nama);
-            $sheet->setCellValue('B'.$row, $student->nipd);
-            $sheet->setCellValue('C'.$row, $student->nisn);
-            $sheet->setCellValue('D'.$row, $student->jk === 'L' ? 'Laki-laki' : 'Perempuan');
+            $sheet->setCellValue('A'.$row, $student->name);
+            $sheet->setCellValue('B'.$row, $student->student_number);
+            $sheet->setCellValue('C'.$row, $student->national_id);
+            $sheet->setCellValue('D'.$row, $student->gender === 'L' ? 'Laki-laki' : 'Perempuan');
             $sheet->setCellValue('E'.$row, $student->school->name ?? '-');
             $sheet->setCellValue('F'.$row, $student->isRegistered() ? 'Terdaftar' : 'Belum Terdaftar');
             $row++;

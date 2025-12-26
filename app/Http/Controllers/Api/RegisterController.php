@@ -41,7 +41,7 @@ class RegisterController extends Controller
             'valid' => true,
             'message' => 'NISN valid. Silakan lanjutkan pendaftaran.',
             'student' => [
-                'nama' => $student->nama,
+                'name' => $student->name,
                 'school' => $student->school->name ?? null,
                 'school_id' => $student->school_id,
             ],
@@ -54,17 +54,16 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'nisn' => ['required', 'string', 'exists:students,nisn'],
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:participants,email'],
+            'nisn' => ['required', 'string', 'exists:students,national_id'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:accounts,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'username' => ['required', 'string', 'max:255', 'unique:participants,username'],
+            'username' => ['required', 'string', 'max:255', 'unique:accounts,username'],
             'no_telp' => ['nullable', 'string', 'max:20'],
             'birth_date' => ['nullable', 'date'],
         ]);
 
         // Verify NISN is not already registered
-        $student = Student::where('nisn', $validated['nisn'])->first();
+        $student = Student::where('national_id', $validated['nisn'])->first();
         if (! $student) {
             return response()->json(['message' => 'NISN tidak ditemukan'], 404);
         }
@@ -90,7 +89,6 @@ class RegisterController extends Controller
         }
 
         $participant = Participant::create([
-            'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'username' => $validated['username'],
@@ -102,8 +100,8 @@ class RegisterController extends Controller
             'school_id' => $student->school_id,
         ]);
 
-        // Link student to the participant
-        $student->update(['participant_id' => $participant->getKey()]);
+        // Link student to the account
+        $student->update(['account_id' => $participant->getKey()]);
 
         // Create Sanctum personal access token and return plain token to client
         // Optionally: to enforce single-device login, uncomment the tokens deletion line below

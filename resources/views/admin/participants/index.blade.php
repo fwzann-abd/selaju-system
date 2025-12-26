@@ -63,7 +63,7 @@
                         @forelse($participants as $participant)
                             <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
                                 <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                    {{ $participant->name }}
+                                    {{ $participant->student?->name ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
                                     {{ $participant->email }}

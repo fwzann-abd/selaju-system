@@ -97,9 +97,9 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
             }
 
             $validated = $request->validate([
-                'username' => ['required', 'string', 'max:50', 'unique:participants,username,'.$user->id.',id'],
+                'username' => ['required', 'string', 'max:50', 'unique:accounts,username,'.$user->uuid.',uuid'],
                 'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:participants,email,'.$user->id.',id'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:accounts,email,'.$user->uuid.',uuid'],
                 'no_telp' => ['nullable', 'string', 'max:20'],
                 'birth_date' => ['nullable', 'date'],
             ]);
