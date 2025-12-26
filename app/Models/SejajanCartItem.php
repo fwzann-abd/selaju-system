@@ -11,7 +11,7 @@ class SejajanCartItem extends Model
     use HasUuids;
 
     protected $fillable = [
-        'participant_id',
+        'account_id',
         'sejajan_id',
         'sejajan_product_id',
         'qty',
@@ -22,9 +22,9 @@ class SejajanCartItem extends Model
         return $this->belongsTo(Sejajan::class);
     }
 
-    public function participant(): BelongsTo
+    public function account(): BelongsTo
     {
-        return $this->belongsTo(Participant::class);
+        return $this->belongsTo(Account::class, 'account_id', 'uuid');
     }
 
     public function product(): BelongsTo

@@ -17,7 +17,7 @@ class SejajanProductController extends Controller
         if (! $user) return response()->json(['message' => 'Unauthenticated'], 401);
 
         // Only owner can add products
-        if ($sejajan->participant_id !== $user->getKey()) {
+        if ($sejajan->account_id !== $user->getKey()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -75,7 +75,7 @@ class SejajanProductController extends Controller
         if (! $user) return response()->json(['message' => 'Unauthenticated'], 401);
 
         // Only owner can update products
-        if ($sejajan->participant_id !== $user->getKey()) {
+        if ($sejajan->account_id !== $user->getKey()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

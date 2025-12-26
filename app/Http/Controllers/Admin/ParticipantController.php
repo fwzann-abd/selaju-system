@@ -18,11 +18,13 @@ class ParticipantController extends Controller
 
         $participants = Participant::query()
             ->when($search, function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('username', 'like', "%{$search}%");
+                $query->where('email', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhereHas('student', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
             })
-            ->with('school:id,name,slug')
+            ->with(['school:id,name,slug', 'student:id,account_id,name'])
             ->paginate(15);
 
         return view('admin.participants.index', [
@@ -63,9 +65,8 @@ class ParticipantController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'username' => ['required', 'string', 'max:255', 'unique:participants,username'],
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:participants,email'],
+            'username' => ['required', 'string', 'max:255', 'unique:accounts,username'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:accounts,email'],
             'no_telp' => ['nullable', 'string', 'max:20'],
             'birth_date' => ['nullable', 'date'],
             'school_id' => ['nullable', 'uuid', 'exists:schools,id'],
@@ -123,9 +124,8 @@ class ParticipantController extends Controller
     public function update(Request $request, Participant $participant)
     {
         $validated = $request->validate([
-            'username' => ['required', 'string', 'max:255', 'unique:participants,username,' . $participant->id . ',id'],
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:participants,email,' . $participant->id . ',id'],
+            'username' => ['required', 'string', 'max:255', 'unique:accounts,username,' . $participant->uuid . ',uuid'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:accounts,email,' . $participant->uuid . ',uuid'],
             'no_telp' => ['nullable', 'string', 'max:20'],
             'birth_date' => ['nullable', 'date'],
             'school_id' => ['nullable', 'uuid', 'exists:schools,id'],

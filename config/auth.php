@@ -112,4 +112,17 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Device Session Management
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the maximum number of devices that can be logged
+    | in simultaneously for a single account. When this limit is reached,
+    | the oldest session will be automatically logged out.
+    |
+    */
+
+    'max_devices_per_account' => env('MAX_DEVICES_PER_ACCOUNT', 4),
+
 ];
