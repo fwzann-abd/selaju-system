@@ -62,7 +62,10 @@ class RegisterController extends Controller
             'birth_date' => ['nullable', 'date'],
         ]);
 
-        // Verify NISN is not already registered
+        // Remove +62 prefix from phone number if present (store without country code)
+        if (!empty($validated['no_telp'])) {
+            $validated['no_telp'] = preg_replace('/^\+?62/', '', $validated['no_telp']);
+        }
         $student = Student::where('national_id', $validated['nisn'])->first();
         if (! $student) {
             return response()->json(['message' => 'NISN tidak ditemukan'], 404);
