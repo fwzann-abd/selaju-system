@@ -53,7 +53,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     });
     Route::post('/check-nisn', [RegisterController::class, 'checkNisn']);
     Route::post('/register', [RegisterController::class, 'register']);
-    Route::get('/schools', [SchoolController::class, 'index']);
+    // Route::get('/schools', [SchoolController::class, 'index']); // Not needed - school_id comes from NISN verification
     Route::patch('/register/{participant}/school', [RegisterController::class, 'updateSchool']);
 
     // Sejajan public endpoints
@@ -75,13 +75,21 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     // Protected routes (require auth) - using Sanctum personal access tokens
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', function (Request $request) {
-            // Ensure related school is loaded so frontend can display school.name
+            // Ensure related school and student are loaded so frontend can display school.name and name
             $user = $request->user();
-            if ($user) {
-                $user->load('school');
+            if (! $user) {
+                return response()->json(null, 200);
             }
 
-            return response()->json($user);
+            $user->load(['school', 'student']);
+
+            // Normalize response shape for frontend expectations. Some older frontend
+            // code expects `name` on the user object — derive it from student.nama
+            // or fallback to username/nomor_participant.
+            $payload = $user->toArray();
+            $payload['name'] = $user->name ?? ($user->student?->nama ?? $user->username ?? $user->nomor_participant ?? null);
+
+            return response()->json($payload);
         });
         // Revoke current access token (logout)
         Route::post('/logout', function (Request $request) {
