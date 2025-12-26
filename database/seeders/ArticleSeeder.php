@@ -6,7 +6,6 @@ use App\Models\Article;
 use App\Models\ArticleCategory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class ArticleSeeder extends Seeder
 {

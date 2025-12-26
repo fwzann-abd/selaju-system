@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Sejajan;
-use App\Models\Participant;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 use App\Helpers\Helper;
+use App\Http\Controllers\Controller;
+use App\Models\Participant;
+use App\Models\Sejajan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SejajanController extends Controller
 {
@@ -88,7 +88,7 @@ class SejajanController extends Controller
         // Handle photo upload
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
-            $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$file->getClientOriginalExtension();
             $file->storeAs('public/assets/modules/sejajan/mart', $filename);
             $validated['photo'] = $filename;
         }
@@ -110,7 +110,7 @@ class SejajanController extends Controller
         return view('admin.sejajan.show', [
             'shop' => $sejajan,
             'photoPath' => Helper::getPhotoBasePath(),
-            'pageTitle' => 'Detail Toko: ' . $sejajan->name,
+            'pageTitle' => 'Detail Toko: '.$sejajan->name,
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => route('dashboard')],
                 ['label' => 'Sejajan', 'url' => null],
@@ -137,7 +137,7 @@ class SejajanController extends Controller
             'shop' => $sejajan,
             'participants' => $participants,
             'photoPath' => Helper::getPhotoBasePath(),
-            'pageTitle' => 'Edit Toko: ' . $sejajan->name,
+            'pageTitle' => 'Edit Toko: '.$sejajan->name,
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => route('dashboard')],
                 ['label' => 'Sejajan', 'url' => null],
@@ -153,9 +153,9 @@ class SejajanController extends Controller
     public function update(Request $request, Sejajan $sejajan)
     {
         $validated = $request->validate([
-            'participant_id' => 'required|exists:participants,uuid|unique:sejajans,participant_id,' . $sejajan->id,
+            'participant_id' => 'required|exists:participants,uuid|unique:sejajans,participant_id,'.$sejajan->id,
             'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:sejajans,slug,' . $sejajan->id,
+            'slug' => 'nullable|string|max:255|unique:sejajans,slug,'.$sejajan->id,
             'description' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
@@ -170,11 +170,11 @@ class SejajanController extends Controller
         if ($request->hasFile('photo')) {
             // Delete old photo if exists
             if ($sejajan->photo) {
-                Storage::delete('public/assets/modules/sejajan/mart/' . $sejajan->photo);
+                Storage::delete('public/assets/modules/sejajan/mart/'.$sejajan->photo);
             }
 
             $file = $request->file('photo');
-            $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$file->getClientOriginalExtension();
             $file->storeAs('public/assets/modules/sejajan/mart', $filename);
             $validated['photo'] = $filename;
         }
@@ -193,7 +193,7 @@ class SejajanController extends Controller
     {
         // Delete photo if exists
         if ($sejajan->photo) {
-            Storage::delete('public/assets/modules/sejajan/mart/' . $sejajan->photo);
+            Storage::delete('public/assets/modules/sejajan/mart/'.$sejajan->photo);
         }
 
         $sejajan->delete();

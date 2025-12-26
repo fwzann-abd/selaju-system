@@ -49,8 +49,8 @@ class UserGroupSeeder extends Seeder
                 ModuleAccess::create([
                     'module_id' => $module->id,
                     'type' => 'action',
-                    'identifiers' => $module->identifiers . '-' . $access,
-                    'name' => ucfirst($access) . ' ' . $module->name,
+                    'identifiers' => $module->identifiers.'-'.$access,
+                    'name' => ucfirst($access).' '.$module->name,
                 ]);
             }
         }
@@ -80,7 +80,7 @@ class UserGroupSeeder extends Seeder
                 'role-permission-delete',
             ]);
 
-            if (!$isAdminOnly) {
+            if (! $isAdminOnly) {
                 UserGroupPermission::create([
                     'user_group_id' => $adminGroup->id,
                     'module_access_id' => $access->id,

@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use App\Models\Sejajan;
 use App\Models\SejajanProduct;
-use App\Helpers\Helper;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SejajanProductController extends Controller
 {
     public function store(Request $request, Sejajan $sejajan)
     {
         $user = $request->user();
-        if (! $user) return response()->json(['message' => 'Unauthenticated'], 401);
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
 
         // Only owner can add products
         if ($sejajan->account_id !== $user->getKey()) {
@@ -51,7 +53,7 @@ class SejajanProductController extends Controller
                 \Illuminate\Support\Facades\File::makeDirectory($dest, 0755, true);
             }
 
-            $filename = time() . '_' . preg_replace('/[^A-Za-z0-9\\._-]/', '_', $file->getClientOriginalName());
+            $filename = time().'_'.preg_replace('/[^A-Za-z0-9\\._-]/', '_', $file->getClientOriginalName());
             $file->move($dest, $filename);
             $data['photo'] = $filename;
         }
@@ -72,7 +74,9 @@ class SejajanProductController extends Controller
     public function update(Request $request, Sejajan $sejajan, SejajanProduct $product)
     {
         $user = $request->user();
-        if (! $user) return response()->json(['message' => 'Unauthenticated'], 401);
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
 
         // Only owner can update products
         if ($sejajan->account_id !== $user->getKey()) {
@@ -104,7 +108,7 @@ class SejajanProductController extends Controller
         if ($request->hasFile('photo')) {
             // Delete old photo
             if ($product->photo) {
-                $oldFile = public_path('assets/modules/sejajan/mart/' . $product->photo);
+                $oldFile = public_path('assets/modules/sejajan/mart/'.$product->photo);
                 if (\Illuminate\Support\Facades\File::exists($oldFile)) {
                     \Illuminate\Support\Facades\File::delete($oldFile);
                 }
@@ -116,7 +120,7 @@ class SejajanProductController extends Controller
                 \Illuminate\Support\Facades\File::makeDirectory($dest, 0755, true);
             }
 
-            $filename = time() . '_' . preg_replace('/[^A-Za-z0-9\\._-]/', '_', $file->getClientOriginalName());
+            $filename = time().'_'.preg_replace('/[^A-Za-z0-9\\._-]/', '_', $file->getClientOriginalName());
             $file->move($dest, $filename);
             $data['photo'] = $filename;
         }

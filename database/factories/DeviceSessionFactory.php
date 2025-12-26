@@ -27,9 +27,9 @@ class DeviceSessionFactory extends Factory
         return [
             'account_id' => \App\Models\Account::factory(),
             'device_id' => fake()->uuid(),
-            'device_name' => $browser . ' on ' . $osName,
+            'device_name' => $browser.' on '.$osName,
             'device_type' => fake()->randomElement($deviceTypes),
-            'browser' => $browser . ' ' . fake()->numberBetween(100, 130),
+            'browser' => $browser.' '.fake()->numberBetween(100, 130),
             'os' => $osName,
             'ip_address' => fake()->ipv4(),
             'user_agent' => fake()->userAgent(),

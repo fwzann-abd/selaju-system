@@ -104,8 +104,18 @@
         [
             'icon' => 'cog',
             'label' => 'Pengaturan',
-            'href' => route('profile.edit'),
-            'active' => ['profile.*'],
+            'children' => [
+                [
+                    'label' => 'Profil',
+                    'href' => route('profile.edit'),
+                    'active' => ['profile.*'],
+                ],
+                [
+                    'label' => 'Generasi',
+                    'href' => route('admin.generations.index'),
+                    'active' => ['admin.generations.*'],
+                ],
+            ],
         ],
     ];
 

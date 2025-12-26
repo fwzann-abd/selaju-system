@@ -62,9 +62,17 @@ class RegisterController extends Controller
             'birth_date' => ['nullable', 'date'],
         ]);
 
-        // Remove +62 prefix from phone number if present (store without country code)
-        if (!empty($validated['no_telp'])) {
-            $validated['no_telp'] = preg_replace('/^\+?62/', '', $validated['no_telp']);
+        // Normalize phone number: handle +62 country code and various formats
+        if (! empty($validated['no_telp'])) {
+            $phone = $validated['no_telp'];
+            // Check if phone starts with +62 (country code format)
+            if (str_starts_with($phone, '+62')) {
+                // Remove + and replace 62 with 8 (+62 -> 8)
+                $phone = str_replace('+62', '8', $phone, 1);
+            }
+            // Remove all remaining non-digits
+            $phone = preg_replace('/[^0-9]/', '', $phone);
+            $validated['no_telp'] = $phone;
         }
         $student = Student::where('national_id', $validated['nisn'])->first();
         if (! $student) {
@@ -79,15 +87,20 @@ class RegisterController extends Controller
             $nomor = str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
         } while (Participant::where('nomor_participant', $nomor)->exists());
 
-        // Get active generation
-        $activeGeneration = Generation::where('is_active', true)->first();
-        if (! $activeGeneration) {
+        // Get current generation (for registrations)
+        $currentGeneration = Generation::where('is_current', true)->first();
+        if (! $currentGeneration) {
+            // Fallback: if no current generation is set, use the first active generation
+            $currentGeneration = Generation::where('is_active', true)->first();
+        }
+        if (! $currentGeneration) {
             // Fallback: if no active generation exists, create one
-            $activeGeneration = Generation::create([
+            $currentGeneration = Generation::create([
                 'name' => 'Generasi Saat Ini',
                 'start_years' => date('Y'),
                 'end_years' => date('Y'),
                 'is_active' => true,
+                'is_current' => true,
             ]);
         }
 
@@ -99,7 +112,7 @@ class RegisterController extends Controller
             'birth_date' => $validated['birth_date'] ?? null,
             'nomor_participant' => $nomor,
             'is_active' => true,
-            'generation_id' => $activeGeneration->id,
+            'generation_id' => $currentGeneration->id,
             'school_id' => $student->school_id,
         ]);
 

@@ -95,7 +95,7 @@ class ModuleManagementController extends Controller
     {
         $request->validate([
             'menu_id' => 'required|exists:menus,id',
-            'identifiers' => 'required|string|max:255|unique:modules,identifiers,' . $module->id,
+            'identifiers' => 'required|string|max:255|unique:modules,identifiers,'.$module->id,
             'name' => 'required|string|max:255',
             'url' => 'nullable|string|max:255',
             'icon' => 'nullable|string|max:255',

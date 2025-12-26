@@ -56,6 +56,7 @@
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Tahun Mulai</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Tahun Akhir</th>
                             <th class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</th>
+                            <th class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Saat Ini</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Diperbarui</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Aksi</th>
                         </tr>
@@ -93,6 +94,22 @@
                                         </button>
                                     </form>
                                 </td>
+                                <td class="px-6 py-4 text-center">
+                                    @if($generation->is_current)
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
+                                            <i class="fa-solid fa-star text-xs"></i>
+                                            Saat Ini
+                                        </span>
+                                    @else
+                                        <form action="{{ route('admin.generations.set-as-current', $generation) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="text-xs text-slate-500 transition hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer">
+                                                Set Saat Ini
+                                            </button>
+                                        </form>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
                                     {{ $generation->updated_at?->format('d M Y H:i') ?? '-' }}
                                 </td>
@@ -116,7 +133,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                                <td colspan="7" class="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
                                     Belum ada data generasi.
                                 </td>
                             </tr>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Generation;
 use App\Models\School;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -77,9 +78,13 @@ class StudentController extends Controller
     public function showImportForm()
     {
         $schools = School::select('id', 'name')->orderBy('name')->get();
+        $generations = Generation::where('is_active', true)->select('id', 'name')->orderBy('start_years', 'desc')->get();
+        $currentGeneration = Generation::where('is_current', true)->first();
 
         return view('admin.students.import', [
             'schools' => $schools,
+            'generations' => $generations,
+            'currentGeneration' => $currentGeneration,
             'pageTitle' => 'Tambah Siswa via Excel',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => route('dashboard')],
@@ -233,6 +238,7 @@ class StudentController extends Controller
     {
         $request->validate([
             'school_id' => ['required', 'uuid', 'exists:schools,id'],
+            'generation_id' => ['nullable', 'uuid', 'exists:generations,id'],
             'file' => ['required', 'file', 'mimes:xlsx,xls', 'max:5120'],
         ]);
 
@@ -271,6 +277,7 @@ class StudentController extends Controller
 
                 if ($validator->fails()) {
                     $errors[] = "Baris {$rowNumber}: ".implode(', ', $validator->errors()->all());
+
                     continue;
                 }
 
@@ -294,6 +301,7 @@ class StudentController extends Controller
             Cache::put('student-import-'.$token, [
                 'rows' => $validRows,
                 'school_id' => $request->school_id,
+                'generation_id' => $request->generation_id,
                 'filename' => $file->getClientOriginalName(),
             ], now()->addMinutes(30));
 
@@ -362,6 +370,7 @@ class StudentController extends Controller
 
         $rows = $payload['rows'] ?? [];
         $schoolId = $payload['school_id'] ?? null;
+        $generationId = $payload['generation_id'] ?? null;
 
         if (! $schoolId || empty($rows)) {
             return back()->with('error', 'Data import tidak valid atau kosong.');
@@ -371,6 +380,10 @@ class StudentController extends Controller
             return back()->with('error', 'Sekolah tujuan sudah tidak tersedia. Silakan ulangi proses import.');
         }
 
+        if ($generationId && ! Generation::where('id', $generationId)->exists()) {
+            return back()->with('error', 'Generasi tujuan sudah tidak tersedia. Silakan ulangi proses import.');
+        }
+
         $imported = 0;
         $skipped = 0;
         $errors = [];
@@ -378,6 +391,7 @@ class StudentController extends Controller
         foreach ($rows as $row) {
             $data = [
                 'school_id' => $schoolId,
+                'generation_id' => $generationId,
                 'name' => $row['name'] ?? '',
                 'student_number' => $row['student_number'] ?? null,
                 'national_id' => $row['national_id'] ?? '',
@@ -395,6 +409,7 @@ class StudentController extends Controller
                 $skipped++;
                 $rowNumber = $row['row_number'] ?? '-';
                 $errors[] = "Baris {$rowNumber}: ".implode(', ', $validator->errors()->all());
+
                 continue;
             }
 

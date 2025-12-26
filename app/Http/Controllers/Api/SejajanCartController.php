@@ -160,7 +160,7 @@ class SejajanCartController extends Controller
     {
         return $items->map(function (SejajanCartItem $item) {
             $product = $item->product;
-            $sejajan = $item->sejajan ?: new Sejajan();
+            $sejajan = $item->sejajan ?: new Sejajan;
 
             return [
                 'id' => $item->getKey(),
@@ -171,7 +171,7 @@ class SejajanCartController extends Controller
                 'name' => $product?->name,
                 'price' => $product?->price ?? 0,
                 'qty' => $item->qty,
-                'photo' => $product && $product->photo ? Helper::getPhotoBasePath() . $product->photo : null,
+                'photo' => $product && $product->photo ? Helper::getPhotoBasePath().$product->photo : null,
                 'photo_path' => $product?->photo,
                 'stock' => $product?->stock ?? $item->qty,
             ];
