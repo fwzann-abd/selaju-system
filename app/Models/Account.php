@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class Account extends Model implements MustVerifyEmail
+class Account extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasUuids, Notifiable;
 
@@ -64,9 +66,24 @@ class Account extends Model implements MustVerifyEmail
         return $this->hasMany(Sejajan::class, 'account_id', 'uuid');
     }
 
-    public function student(): BelongsTo
+    public function student()
     {
-        return $this->belongsTo(Student::class, 'uuid', 'account_id');
+        return $this->hasOne(Student::class, 'account_id', 'uuid');
+    }
+
+    /**
+     * Shortcut to access the student's school from the account.
+     */
+    public function school()
+    {
+        return $this->hasOneThrough(
+            School::class,
+            Student::class,
+            'account_id', // Foreign key on students table...
+            'id', // Foreign key on schools table (primary key)
+            'uuid', // Local key on accounts table
+            'school_id' // Local key on students table that references schools
+        );
     }
 
     /**
