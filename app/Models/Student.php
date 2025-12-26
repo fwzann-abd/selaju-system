@@ -18,6 +18,7 @@ class Student extends Model
     protected $fillable = [
         'account_id',
         'school_id',
+        'generation_id',
         'name',
         'student_number',
         'national_id',
@@ -38,6 +39,14 @@ class Student extends Model
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
+    }
+
+    /**
+     * Get the generation this student belongs to
+     */
+    public function generation(): BelongsTo
+    {
+        return $this->belongsTo(Generation::class);
     }
 
     /**

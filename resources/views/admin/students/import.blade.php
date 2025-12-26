@@ -50,7 +50,7 @@
                                 <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 <div>
                                     <div class="text-sm font-medium">Pilih atau seret file Excel di sini</div>
-                                    <div class="text-xs text-slate-400" x-text="filename ? filename : 'Gunakan template yang disediakan. Kolom: nama, nipd, nisn, jk (L/P).'">
+                                    <div class="text-xs text-slate-400" x-text="filename ? filename : 'Gunakan template yang disediakan. Kolom: name, student_number, national_id, gender (L/P).'">
                                     </div>
                                 </div>
                             </div>
@@ -87,7 +87,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                             </svg>
-                            <span x-text="isPreviewing ? 'Mengimpor...' : 'Import (Preview)'">Import (Preview)</span>
+                            <span x-text="isPreviewing ? 'Memproses file...' : 'Import (Preview)'">Import (Preview)</span>
                         </button>
                     </div>
                 </div>
@@ -100,10 +100,10 @@
                         <thead>
                             <tr class="bg-slate-100 dark:bg-slate-800">
                                 <th class="border border-slate-200 dark:border-slate-700 px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-200">No</th>
-                                <th class="border border-slate-200 dark:border-slate-700 px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-200">Nama</th>
-                                <th class="border border-slate-200 dark:border-slate-700 px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-200">NIPD</th>
-                                <th class="border border-slate-200 dark:border-slate-700 px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-200">NISN</th>
-                                <th class="border border-slate-200 dark:border-slate-700 px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-200">JK</th>
+                                <th class="border border-slate-200 dark:border-slate-700 px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-200">name</th>
+                                <th class="border border-slate-200 dark:border-slate-700 px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-200">student_number</th>
+                                <th class="border border-slate-200 dark:border-slate-700 px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-200">national_id</th>
+                                <th class="border border-slate-200 dark:border-slate-700 px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-200">gender</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -174,20 +174,20 @@
                             <thead>
                                 <tr class="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200">
                                     <th class="border border-slate-200 px-3 py-2 text-left dark:border-slate-700">No</th>
-                                    <th class="border border-slate-200 px-3 py-2 text-left dark:border-slate-700">Nama</th>
-                                    <th class="border border-slate-200 px-3 py-2 text-left dark:border-slate-700">NIPD</th>
-                                    <th class="border border-slate-200 px-3 py-2 text-left dark:border-slate-700">NISN</th>
-                                    <th class="border border-slate-200 px-3 py-2 text-left dark:border-slate-700">JK</th>
+                                    <th class="border border-slate-200 px-3 py-2 text-left dark:border-slate-700">name</th>
+                                    <th class="border border-slate-200 px-3 py-2 text-left dark:border-slate-700">student_number</th>
+                                    <th class="border border-slate-200 px-3 py-2 text-left dark:border-slate-700">national_id</th>
+                                    <th class="border border-slate-200 px-3 py-2 text-left dark:border-slate-700">gender</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template x-for="(row, index) in paginatedRows" :key="row.row_number ?? index">
                                     <tr class="odd:bg-white even:bg-slate-50 text-slate-700 dark:odd:bg-slate-900 dark:even:bg-slate-800 dark:text-slate-200">
                                         <td class="border border-slate-200 px-3 py-2 text-center dark:border-slate-800" x-text="row.row_number ?? ((previewPage - 1) * perPage + index + 1)"></td>
-                                        <td class="border border-slate-200 px-3 py-2 dark:border-slate-800" x-text="row.nama"></td>
-                                        <td class="border border-slate-200 px-3 py-2 dark:border-slate-800" x-text="row.nipd || '-' "></td>
-                                        <td class="border border-slate-200 px-3 py-2 dark:border-slate-800" x-text="row.nisn"></td>
-                                        <td class="border border-slate-200 px-3 py-2 uppercase dark:border-slate-800" x-text="row.jk"></td>
+                                        <td class="border border-slate-200 px-3 py-2 dark:border-slate-800" x-text="row.name"></td>
+                                        <td class="border border-slate-200 px-3 py-2 dark:border-slate-800" x-text="row.student_number || '-' "></td>
+                                        <td class="border border-slate-200 px-3 py-2 dark:border-slate-800" x-text="row.national_id"></td>
+                                        <td class="border border-slate-200 px-3 py-2 uppercase dark:border-slate-800" x-text="row.gender"></td>
                                     </tr>
                                 </template>
                             </tbody>

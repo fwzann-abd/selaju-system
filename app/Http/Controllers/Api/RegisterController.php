@@ -21,7 +21,7 @@ class RegisterController extends Controller
             'nisn' => ['required', 'string'],
         ]);
 
-        $student = Student::where('nisn', $validated['nisn'])->first();
+        $student = Student::where('national_id', $validated['nisn'])->first();
 
         if (! $student) {
             return response()->json([

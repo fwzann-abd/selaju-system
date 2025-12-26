@@ -24,8 +24,6 @@ class Account extends Model implements MustVerifyEmail
     protected $fillable = [
         'uuid',
         'nomor_participant',
-        'school_id',
-        'generation_id',
         'username',
         'birth_date',
         'no_telp',
@@ -46,16 +44,6 @@ class Account extends Model implements MustVerifyEmail
             'birth_date' => 'date',
             'is_active' => 'boolean',
         ];
-    }
-
-    public function school(): BelongsTo
-    {
-        return $this->belongsTo(School::class);
-    }
-
-    public function generation(): BelongsTo
-    {
-        return $this->belongsTo(Generation::class);
     }
 
     public function deviceSessions(): HasMany
