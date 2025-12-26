@@ -48,6 +48,9 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         ]);
     });
 
+    Route::options('/check-nisn', function () {
+        return response('', 200);
+    });
     Route::post('/check-nisn', [RegisterController::class, 'checkNisn']);
     Route::post('/register', [RegisterController::class, 'register']);
     Route::get('/schools', [SchoolController::class, 'index']);
