@@ -33,7 +33,7 @@ class StudentController extends Controller
             ->when($schoolId, function ($query) use ($schoolId) {
                 $query->where('school_id', $schoolId);
             })
-            ->with(['school:id,name', 'account:uuid,name'])
+            ->with(['school:id,name', 'account:uuid,username,email'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
