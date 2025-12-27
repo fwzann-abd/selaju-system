@@ -24,10 +24,10 @@ class SejajanController extends Controller
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
                     ->orWhereHas('account', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
+                        $q->where('username', 'like', "%{$search}%");
                     });
             })
-            ->with('account:uuid,name,username')
+            ->with('account:uuid,username,email')
             ->withCount('products')
             ->latest()
             ->paginate(15);
@@ -49,9 +49,9 @@ class SejajanController extends Controller
      */
     public function create()
     {
-        $participants = \App\Models\Account::select('uuid', 'name', 'username', 'email')
+        $participants = \App\Models\Account::select('uuid', 'username', 'email')
             ->whereDoesntHave('sejajans')
-            ->orderBy('name')
+            ->orderBy('username')
             ->get();
 
         return view('admin.sejajan.create', [
