@@ -173,38 +173,45 @@ class PerpossagarBookController extends Controller
     public function popular(Request $request)
     {
         $limit = $request->query('limit', 10);
+        $random = filter_var($request->query('random', false), FILTER_VALIDATE_BOOLEAN);
 
-        $books = PerpossagarBook::with(['author', 'categories', 'languageOption'])
+        $query = PerpossagarBook::with(['author', 'categories', 'languageOption'])
             ->where('is_approved', true)
             ->orderBy('read_count', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->limit($limit)
-            ->get()
-            ->map(function ($book) {
-                return [
-                    'uuid' => $book->uuid,
-                    'title' => $book->title,
-                    'subtitle' => $book->subtitle,
-                    'slug' => $book->slug,
-                    'desc' => $book->desc,
-                    'photo' => $book->photo ? basename($book->photo) : null,
-                    'color_hex' => $book->color_hex,
-                    'author' => $book->author_display_name,
-                    'language_meta' => ($book->language_id || $book->language) ? [
-                        'uuid' => $book->language_id,
-                        'name' => $book->languageOption?->name,
-                        'slug' => $book->languageOption?->slug ?? $book->language,
-                    ] : null,
-                    'read_count' => $book->read_count ?? 0,
-                    'categories' => $book->categories->map(function ($cat) {
-                        return [
-                            'uuid' => $cat->uuid,
-                            'name' => $cat->name,
-                            'slug' => $cat->slug,
-                        ];
-                    }),
-                ];
-            });
+            ->orderBy('created_at', 'desc');
+
+        $books = $query->limit($limit)->get();
+
+        if ($random) {
+            $poolLimit = max($limit * 3, $limit);
+            $books = $query->limit($poolLimit)->get()->shuffle()->take($limit)->values();
+        }
+
+        $books = $books->map(function ($book) {
+            return [
+                'uuid' => $book->uuid,
+                'title' => $book->title,
+                'subtitle' => $book->subtitle,
+                'slug' => $book->slug,
+                'desc' => $book->desc,
+                'photo' => $book->photo ? basename($book->photo) : null,
+                'color_hex' => $book->color_hex,
+                'author' => $book->author_display_name,
+                'language_meta' => ($book->language_id || $book->language) ? [
+                    'uuid' => $book->language_id,
+                    'name' => $book->languageOption?->name,
+                    'slug' => $book->languageOption?->slug ?? $book->language,
+                ] : null,
+                'read_count' => $book->read_count ?? 0,
+                'categories' => $book->categories->map(function ($cat) {
+                    return [
+                        'uuid' => $cat->uuid,
+                        'name' => $cat->name,
+                        'slug' => $cat->slug,
+                    ];
+                }),
+            ];
+        });
 
         $photoPath = rtrim(url('/assets/modules/perpossagar/books/image/'), '/').'/';
 
