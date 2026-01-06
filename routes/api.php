@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\PerpossagarBookLanguageController;
 use App\Http\Controllers\Api\RegisterController;
@@ -71,6 +72,10 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         ->whereUuid('uuid');
     Route::post('/perpossagar/books/{uuid}/read', [\App\Http\Controllers\Api\PerpossagarBookController::class, 'incrementReadCount'])
         ->whereUuid('uuid');
+
+    // Selaju articles
+    Route::get('/articles', [ArticleController::class, 'index']);
+    Route::get('/articles/{slug}', [ArticleController::class, 'show']);
 
     // Protected routes (require auth) - using Sanctum personal access tokens
     Route::middleware('auth:sanctum')->group(function () {
