@@ -9,6 +9,7 @@ use App\Models\Donation;
 use App\Models\ManualTransfer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DonationController extends Controller
 {
@@ -30,7 +31,7 @@ class DonationController extends Controller
 
         return response()->json([
             'data' => [
-                'donations' => $donations->map(fn ($donation) => [
+                'donations' => $donations->map(fn($donation) => [
                     'id' => $donation->id,
                     'donor_name' => $donation->donor_name,
                     'amount' => $donation->amount,
@@ -85,6 +86,8 @@ class DonationController extends Controller
                 'message' => $request->message,
                 'payment_method' => $request->payment_method,
                 'payment_status' => 'pending',
+                // Generate unique numeric payment code (12 digits)
+                'payment_code' => $this->generatePaymentCode(),
             ]);
 
             // Generate payment based on method
@@ -215,7 +218,7 @@ class DonationController extends Controller
         // TODO: Implement DOKU QRIS generation when library is installed
         // For now, return dummy data
         return [
-            'transaction_id' => 'TRX-'.time().'-'.$donation->id,
+            'transaction_id' => 'TRX-' . time() . '-' . $donation->id,
             'qris_string' => 'dummy_qris_string',
             'qris_url' => 'https://example.com/qris.png',
             'expired_at' => now()->addMinutes(30),
@@ -237,7 +240,10 @@ class DonationController extends Controller
             $channel = $channelMap[$bankCode] ?? 'VIRTUAL_ACCOUNT_BANK_PERMATA';
             $companyCode = '89656'; // Company Code for Permata from DOKU dashboard
             $prefix = 'Galactic'; // Merchant Prefix from DOKU dashboard
-            $customerNo = str_pad($donation->id, 10, '0', STR_PAD_LEFT); // Customer number from donation ID
+
+            // Use payment_code (numeric) for VA number generation
+            // Ensure payment_code exists, otherwise fallback to something safe or throw
+            $customerNo = str_pad($donation->payment_code ?? time(), 10, '0', STR_PAD_LEFT);
             $virtualAccountNo = $companyCode . $customerNo; // Format: {companyCode}{customerNo}
             $transactionId = 'DONATION-' . $donation->id . '-' . time();
             $expiredDate = now()->addHours(24)->format('Y-m-d\\TH:i:sP');
@@ -259,7 +265,7 @@ class DonationController extends Controller
                 'expired_at' => $expiredDate,
                 'payment_instructions' => [
                     'Transfer ke nomor Virtual Account Bank Permata di atas',
-                    'Jumlah transfer harus SESUAI PERSIS dengan nominal: Rp ' . number_format($donation->amount, 0, ',', '.'),
+                    'Jumlah transfer harus SESUAI PERSIS dengan nominal: Rp ' . number_format((float) $donation->amount, 0, ',', '.'),
                     'Virtual Account berlaku hingga ' . now()->addHours(24)->format('d/m/Y H:i'),
                     'Pembayaran akan otomatis dikonfirmasi setelah transfer berhasil',
                 ],
@@ -300,7 +306,7 @@ class DonationController extends Controller
 
             // Generate token (JWT or simple token based on DOKU requirement)
             $timestamp = time();
-            $token = base64_encode($clientId.':'.$timestamp.':'.$secretKey);
+            $token = base64_encode($clientId . ':' . $timestamp . ':' . $secretKey);
 
             return response()->json([
                 'token' => $token,
@@ -313,5 +319,22 @@ class DonationController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Generate unique numeric payment code
+     */
+    protected function generatePaymentCode(): string
+    {
+        // Format: Ymd + 4 random digits
+        // Example: 202401071234
+        // Total 12 digits (YYYYMMDDRRRR)
+        // If volume is high, increase random digits
+        do {
+            $code = date('Ymd') . mt_rand(1000, 9999);
+            $exists = Donation::where('payment_code', $code)->exists();
+        } while ($exists);
+
+        return $code;
     }
 }

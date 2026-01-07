@@ -28,6 +28,7 @@ class Donation extends Model
         'payment_method',
         'payment_status',
         'transaction_id',
+        'payment_code',
         'payment_data',
         'paid_at',
     ];
