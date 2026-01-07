@@ -20,7 +20,7 @@ class Donation extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'user_id',
+        'account_id',
         'donor_name',
         'donor_ig',
         'amount',
@@ -44,9 +44,9 @@ class Donation extends Model
         ];
     }
 
-    public function user()
+    public function account()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Account::class);
     }
 
     public function manualTransfer()

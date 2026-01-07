@@ -78,7 +78,7 @@ class DonationController extends Controller
             DB::beginTransaction();
 
             $donation = Donation::create([
-                'user_id' => auth()->id(),
+                'account_id' => auth()->id(),
                 'donor_name' => $request->donor_name,
                 'donor_ig' => $request->donor_ig,
                 'amount' => $request->amount,
