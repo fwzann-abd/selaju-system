@@ -285,7 +285,7 @@ class DonationController extends Controller
                 ],
             ];
         } catch (\Exception $e) {
-            \Log::error('Failed to generate VA: ' . $e->getMessage());
+            Log::error('Failed to generate VA: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -340,12 +340,11 @@ class DonationController extends Controller
      */
     protected function generatePaymentCode(): string
     {
-        // Format: Ymd + 4 random digits
-        // Example: 202401071234
-        // Total 12 digits (YYYYMMDDRRRR)
-        // If volume is high, increase random digits
+        // Format: ymd + 5 random digits
+        // Example: 24010712345
+        // Total 11 digits. Combined with Company Code (5 digits) = 16 digits (Max for Permata)
         do {
-            $code = date('Ymd') . mt_rand(1000, 9999);
+            $code = date('ymd') . mt_rand(10000, 99999);
             $exists = Donation::where('payment_code', $code)->exists();
         } while ($exists);
 
