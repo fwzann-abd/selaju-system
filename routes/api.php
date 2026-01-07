@@ -79,9 +79,10 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
 
     // Donation public endpoints
     Route::get('/donations', [\App\Http\Controllers\Api\DonationController::class, 'index']);
+    Route::middleware('auth:sanctum')->get('/donations/history', [\App\Http\Controllers\Api\DonationController::class, 'history']);
     Route::get('/donations/banks', [\App\Http\Controllers\Api\DonationController::class, 'getAvailableBanks']);
     Route::post('/donations', [\App\Http\Controllers\Api\DonationController::class, 'store']);
-    Route::get('/donations/{id}', [\App\Http\Controllers\Api\DonationController::class, 'show']);
+    Route::get('/donations/{id}', [\App\Http\Controllers\Api\DonationController::class, 'show'])->whereUuid('id');
     Route::post('/donations/manual-transfer', [\App\Http\Controllers\Api\DonationController::class, 'storeManualTransfer']);
     Route::post('/payment/callback', [\App\Http\Controllers\Api\DonationController::class, 'paymentCallback']);
     Route::post('/payment/token', [\App\Http\Controllers\Api\DonationController::class, 'generateToken']);
@@ -122,9 +123,9 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
             }
 
             $validated = $request->validate([
-                'username' => ['required', 'string', 'max:50', 'unique:accounts,username,'.$user->uuid.',uuid'],
+                'username' => ['required', 'string', 'max:50', 'unique:accounts,username,' . $user->uuid . ',uuid'],
                 'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:accounts,email,'.$user->uuid.',uuid'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:accounts,email,' . $user->uuid . ',uuid'],
                 'no_telp' => ['nullable', 'string', 'max:20'],
                 'birth_date' => ['nullable', 'date'],
             ]);
@@ -301,5 +302,4 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     Route::post('/books', [BookController::class, 'store']);
     Route::put('/books/{uuid}', [BookController::class, 'update']);
     Route::delete('/books/{uuid}', [BookController::class, 'destroy']);
-
 });

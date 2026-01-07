@@ -47,6 +47,20 @@ class DonationController extends Controller
     }
 
     /**
+     * Get donation history for logged in user.
+     */
+    public function history(Request $request)
+    {
+        $donations = Donation::where('account_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'data' => $donations,
+        ]);
+    }
+
+    /**
      * Get available banks for virtual account.
      */
     public function getAvailableBanks()
