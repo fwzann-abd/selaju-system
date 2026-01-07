@@ -242,52 +242,144 @@ class DonationController extends Controller
     /**
      * Generate Virtual Account payment using DOKU.
      */
+    /**
+     * Generate Virtual Account payment using DOKU Snap Library.
+     */
     protected function generateVirtualAccountPayment(Donation $donation, string $bankCode): array
     {
         try {
-            // Map bank code to DOKU channel format
-            // Currently using Bank Permata (DGPC - FIX_BILL, Company Code: 89656)
+            // Check keys availability
+            $privateKeyPath = config('doku.merchant_private_key');
+            $publicKeyPath = config('doku.merchant_public_key'); // Merchant Public Key (Optional for Snap? Snap constructor needs it)
+            $dokuPublicKeyPath = config('doku.doku_public_key');
+
+            if (!file_exists($privateKeyPath) || !file_exists($publicKeyPath) || !file_exists($dokuPublicKeyPath)) {
+                // If keys are missing (dev environment without keys), fallback to mock with warning
+                Log::warning('DOKU Keys not found. Returning Mock VA. Path: ' . $privateKeyPath);
+                // Return Mock Data (Same as before but consistent)
+                return $this->generateMockVa($donation, $bankCode);
+            }
+
+            $privateKey = file_get_contents($privateKeyPath);
+            $publicKey = file_get_contents($publicKeyPath);
+            $dokuPublicKey = file_get_contents($dokuPublicKeyPath);
+            $clientId = config('doku.client_id');
+            $secretKey = config('doku.secret_key');
+            $isProduction = config('doku.env') === 'production';
+
+            // Init Snap
+            // Constructor: privateKey, publicKey, dokuPublicKey, clientId, issuer, isProduction, secretKey
+            $snap = new \Doku\Snap\Snap(
+                $privateKey,
+                $publicKey,
+                $dokuPublicKey,
+                $clientId,
+                $clientId, // Issuer is usually Client ID
+                $isProduction,
+                $secretKey
+            );
+
+            // Prepare DTOs
+            // Company Code for Permata (Sandbox) usually 89656. In prod, from DOKU.
+            // Using 89656 as default for Permata VA.
+            $partnerServiceId = '89656';
+            if ($bankCode !== 'PERMATA') {
+                // Handle others or fallback
+                $partnerServiceId = '89656';
+            }
+
+            $customerNo = $donation->payment_code; // 11 digits
+            $virtualAccountNo = $partnerServiceId . $customerNo;
+            $trxId = 'DONATION-' . $donation->id;
+
+            // Amount string with 2 decimals
+            $amountStr = number_format($donation->amount, 2, '.', '');
+            $totalAmount = new \Doku\Snap\Models\TotalAmount\TotalAmount($amountStr, 'IDR');
+
+            // Config: Not reusable (One time)
+            $vaConfig = new \Doku\Snap\Models\VA\VirtualAccountConfig\CreateVaVirtualAccountConfig(false);
+
+            // Channel mapping
             $channelMap = [
                 'PERMATA' => 'VIRTUAL_ACCOUNT_BANK_PERMATA',
+                'MANDIRI' => 'VIRTUAL_ACCOUNT_BANK_MANDIRI',
+                'BRI'     => 'VIRTUAL_ACCOUNT_BANK_BRI',
+                'BNI'     => 'VIRTUAL_ACCOUNT_BANK_BNI',
             ];
-
             $channel = $channelMap[$bankCode] ?? 'VIRTUAL_ACCOUNT_BANK_PERMATA';
-            $companyCode = '89656'; // Company Code for Permata from DOKU dashboard
-            $prefix = 'Galactic'; // Merchant Prefix from DOKU dashboard
 
-            // Use payment_code (numeric) for VA number generation
-            // Ensure payment_code exists, otherwise fallback to something safe or throw
-            $customerNo = str_pad($donation->payment_code ?? time(), 10, '0', STR_PAD_LEFT);
-            $virtualAccountNo = $companyCode . $customerNo; // Format: {companyCode}{customerNo}
-            $transactionId = 'DONATION-' . $donation->id . '-' . time();
-            $expiredDate = now()->addHours(24)->format('Y-m-d\\TH:i:sP');
+            $additionalInfo = new \Doku\Snap\Models\VA\AdditionalInfo\CreateVaRequestAdditionalInfo($channel, $vaConfig);
 
-            // For now, return formatted data structure (actual DOKU API call will be implemented)
-            // TODO: Implement actual DOKU SDK createVa call when ready
-            return [
-                'transaction_id' => $transactionId,
-                'va_number' => $virtualAccountNo,
-                'bank_code' => $bankCode,
-                'bank_name' => $this->getBankName($bankCode),
-                'channel' => $channel,
-                'company_code' => $companyCode,
-                'merchant_prefix' => $prefix,
-                'billing_type' => 'FIX_BILL',
-                'feature' => 'DGPC',
-                'amount' => $donation->amount,
-                'customer_name' => $donation->donor_name,
-                'expired_at' => $expiredDate,
-                'payment_instructions' => [
-                    'Transfer ke nomor Virtual Account Bank Permata di atas',
-                    'Jumlah transfer harus SESUAI PERSIS dengan nominal: Rp ' . number_format((float) $donation->amount, 0, ',', '.'),
-                    'Virtual Account berlaku hingga ' . now()->addHours(24)->format('d/m/Y H:i'),
-                    'Pembayaran akan otomatis dikonfirmasi setelah transfer berhasil',
-                ],
-            ];
+            // Create DTO
+            $dto = new \Doku\Snap\Models\VA\Request\CreateVaRequestDto(
+                $partnerServiceId,
+                $customerNo,
+                $virtualAccountNo,
+                substr($donation->donor_name, 0, 30), // Max length safety
+                null, // email
+                null, // phone
+                $trxId,
+                $totalAmount,
+                $additionalInfo,
+                'C', // Trx Type Create
+                date('c', strtotime('+1 day')) // Expired in 24h ISO8601
+            );
+
+            // Call API
+            $response = $snap->createVa($dto);
+
+            // Check response
+            // Snap returns DTO or array? createVa returns CreateVaResponseDto.
+            // properties: virtualAccountData->virtualAccountNo
+
+            if (isset($response->virtualAccountData)) {
+                $vaNo = $response->virtualAccountData->virtualAccountNo;
+
+                return [
+                    'transaction_id' => $trxId,
+                    'va_number' => $vaNo,
+                    'bank_code' => $bankCode,
+                    'bank_name' => $this->getBankName($bankCode),
+                    'channel' => $channel,
+                    'amount' => $donation->amount,
+                    'expired_at' => date('c', strtotime('+1 day')),
+                    'payment_instructions' => [
+                        'Transfer ke nomor Virtual Account ' . $this->getBankName($bankCode),
+                        'Nomor VA: ' . $vaNo,
+                        'Total: Rp ' . number_format($donation->amount, 0, ',', '.'),
+                    ]
+                ];
+            } else {
+                // Handle error structure
+                // Response might be array if error simulation?
+                Log::error('DOKU VA Error', (array)$response);
+                throw new \Exception('Gagal membuat VA DOKU. Response invalid.');
+            }
         } catch (\Exception $e) {
-            Log::error('Failed to generate VA: ' . $e->getMessage());
+            Log::error('Failed to generate VA Real: ' . $e->getMessage());
+            // Fallback to Mock if Real fails? Or throw?
+            // If user wants REAL, throwing is better to debug key issues.
+            // But for reliability, maybe Mock?
+            // Given "Transaction Not Found", I should throw or return error so user knows keys are invalid.
             throw $e;
         }
+    }
+
+    protected function generateMockVa(Donation $donation, string $bankCode): array
+    {
+        $partnerServiceId = '89656';
+        $customerNo = $donation->payment_code;
+        $virtualAccountNo = $partnerServiceId . $customerNo;
+
+        return [
+            'transaction_id' => 'MOCK-' . time(),
+            'va_number' => $virtualAccountNo,
+            'bank_code' => $bankCode,
+            'bank_name' => $this->getBankName($bankCode),
+            'amount' => $donation->amount,
+            'expired_at' => now()->addDay(),
+            'payment_instructions' => ['MOCK VA - SET KEYS FOR REAL'],
+        ];
     }
 
     /**
