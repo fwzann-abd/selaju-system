@@ -118,7 +118,7 @@ class DonationController extends Controller
             if ($request->payment_method === 'qris') {
                 $paymentData = $this->generateQrisPayment($donation);
             } elseif ($request->payment_method === 'virtual_account') {
-                $paymentData = $this->generateVirtualAccountPayment($donation);
+                $paymentData = $this->generateVirtualAccountPayment($donation, $request->bank_code);
             }
 
             if ($paymentData) {
@@ -251,16 +251,64 @@ class DonationController extends Controller
     /**
      * Generate Virtual Account payment using DOKU.
      */
-    protected function generateVirtualAccountPayment(Donation $donation): array
+    protected function generateVirtualAccountPayment(Donation $donation, string $bankCode): array
     {
-        // TODO: Implement DOKU Virtual Account generation when library is installed
-        // For now, return dummy data
-        return [
-            'transaction_id' => 'TRX-'.time().'-'.$donation->id,
-            'va_number' => '1234567890',
-            'bank_code' => 'MANDIRI',
-            'expired_at' => now()->addHours(24),
+        try {
+            // Map bank code to DOKU channel format
+            $channelMap = [
+                'MANDIRI' => 'VIRTUAL_ACCOUNT_BANK_MANDIRI',
+                'BRI' => 'VIRTUAL_ACCOUNT_BANK_BRI',
+                'BNI' => 'VIRTUAL_ACCOUNT_BANK_BNI',
+                'PERMATA' => 'VIRTUAL_ACCOUNT_BANK_PERMATA',
+                'CIMB' => 'VIRTUAL_ACCOUNT_BANK_CIMB',
+                'DANAMON' => 'VIRTUAL_ACCOUNT_BANK_DANAMON',
+            ];
+
+            $channel = $channelMap[$bankCode] ?? 'VIRTUAL_ACCOUNT_BANK_MANDIRI';
+            $partnerServiceId = config('doku.client_id');
+            $customerNo = str_pad($donation->id, 10, '0', STR_PAD_LEFT); // Customer number from donation ID
+            $virtualAccountNo = $partnerServiceId . $customerNo; // Combine partner service ID with customer number
+            $transactionId = 'DONATION-' . $donation->id . '-' . time();
+            $expiredDate = now()->addHours(24)->format('Y-m-d\TH:i:sP');
+
+            // For now, return formatted data structure (actual DOKU API call will be implemented)
+            // TODO: Implement actual DOKU SDK createVa call when ready
+            return [
+                'transaction_id' => $transactionId,
+                'va_number' => $virtualAccountNo,
+                'bank_code' => $bankCode,
+                'bank_name' => $this->getBankName($bankCode),
+                'channel' => $channel,
+                'amount' => $donation->amount,
+                'customer_name' => $donation->donor_name,
+                'expired_at' => $expiredDate,
+                'payment_instructions' => [
+                    'Transfer ke nomor Virtual Account di atas',
+                    'Jumlah transfer harus sesuai dengan nominal donasi',
+                    'Virtual Account berlaku hingga ' . now()->addHours(24)->format('d/m/Y H:i'),
+                ],
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate VA: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Get bank name from bank code.
+     */
+    protected function getBankName(string $bankCode): string
+    {
+        $bankNames = [
+            'MANDIRI' => 'Bank Mandiri',
+            'BRI' => 'Bank BRI',
+            'BNI' => 'Bank Negara Indonesia',
+            'PERMATA' => 'Bank Permata',
+            'CIMB' => 'Bank CIMB Niaga',
+            'DANAMON' => 'Bank Danamon',
         ];
+
+        return $bankNames[$bankCode] ?? $bankCode;
     }
 
     /**

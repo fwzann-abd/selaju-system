@@ -28,6 +28,7 @@ class StoreDonationRequest extends FormRequest
             'donor_ig' => ['nullable', 'string', 'max:255'],
             'message' => ['nullable', 'string', 'max:1000'],
             'payment_method' => ['required', Rule::in(['qris', 'virtual_account', 'manual_transfer'])],
+            'bank_code' => ['required_if:payment_method,virtual_account', Rule::in(['MANDIRI', 'BRI', 'BNI', 'PERMATA', 'CIMB', 'DANAMON'])],
         ];
     }
 
@@ -46,6 +47,8 @@ class StoreDonationRequest extends FormRequest
             'message.max' => 'Pesan maksimal 1000 karakter',
             'payment_method.required' => 'Metode pembayaran wajib dipilih',
             'payment_method.in' => 'Metode pembayaran tidak valid',
+            'bank_code.required_if' => 'Bank wajib dipilih untuk Virtual Account',
+            'bank_code.in' => 'Bank yang dipilih tidak valid',
         ];
     }
 }
