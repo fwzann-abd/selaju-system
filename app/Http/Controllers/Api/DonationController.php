@@ -51,42 +51,16 @@ class DonationController extends Controller
     public function getAvailableBanks()
     {
         // List bank yang support Non-SNAP Virtual Account di DOKU
+        // Sementara hanya Bank Permata untuk testing (DGPC - FIX_BILL, Company Code: 89656)
         $banks = [
-            [
-                'code' => 'MANDIRI',
-                'name' => 'Bank Mandiri',
-                'icon' => '🏦',
-                'available' => true,
-            ],
-            [
-                'code' => 'BRI',
-                'name' => 'Bank BRI',
-                'icon' => '🏦',
-                'available' => true,
-            ],
-            [
-                'code' => 'BNI',
-                'name' => 'Bank Negara Indonesia',
-                'icon' => '🏦',
-                'available' => true,
-            ],
             [
                 'code' => 'PERMATA',
                 'name' => 'Bank Permata',
                 'icon' => '🏦',
                 'available' => true,
-            ],
-            [
-                'code' => 'CIMB',
-                'name' => 'Bank CIMB Niaga',
-                'icon' => '🏦',
-                'available' => true,
-            ],
-            [
-                'code' => 'DANAMON',
-                'name' => 'Bank Danamon',
-                'icon' => '🏦',
-                'available' => true,
+                'billing_type' => 'FIX_BILL',
+                'feature' => 'DGPC',
+                'company_code' => '89656',
             ],
         ];
 
@@ -255,21 +229,18 @@ class DonationController extends Controller
     {
         try {
             // Map bank code to DOKU channel format
+            // Currently using Bank Permata (DGPC - FIX_BILL, Company Code: 89656)
             $channelMap = [
-                'MANDIRI' => 'VIRTUAL_ACCOUNT_BANK_MANDIRI',
-                'BRI' => 'VIRTUAL_ACCOUNT_BANK_BRI',
-                'BNI' => 'VIRTUAL_ACCOUNT_BANK_BNI',
                 'PERMATA' => 'VIRTUAL_ACCOUNT_BANK_PERMATA',
-                'CIMB' => 'VIRTUAL_ACCOUNT_BANK_CIMB',
-                'DANAMON' => 'VIRTUAL_ACCOUNT_BANK_DANAMON',
             ];
 
-            $channel = $channelMap[$bankCode] ?? 'VIRTUAL_ACCOUNT_BANK_MANDIRI';
-            $partnerServiceId = config('doku.client_id');
+            $channel = $channelMap[$bankCode] ?? 'VIRTUAL_ACCOUNT_BANK_PERMATA';
+            $companyCode = '89656'; // Company Code for Permata from DOKU dashboard
+            $prefix = 'Galactic'; // Merchant Prefix from DOKU dashboard
             $customerNo = str_pad($donation->id, 10, '0', STR_PAD_LEFT); // Customer number from donation ID
-            $virtualAccountNo = $partnerServiceId . $customerNo; // Combine partner service ID with customer number
+            $virtualAccountNo = $companyCode . $customerNo; // Format: {companyCode}{customerNo}
             $transactionId = 'DONATION-' . $donation->id . '-' . time();
-            $expiredDate = now()->addHours(24)->format('Y-m-d\TH:i:sP');
+            $expiredDate = now()->addHours(24)->format('Y-m-d\\TH:i:sP');
 
             // For now, return formatted data structure (actual DOKU API call will be implemented)
             // TODO: Implement actual DOKU SDK createVa call when ready
@@ -279,13 +250,18 @@ class DonationController extends Controller
                 'bank_code' => $bankCode,
                 'bank_name' => $this->getBankName($bankCode),
                 'channel' => $channel,
+                'company_code' => $companyCode,
+                'merchant_prefix' => $prefix,
+                'billing_type' => 'FIX_BILL',
+                'feature' => 'DGPC',
                 'amount' => $donation->amount,
                 'customer_name' => $donation->donor_name,
                 'expired_at' => $expiredDate,
                 'payment_instructions' => [
-                    'Transfer ke nomor Virtual Account di atas',
-                    'Jumlah transfer harus sesuai dengan nominal donasi',
+                    'Transfer ke nomor Virtual Account Bank Permata di atas',
+                    'Jumlah transfer harus SESUAI PERSIS dengan nominal: Rp ' . number_format($donation->amount, 0, ',', '.'),
                     'Virtual Account berlaku hingga ' . now()->addHours(24)->format('d/m/Y H:i'),
+                    'Pembayaran akan otomatis dikonfirmasi setelah transfer berhasil',
                 ],
             ];
         } catch (\Exception $e) {
