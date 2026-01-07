@@ -280,15 +280,26 @@ class DonationController extends Controller
             );
 
             // Prepare DTOs
-            // Company Code for Permata (Sandbox) usually 89656. In prod, from DOKU.
-            // Using 89656 as default for Permata VA.
-            $partnerServiceId = '89656';
+            // Prepare DTOs
+            // Company Code (partnerServiceId) for Snap is usually 8 digits. DOKU Dashboard "Client ID" is often used or specific prefix.
+            // For Permata Sandbox, usually '89656'. Snap requests 8 digits. Padded with space if shorter.
+            // Example from doc: " 8412" (Left space padded?) or "99341537".
+            // We will pad left with space to length 8.
+            $partnerServiceId = str_pad('89656', 8, ' ', STR_PAD_LEFT);
             if ($bankCode !== 'PERMATA') {
-                // Handle others or fallback
-                $partnerServiceId = '89656';
+                $partnerServiceId = str_pad('89656', 8, ' ', STR_PAD_LEFT);
             }
 
-            $customerNo = $donation->payment_code; // 11 digits
+            // Customer No: Snap often expects up to 20 digits.
+            // We use payment_code (11 digits). We pad left with 0 to 20 digits.
+            // Documentation for BNC/BNI says customerNo string(20).
+            $customerNo = str_pad($donation->payment_code, 20, '0', STR_PAD_LEFT);
+
+            // Virtual Account No: partnerServiceId + customerNo
+            // "   89656" + "0000...12345"
+            // Note: If spaces are in partnerServiceId, they are part of the number string?
+            // Usually VA number in banking app excludes spaces. But API might require them for matching.
+            // Let's assume standard string concatenation.
             $virtualAccountNo = $partnerServiceId . $customerNo;
             $trxId = 'DONATION-' . $donation->id;
 
