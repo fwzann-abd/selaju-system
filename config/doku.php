@@ -63,10 +63,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | DOKU Public Key
+    |--------------------------------------------------------------------------
+    |
+    | Path to DOKU's RSA public key (for encrypting data sent to DOKU)
+    |
+    */
+    'doku_public_key' => env('DOKU_PUBLIC_KEY_PATH'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Merchant Keys Path
     |--------------------------------------------------------------------------
     |
     | Path to merchant's RSA private and public keys
+    | Private key: for decrypting data from DOKU
+    | Public key: given to DOKU for encrypting data sent to merchant
     |
     */
     'merchant_private_key' => env('DOKU_MERCHANT_PRIVATE_KEY_PATH'),
