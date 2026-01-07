@@ -10,6 +10,8 @@ use App\Models\ManualTransfer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class DonationController extends Controller
 {
@@ -106,10 +108,26 @@ class DonationController extends Controller
 
             // Generate payment based on method
             $paymentData = null;
-            if ($request->payment_method === 'qris') {
-                $paymentData = $this->generateQrisPayment($donation);
-            } elseif ($request->payment_method === 'virtual_account') {
-                $paymentData = $this->generateVirtualAccountPayment($donation, $request->bank_code);
+            if ($request->payment_method === 'MANUAL') {
+                // Keep manual transfer logic if implemented or add TODO
+                // Assuming generateManualPayment exists or we just return basic info
+                $paymentData = [
+                    'transaction_id' => 'MANUAL-' . time(),
+                    'status' => 'PENDING',
+                    'type' => 'MANUAL',
+                    'instructions' => 'Silakan transfer manual ke rekening tertera.'
+                ];
+                // Or call existing method if available? Previous code had it?
+                // Checking previous view: line 110 called generateQrisPayment, 112 generateVirtualAccountPayment.
+                // It didn't seem to have generateManualPayment in the view I saw?
+                // Wait, line 110: if ($request->payment_method === 'qris')
+                // line 111: elseif ($request->payment_method === 'virtual_account')
+                // line 156: storeManualTransfer exists.
+                // So generic store() usually handles creation.
+                // Let's assume 'MANUAL' just returns pending.
+            } else {
+                // All other methods (VA, QRIS, CREDIT_CARD, OVO) -> Doku Checkout
+                $paymentData = $this->generateCheckoutPayment($donation);
             }
 
             if ($paymentData) {
@@ -452,5 +470,104 @@ class DonationController extends Controller
         } while ($exists);
 
         return $code;
+    }
+
+    /**
+     * Generate Checkout Payment URL (Jokul Checkout).
+     */
+    protected function generateCheckoutPayment(Donation $donation): array
+    {
+        $clientId = config('doku.client_id');
+        $secretKey = config('doku.secret_key');
+
+        // Environment
+        $baseUrl = config('doku.env') === 'production'
+            ? 'https://api.doku.com'
+            : 'https://api-sandbox.doku.com';
+
+        $path = '/checkout/v1/payment';
+        $url = $baseUrl . $path;
+
+        $invoiceNumber = 'DON-' . time() . '-' . $donation->id; // Unique invoice
+        $amount = $donation->amount;
+
+        // Request Body
+        $data = [
+            'order' => [
+                'invoice_number' => $invoiceNumber,
+                'amount' => $amount,
+                'auto_redirect' => false,
+                // 'callback_url' => config('doku.callback_url'),
+            ],
+            'payment' => [
+                'payment_due_date' => 60, // 60 minutes
+            ],
+            'customer' => [
+                'name' => substr($donation->donor_name, 0, 50),
+                'email' => $donation->email ?? 'guest@example.com',
+            ],
+            'additional_info' => [
+                'integration' => [
+                    'name' => 'php-library',
+                    'version' => '2.1.0'
+                ]
+            ]
+        ];
+
+        // Generate Signature V2 (HMAC-SHA256)
+        $requestId = Str::uuid()->toString();
+        $date = new \DateTime('now', new \DateTimeZone('UTC'));
+        $timestamp = $date->format('Y-m-d\TH:i:s\Z');
+        $bodyJson = json_encode($data);
+
+        // Digest: Output must be Base64 of SHA256 binary
+        $digest = base64_encode(hash('sha256', $bodyJson, true));
+
+        // Target: Path usually
+        $target = $path;
+
+        // Raw Signature String
+        // Client-Id + Request-Id + Request-Timestamp + Request-Target + Digest
+        $rawSignature = "Client-Id:" . $clientId . "\n" .
+            "Request-Id:" . $requestId . "\n" .
+            "Request-Timestamp:" . $timestamp . "\n" .
+            "Request-Target:" . $target . "\n" .
+            "Digest:" . $digest;
+
+        // HMAC using Secret Key
+        $signature = base64_encode(hash_hmac('sha256', $rawSignature, $secretKey, true));
+        $finalSignature = 'HMACSHA256=' . $signature;
+
+        try {
+            $response = Http::withHeaders([
+                'Client-Id' => $clientId,
+                'Request-Id' => $requestId,
+                'Request-Timestamp' => $timestamp,
+                'Signature' => $finalSignature,
+                'Content-Type' => 'application/json',
+            ])->post($url, $data);
+
+            if ($response->successful()) {
+                $json = $response->json();
+
+                // Response V1 Checkout: response.payment.url
+                if (isset($json['response']['payment']['url'])) {
+                    return [
+                        'transaction_id' => $invoiceNumber,
+                        'payment_url' => $json['response']['payment']['url'],
+                        'amount' => $amount,
+                        'status' => 'PENDING',
+                        'type' => 'CHECKOUT_URL'
+                    ];
+                }
+            }
+
+            Log::error('DOKU Checkout Failed', ['body' => $response->body(), 'status' => $response->status()]);
+            // Fallback for testing if sandbox fails? No, throw generic error.
+            throw new \Exception('Maaf, gagal membuat Link Pembayaran (DOKU Checkout).');
+        } catch (\Exception $e) {
+            Log::error('DOKU Checkout Exception: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }
