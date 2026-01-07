@@ -77,6 +77,14 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     Route::get('/articles', [ArticleController::class, 'index']);
     Route::get('/articles/{slug}', [ArticleController::class, 'show']);
 
+    // Donation public endpoints
+    Route::get('/donations', [\App\Http\Controllers\Api\DonationController::class, 'index']);
+    Route::post('/donations', [\App\Http\Controllers\Api\DonationController::class, 'store']);
+    Route::get('/donations/{id}', [\App\Http\Controllers\Api\DonationController::class, 'show']);
+    Route::post('/donations/manual-transfer', [\App\Http\Controllers\Api\DonationController::class, 'storeManualTransfer']);
+    Route::post('/payment/callback', [\App\Http\Controllers\Api\DonationController::class, 'paymentCallback']);
+    Route::post('/payment/token', [\App\Http\Controllers\Api\DonationController::class, 'generateToken']);
+
     // Protected routes (require auth) - using Sanctum personal access tokens
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', function (Request $request) {
