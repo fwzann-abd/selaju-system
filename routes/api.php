@@ -79,6 +79,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
 
     // Donation public endpoints
     Route::get('/donations', [\App\Http\Controllers\Api\DonationController::class, 'index']);
+    Route::get('/donations/banks', [\App\Http\Controllers\Api\DonationController::class, 'getAvailableBanks']);
     Route::post('/donations', [\App\Http\Controllers\Api\DonationController::class, 'store']);
     Route::get('/donations/{id}', [\App\Http\Controllers\Api\DonationController::class, 'show']);
     Route::post('/donations/manual-transfer', [\App\Http\Controllers\Api\DonationController::class, 'storeManualTransfer']);

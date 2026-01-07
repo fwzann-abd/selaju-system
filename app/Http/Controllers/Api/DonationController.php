@@ -46,6 +46,56 @@ class DonationController extends Controller
     }
 
     /**
+     * Get available banks for virtual account.
+     */
+    public function getAvailableBanks()
+    {
+        // List bank yang support Non-SNAP Virtual Account di DOKU
+        $banks = [
+            [
+                'code' => 'MANDIRI',
+                'name' => 'Bank Mandiri',
+                'icon' => '🏦',
+                'available' => true,
+            ],
+            [
+                'code' => 'BRI',
+                'name' => 'Bank BRI',
+                'icon' => '🏦',
+                'available' => true,
+            ],
+            [
+                'code' => 'BNI',
+                'name' => 'Bank Negara Indonesia',
+                'icon' => '🏦',
+                'available' => true,
+            ],
+            [
+                'code' => 'PERMATA',
+                'name' => 'Bank Permata',
+                'icon' => '🏦',
+                'available' => true,
+            ],
+            [
+                'code' => 'CIMB',
+                'name' => 'Bank CIMB Niaga',
+                'icon' => '🏦',
+                'available' => true,
+            ],
+            [
+                'code' => 'DANAMON',
+                'name' => 'Bank Danamon',
+                'icon' => '🏦',
+                'available' => true,
+            ],
+        ];
+
+        return response()->json([
+            'data' => $banks,
+        ]);
+    }
+
+    /**
      * Store a newly created donation.
      */
     public function store(StoreDonationRequest $request)
