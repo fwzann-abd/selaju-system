@@ -518,16 +518,20 @@ class DonationController extends Controller
         $requestId = Str::uuid()->toString();
         $date = new \DateTime('now', new \DateTimeZone('UTC'));
         $timestamp = $date->format('Y-m-d\TH:i:s\Z');
+
+        // IMPORTANT: Use exact same JSON string for Digest and Body
         $bodyJson = json_encode($data);
 
         // Digest: Output must be Base64 of SHA256 binary
         $digest = base64_encode(hash('sha256', $bodyJson, true));
 
-        // Target: Path usually
+        // Target: Request-Target must include query string if any.
+        // Here path is '/checkout/v1/payment'
         $target = $path;
 
         // Raw Signature String
         // Client-Id + Request-Id + Request-Timestamp + Request-Target + Digest
+        // Ensure \n is used as separator per Doku spec (Jokul)
         $rawSignature = "Client-Id:" . $clientId . "\n" .
             "Request-Id:" . $requestId . "\n" .
             "Request-Timestamp:" . $timestamp . "\n" .
@@ -544,8 +548,10 @@ class DonationController extends Controller
                 'Request-Id' => $requestId,
                 'Request-Timestamp' => $timestamp,
                 'Signature' => $finalSignature,
-                'Content-Type' => 'application/json',
-            ])->post($url, $data);
+                // Content-Type is set by withBody second argument or header
+            ])
+                ->withBody($bodyJson, 'application/json') // FORCE exact body
+                ->post($url);
 
             if ($response->successful()) {
                 $json = $response->json();
@@ -562,8 +568,14 @@ class DonationController extends Controller
                 }
             }
 
-            Log::error('DOKU Checkout Failed', ['body' => $response->body(), 'status' => $response->status()]);
-            // Fallback for testing if sandbox fails? No, throw generic error.
+            // Log full error details for debugging
+            Log::error('DOKU Checkout Failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'headers' => $response->headers(),
+                'request_signature_string' => $rawSignature
+            ]);
+
             throw new \Exception('Maaf, gagal membuat Link Pembayaran (DOKU Checkout).');
         } catch (\Exception $e) {
             Log::error('DOKU Checkout Exception: ' . $e->getMessage());
