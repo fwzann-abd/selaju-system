@@ -24,7 +24,12 @@ class ParticipantController extends Controller
                         $q->where('name', 'like', "%{$search}%");
                     });
             })
-            ->with(['school:id,name,slug', 'student:id,account_id,school_id,name'])
+            ->with(['student' => function ($q) {
+                $q->select('id', 'account_id', 'school_id', 'name')
+                    ->with(['school' => function ($sq) {
+                        $sq->select('schools.id', 'schools.name', 'schools.slug');
+                    }]);
+            }])
             ->paginate(15);
 
         return view('admin.participants.index', [

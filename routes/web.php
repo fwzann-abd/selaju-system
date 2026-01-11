@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GenerationController;
+use App\Http\Controllers\Admin\ManualTransferController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
 use App\Http\Controllers\Admin\ParticipantController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Admin\SchoolController;
 use App\Http\Controllers\Admin\SejajanController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\WebexEkskulController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +70,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('perpossagar-books/hero', [PerpossagarBookController::class, 'heroSettings'])->name('perpossagar-books.hero');
         Route::post('perpossagar-books/hero', [PerpossagarBookController::class, 'updateHero'])->name('perpossagar-books.hero.update');
         Route::resource('perpossagar-books', PerpossagarBookController::class);
+        // Donation and Manual Transfers
+        Route::resource('manual-transfers', ManualTransferController::class)->only(['index', 'show']);
+        // Webex management
+        Route::resource('webex/ekskul', WebexEkskulController::class)->names('webex.ekskul');
     });
 });
 
