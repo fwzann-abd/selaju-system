@@ -107,6 +107,17 @@
             ],
         ],
         [
+            'icon' => 'shield-check',
+            'label' => 'Eplin',
+            'children' => [
+                [
+                    'label' => 'Petugas',
+                    'href' => route('admin.eplin.officers.index'),
+                    'active' => ['admin.eplin.officers.*'],
+                ],
+            ],
+        ],
+        [
             'icon' => 'newspaper',
             'label' => 'Artikel',
             'children' => [

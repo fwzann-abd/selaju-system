@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('eplin_officers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('student_id');
-            $table->enum('role', ['ketua', 'wakil', 'anggota'])->default('anggota');
+            $table->enum('role', ['petugas', 'ketua', 'wakil', 'anggota'])->default('petugas');
             $table->date('start_date');
             $table->date('end_date')->nullable();
             $table->boolean('is_active')->default(true);

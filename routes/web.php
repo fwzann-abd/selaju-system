@@ -74,6 +74,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('manual-transfers', ManualTransferController::class)->only(['index', 'show']);
         // Webex management
         Route::resource('webex/ekskul', WebexEkskulController::class)->names('webex.ekskul');
+        // Eplin management
+        Route::resource('eplin/officers', \App\Http\Controllers\Admin\EplinOfficerController::class)->names('eplin.officers');
     });
 });
 
