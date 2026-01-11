@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SchoolController;
 use App\Http\Controllers\Api\SejajanCartController;
 use App\Http\Controllers\Api\SejajanOrderController;
+use App\Http\Controllers\Api\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +55,8 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     });
     Route::post('/check-nisn', [RegisterController::class, 'checkNisn']);
     Route::post('/register', [RegisterController::class, 'register']);
+    Route::get('/students', [StudentController::class, 'index']);
+    Route::get('/students/{student}', [StudentController::class, 'show']);
     // Route::get('/schools', [SchoolController::class, 'index']); // Not needed - school_id comes from NISN verification
     Route::patch('/register/{participant}/school', [RegisterController::class, 'updateSchool']);
 
@@ -336,6 +339,36 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
             Route::put('/{attendance}', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'update']);
             Route::delete('/{attendance}', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'destroy']);
         });
+    });
+
+    // Eplin Violation Types endpoints
+    Route::get('/eplin/violation-types', [\App\Http\Controllers\Api\EplinOfficerController::class, 'getViolationTypes']);
+
+    // Eplin Officers endpoints
+    Route::prefix('/eplin/officers')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\EplinOfficerController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\EplinOfficerController::class, 'store']);
+        Route::get('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'show']);
+        Route::put('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'update']);
+        Route::delete('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'destroy']);
+    });
+
+    // Eplin Violations endpoints
+    Route::prefix('/eplin/violations')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\EplinViolationController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\EplinViolationController::class, 'store']);
+        Route::get('/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'show']);
+        Route::put('/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'update']);
+        Route::delete('/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'destroy']);
+    });
+
+    // Eplin Attendances endpoints
+    Route::prefix('/eplin/attendances')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'store']);
+        Route::get('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'show']);
+        Route::put('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'update']);
+        Route::delete('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'destroy']);
     });
 
     // Book endpoints
