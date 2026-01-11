@@ -25,7 +25,7 @@ class EplinAttendanceController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = EplinAttendance::with([
-            'student' => fn ($q) => $q->select('id', 'name', 'nis', 'email'),
+            'student' => fn ($q) => $q->select('id', 'name', 'student_number', 'email'),
         ]);
 
         // Filter by date range
