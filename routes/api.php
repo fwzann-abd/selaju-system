@@ -123,9 +123,9 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
             }
 
             $validated = $request->validate([
-                'username' => ['required', 'string', 'max:50', 'unique:accounts,username,' . $user->uuid . ',uuid'],
+                'username' => ['required', 'string', 'max:50', 'unique:accounts,username,'.$user->uuid.',uuid'],
                 'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:accounts,email,' . $user->uuid . ',uuid'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:accounts,email,'.$user->uuid.',uuid'],
                 'no_telp' => ['nullable', 'string', 'max:20'],
                 'birth_date' => ['nullable', 'date'],
             ]);
@@ -295,6 +295,48 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     });
 
     Route::get('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'show']);
+
+    // Webex Ekskul endpoints
+    Route::prefix('/webex/ekskuls')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'store']);
+        Route::get('/{ekskul}', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'show']);
+        Route::put('/{ekskul}', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'update']);
+        Route::delete('/{ekskul}', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'destroy']);
+
+        // Participants
+        Route::prefix('/{ekskul}/participants')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'store']);
+            Route::put('/{participant}', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'update']);
+            Route::delete('/{participant}', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'destroy']);
+        });
+
+        // Pengurus
+        Route::prefix('/{ekskul}/pengurus')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'store']);
+            Route::put('/{pengurus}', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'update']);
+            Route::delete('/{pengurus}', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'destroy']);
+        });
+
+        // Reports
+        Route::prefix('/{ekskul}/reports')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'index']);
+            Route::get('/{report}', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'show']);
+            Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'store']);
+            Route::put('/{report}', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'update']);
+            Route::delete('/{report}', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'destroy']);
+        });
+
+        // Attendances
+        Route::prefix('/{ekskul}/attendances')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'store']);
+            Route::put('/{attendance}', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'update']);
+            Route::delete('/{attendance}', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'destroy']);
+        });
+    });
 
     // Book endpoints
     Route::get('/books', [BookController::class, 'index']);

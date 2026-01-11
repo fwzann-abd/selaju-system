@@ -70,6 +70,43 @@
             ],
         ],
         [
+            'icon' => 'gift',
+            'label' => 'Selaju',
+            'children' => [
+                [
+                    'label' => 'Transfer Manual',
+                    'href' => route('admin.manual-transfers.index'),
+                    'active' => ['admin.manual-transfers.index', 'admin.manual-transfers.show'],
+                ],
+            ],
+        ],
+        [
+            'icon' => 'users',
+            'label' => 'Webex',
+            'children' => [
+                [
+                    'label' => 'Ekskul',
+                    'href' => route('admin.webex.ekskul.index'),
+                    'active' => ['admin.webex.ekskul.*'],
+                ],
+                [
+                    'label' => 'Peserta',
+                    'href' => '#',
+                    'active' => ['admin.webex.peserta.*'],
+                ],
+                [
+                    'label' => 'Laporan',
+                    'href' => '#',
+                    'active' => ['admin.webex.laporan.*'],
+                ],
+                [
+                    'label' => 'Presensi',/*  */
+                    'href' => '#',
+                    'active' => ['admin.webex.presensi.*'],
+                ],
+            ],
+        ],
+        [
             'icon' => 'newspaper',
             'label' => 'Artikel',
             'children' => [
@@ -117,6 +154,7 @@
                 ],
             ],
         ],
+
     ];
 
     $navBaseClasses = 'group flex w-full items-center rounded-xl py-3 text-sm font-medium transition-colors cursor-pointer';
