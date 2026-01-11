@@ -11,13 +11,13 @@ class StudentController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Student::select('id', 'nama', 'nisn');
+        $query = Student::select('id', 'name', 'student_number');
 
         // Search by name or NIS
         if ($request->has('search')) {
             $search = $request->query('search');
             $query->where('name', 'like', "%{$search}%")
-                ->orWhere('nisn', 'like', "%{$search}%");
+                ->orWhere('student_number', 'like', "%{$search}%");
         }
 
         $students = $query->limit(100)->get();
@@ -29,6 +29,6 @@ class StudentController extends Controller
 
     public function show(Student $student): JsonResponse
     {
-        return response()->json($student->select('id', 'nama', 'nisn'));
+        return response()->json($student->select('id', 'name', 'student_number'));
     }
 }

@@ -20,7 +20,7 @@ class EplinOfficerController extends Controller
     public function index(Request $request): JsonResponse
     {
         $officers = EplinOfficer::with([
-            'student' => fn ($q) => $q->select('id', 'nama', 'nisn'),
+            'student' => fn ($q) => $q->select('id', 'name', 'student_number'),
         ])
             ->where('is_active', true)
             ->paginate(15);

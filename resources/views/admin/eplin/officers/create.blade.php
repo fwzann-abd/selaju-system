@@ -30,7 +30,7 @@
                     <option value="">— Pilih Siswa —</option>
                     @foreach($students as $student)
                         <option value="{{ $student->id }}" @selected(old('student_id') === $student->id)>
-                            {{ $student->nama }} ({{ $student->nisn }})
+                            {{ $student->name }} ({{ $student->student_number }})
                         </option>
                     @endforeach
                 </select>
