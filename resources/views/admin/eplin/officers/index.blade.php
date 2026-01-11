@@ -65,10 +65,10 @@
                         @forelse($officers as $officer)
                             <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/30">
                                 <td class="px-6 py-4 text-sm text-slate-900 dark:text-slate-100">
-                                    {{ $officer->student?->name ?? 'N/A' }}
+                                    {{ $officer->student?->nama ?? 'N/A' }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
-                                    {{ $officer->student?->student_number ?? 'N/A' }}
+                                    {{ $officer->student?->nisn ?? 'N/A' }}
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">

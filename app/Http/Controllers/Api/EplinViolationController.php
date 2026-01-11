@@ -25,7 +25,7 @@ class EplinViolationController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = EplinViolation::with([
-            'student' => fn ($q) => $q->select('id', 'name', 'student_number', 'email'),
+            'student' => fn ($q) => $q->select('id', 'nama', 'nisn'),
             'violationType',
             'recordedByOfficer.student',
         ]);

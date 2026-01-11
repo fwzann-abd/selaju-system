@@ -19,7 +19,7 @@ class EplinOfficerController extends Controller
             ->when($search, function ($query, $search) {
                 $query->whereHas('student', function ($subQuery) use ($search) {
                     $subQuery->where('name', 'like', "%{$search}%")
-                        ->orWhere('student_number', 'like', "%{$search}%");
+                        ->orWhere('nisn', 'like', "%{$search}%");
                 });
             })
             ->orderBy('created_at', 'desc')
