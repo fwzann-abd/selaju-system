@@ -13,21 +13,21 @@ class EplinViolationController extends Controller
     private function isOfficer(Request $request): bool
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
-        // Find student dengan account_id yang match current user
-        // Kemudian cek apakah student itu adalah officer
-        $exists = EplinOfficer::whereHas('student', function ($q) use ($user) {
-            $q->where('account_id', $user->id);
-        })
-            ->where('is_active', true)
+        // Find student yang associated dengan current account
+        // Lalu cek apakah student itu adalah officer yang aktif
+        $exists = EplinOfficer::where('is_active', true)
+            ->whereHas('student', function ($q) use ($user) {
+                $q->where('account_id', $user->uuid);
+            })
             ->exists();
 
         \Log::info('isOfficer check', [
-            'user_id' => $user->id,
-            'exists' => $exists,
+            'user_id' => $user->uuid,
+            'is_officer' => $exists,
         ]);
 
         return $exists;
@@ -87,8 +87,10 @@ class EplinViolationController extends Controller
         // Find officer yang sesuai dengan current user
         $user = $request->user();
         $officer = EplinOfficer::whereHas('student', function ($q) use ($user) {
-            $q->where('account_id', $user->id);
-        })->where('is_active', true)->first();
+            $q->where('account_id', $user->uuid);
+        })
+            ->where('is_active', true)
+            ->first();
 
         if (! $officer) {
             return response()->json(['message' => 'Officer tidak ditemukan'], 403);
