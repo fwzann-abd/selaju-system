@@ -17,7 +17,11 @@ class EplinViolationController extends Controller
             return false;
         }
 
-        return EplinOfficer::where('student_id', $user->id)
+        // Find student dengan account_id yang match current user
+        // Kemudian cek apakah student itu adalah officer
+        return EplinOfficer::whereHas('student', function ($q) use ($user) {
+            $q->where('account_id', $user->id);
+        })
             ->where('is_active', true)
             ->exists();
     }
@@ -68,12 +72,22 @@ class EplinViolationController extends Controller
         $validated = $request->validate([
             'student_id' => 'required|uuid|exists:students,id',
             'violation_type_id' => 'required|uuid|exists:eplin_violation_types,id',
-            'recorded_by_officer_id' => 'required|uuid|exists:eplin_officers,id',
             'violation_date' => 'required|date',
             'description' => 'nullable|string',
             'evidence' => 'nullable|string',
         ]);
 
+        // Find officer yang sesuai dengan current user
+        $user = $request->user();
+        $officer = EplinOfficer::whereHas('student', function ($q) use ($user) {
+            $q->where('account_id', $user->id);
+        })->where('is_active', true)->first();
+
+        if (! $officer) {
+            return response()->json(['message' => 'Officer tidak ditemukan'], 403);
+        }
+
+        $validated['recorded_by_officer_id'] = $officer->id;
         $violation = EplinViolation::create($validated);
         $violation->load(['student', 'violationType', 'recordedByOfficer.student']);
 

@@ -17,7 +17,11 @@ class EplinAttendanceController extends Controller
             return false;
         }
 
-        return EplinOfficer::where('student_id', $user->id)
+        // Find student dengan account_id yang match current user
+        // Kemudian cek apakah student itu adalah officer
+        return EplinOfficer::whereHas('student', function ($q) use ($user) {
+            $q->where('account_id', $user->id);
+        })
             ->where('is_active', true)
             ->exists();
     }
