@@ -17,13 +17,15 @@ class EplinAttendanceController extends Controller
             return false;
         }
 
-        // Find student dengan account_id yang match current user
-        // Kemudian cek apakah student itu adalah officer
-        return EplinOfficer::whereHas('student', function ($q) use ($user) {
-            $q->where('account_id', $user->id);
-        })
-            ->where('is_active', true)
+        // Find student yang associated dengan current account
+        // Lalu cek apakah student itu adalah officer yang aktif
+        $exists = EplinOfficer::where('is_active', true)
+            ->whereHas('student', function ($q) use ($user) {
+                $q->where('account_id', $user->uuid);
+            })
             ->exists();
+
+        return $exists;
     }
 
     public function index(Request $request): JsonResponse
