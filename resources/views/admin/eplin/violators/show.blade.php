@@ -200,3 +200,5 @@
             });
         }
     </script>
+
+</x-app-layout>

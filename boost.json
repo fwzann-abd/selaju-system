@@ -1,6 +1,9 @@
 {
     "agents": [
-        "copilot"
+        "codex",
+        "copilot",
+        "cursor",
+        "gemini"
     ],
     "editors": [
         "cursor",
