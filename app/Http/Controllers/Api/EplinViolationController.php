@@ -13,17 +13,24 @@ class EplinViolationController extends Controller
     private function isOfficer(Request $request): bool
     {
         $user = $request->user();
-        if (! $user) {
+        if (!$user) {
             return false;
         }
 
         // Find student dengan account_id yang match current user
         // Kemudian cek apakah student itu adalah officer
-        return EplinOfficer::whereHas('student', function ($q) use ($user) {
+        $exists = EplinOfficer::whereHas('student', function ($q) use ($user) {
             $q->where('account_id', $user->id);
         })
             ->where('is_active', true)
             ->exists();
+
+        \Log::info('isOfficer check', [
+            'user_id' => $user->id,
+            'exists' => $exists,
+        ]);
+
+        return $exists;
     }
 
     public function index(Request $request): JsonResponse
