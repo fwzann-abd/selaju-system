@@ -13,11 +13,11 @@ class StudentController extends Controller
     {
         $query = Student::select('id', 'name', 'student_number');
 
-        // Search by name or NIS
+        // Search by name or student_number (case-insensitive)
         if ($request->has('search')) {
             $search = $request->query('search');
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhere('student_number', 'like', "%{$search}%");
+            $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                ->orWhereRaw('LOWER(student_number) LIKE ?', ["%{$search}%"]);
         }
 
         $students = $query->limit(10)->get();
