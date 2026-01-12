@@ -115,6 +115,11 @@
                     'href' => route('admin.eplin.officers.index'),
                     'active' => ['admin.eplin.officers.*'],
                 ],
+                [
+                    'label' => 'Pelanggar',
+                    'href' => route('admin.eplin.violators.index'),
+                    'active' => ['admin.eplin.violators.*'],
+                ],
             ],
         ],
         [

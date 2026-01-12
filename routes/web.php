@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EplinOfficerController;
+use App\Http\Controllers\Admin\EplinViolatorController;
 use App\Http\Controllers\Admin\GenerationController;
 use App\Http\Controllers\Admin\ManualTransferController;
 use App\Http\Controllers\Admin\MenuManagementController;
@@ -75,7 +77,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Webex management
         Route::resource('webex/ekskul', WebexEkskulController::class)->names('webex.ekskul');
         // Eplin management
-        Route::resource('eplin/officers', \App\Http\Controllers\Admin\EplinOfficerController::class)->names('eplin.officers');
+        Route::resource('eplin/officers', EplinOfficerController::class)->names('eplin.officers');
+        Route::resource('eplin/violators', EplinViolatorController::class)->names('eplin.violators');
+        Route::delete('eplin/violators/{violation}/force', [EplinViolatorController::class, 'forceDestroy'])->name('eplin.violators.force-delete');
+        Route::delete('eplin/violator-students/{student}', [EplinViolatorController::class, 'destroyViolator'])->name('eplin.violators.destroy-violator');
+        Route::delete('eplin/violator-students/{student}/force', [EplinViolatorController::class, 'forceDestroyViolator'])->name('eplin.violators.force-destroy-violator');
     });
 });
 
