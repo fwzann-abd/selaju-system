@@ -20,7 +20,7 @@ class StudentController extends Controller
                 ->orWhere('student_number', 'like', "%{$search}%");
         }
 
-        $students = $query->limit(100)->get();
+        $students = $query->limit(10)->get();
 
         return response()->json([
             'data' => $students,
