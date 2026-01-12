@@ -14,23 +14,56 @@ class EplinViolationController extends Controller
     {
         $user = $request->user();
         if (! $user) {
+            \Log::info('isOfficer check - No user');
+
             return false;
         }
+
+        $userUuid = $user->uuid ?? $user->getKey();
 
         // Find student yang associated dengan current account
         // Lalu cek apakah student itu adalah officer yang aktif
         $exists = EplinOfficer::where('is_active', true)
-            ->whereHas('student', function ($q) use ($user) {
-                $q->where('account_id', $user->uuid);
+            ->whereHas('student', function ($q) use ($userUuid) {
+                $q->where('account_id', $userUuid);
             })
             ->exists();
 
         \Log::info('isOfficer check', [
-            'user_id' => $user->uuid,
+            'user_id' => $user->getKey(),
+            'user_uuid' => $userUuid,
+            'user_model' => class_basename($user),
             'is_officer' => $exists,
         ]);
 
         return $exists;
+    }
+
+    private function getOfficer(Request $request): ?EplinOfficer
+    {
+        $user = $request->user();
+        if (! $user) {
+            return null;
+        }
+
+        $userUuid = $user->uuid ?? $user->getKey();
+
+        $officer = EplinOfficer::with('student')
+            ->whereHas('student', function ($q) use ($userUuid) {
+                $q->where('account_id', $userUuid);
+            })
+            ->where('is_active', true)
+            ->first();
+
+        \Log::info('Officer lookup', [
+            'user_id' => $user->getKey(),
+            'user_uuid' => $userUuid,
+            'officer_found' => $officer ? $officer->id : 'not-found',
+            'officer_is_active' => $officer?->is_active,
+            'student_account_id' => $officer?->student?->account_id,
+        ]);
+
+        return $officer;
     }
 
     public function index(Request $request): JsonResponse
@@ -41,13 +74,12 @@ class EplinViolationController extends Controller
             'recordedByOfficer.student',
         ]);
 
-        // Filter by date range
-        if ($request->has('from_date')) {
-            $query->whereDate('violation_date', '>=', $request->query('from_date'));
-        }
-        if ($request->has('to_date')) {
-            $query->whereDate('violation_date', '<=', $request->query('to_date'));
-        }
+        // Default: filter by today's date
+        $fromDate = $request->query('from_date', today()->toDateString());
+        $toDate = $request->query('to_date', today()->toDateString());
+
+        $query->whereDate('violation_date', '>=', $fromDate);
+        $query->whereDate('violation_date', '<=', $toDate);
 
         // Filter by student
         if ($request->has('student_id')) {
@@ -85,12 +117,7 @@ class EplinViolationController extends Controller
         ]);
 
         // Find officer yang sesuai dengan current user
-        $user = $request->user();
-        $officer = EplinOfficer::whereHas('student', function ($q) use ($user) {
-            $q->where('account_id', $user->uuid);
-        })
-            ->where('is_active', true)
-            ->first();
+        $officer = $this->getOfficer($request);
 
         if (! $officer) {
             return response()->json(['message' => 'Officer tidak ditemukan'], 403);

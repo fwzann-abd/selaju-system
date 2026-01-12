@@ -295,6 +295,35 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         Route::delete('/sejajans/cart', [SejajanCartController::class, 'destroyAll']);
 
         Route::delete('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'destroy']);
+        // Eplin Violation Types endpoints
+        Route::get('/eplin/violation-types', [\App\Http\Controllers\Api\EplinOfficerController::class, 'getViolationTypes']);
+
+        // Eplin Officers endpoints
+        Route::prefix('/eplin/officers')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\EplinOfficerController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\Api\EplinOfficerController::class, 'store']);
+            Route::get('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'show']);
+            Route::put('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'update']);
+            Route::delete('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'destroy']);
+        });
+
+        // Eplin Violations endpoints
+        Route::prefix('/eplin/violations')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\EplinViolationController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\Api\EplinViolationController::class, 'store']);
+            Route::get('/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'show']);
+            Route::put('/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'update']);
+            Route::delete('/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'destroy']);
+        });
+
+        // Eplin Attendances endpoints
+        Route::prefix('/eplin/attendances')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'store']);
+            Route::get('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'show']);
+            Route::put('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'update']);
+            Route::delete('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'destroy']);
+        });
     });
 
     Route::get('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'show']);
@@ -341,35 +370,19 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         });
     });
 
-    // Eplin Violation Types endpoints
+    // Eplin Violation Types endpoints (public - no auth required)
     Route::get('/eplin/violation-types', [\App\Http\Controllers\Api\EplinOfficerController::class, 'getViolationTypes']);
 
-    // Eplin Officers endpoints
-    Route::prefix('/eplin/officers')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\EplinOfficerController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\Api\EplinOfficerController::class, 'store']);
-        Route::get('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'show']);
-        Route::put('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'update']);
-        Route::delete('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'destroy']);
-    });
+    // Eplin Officers endpoints (public - for checking officer status)
+    Route::get('/eplin/officers', [\App\Http\Controllers\Api\EplinOfficerController::class, 'index']);
 
-    // Eplin Violations endpoints
-    Route::prefix('/eplin/violations')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\EplinViolationController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\Api\EplinViolationController::class, 'store']);
-        Route::get('/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'show']);
-        Route::put('/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'update']);
-        Route::delete('/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'destroy']);
-    });
+    // Eplin Violations endpoints (public GET - auth required for POST/PUT/DELETE)
+    Route::get('/eplin/violations', [\App\Http\Controllers\Api\EplinViolationController::class, 'index']);
+    Route::get('/eplin/violations/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'show']);
 
-    // Eplin Attendances endpoints
-    Route::prefix('/eplin/attendances')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'store']);
-        Route::get('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'show']);
-        Route::put('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'update']);
-        Route::delete('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'destroy']);
-    });
+    // Eplin Attendances endpoints (public GET - auth required for POST/PUT/DELETE)
+    Route::get('/eplin/attendances', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'index']);
+    Route::get('/eplin/attendances/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'show']);
 
     // Book endpoints
     Route::get('/books', [BookController::class, 'index']);

@@ -15,7 +15,7 @@ class StudentController extends Controller
 
         // Search by name or student_number (case-insensitive)
         if ($request->has('search')) {
-            $search = $request->query('search');
+            $search = strtolower($request->query('search'));
             $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
                 ->orWhereRaw('LOWER(student_number) LIKE ?', ["%{$search}%"]);
         }
