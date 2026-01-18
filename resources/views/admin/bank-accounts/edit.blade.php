@@ -57,24 +57,82 @@
 
                 <!-- Logo -->
                 <div>
-                    <label for="logo" class="block text-sm font-medium text-slate-900 dark:text-slate-100">
-                        Logo (Maks 100KB)
+                    <label for="logo" class="block text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">
+                        Logo Bank <span class="text-slate-500 font-normal">(Maks 100KB)</span>
                     </label>
                     @if($bankAccount->logo)
-                        <div class="mt-2 mb-4 flex items-center gap-4">
+                        <div class="mb-4 flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800" id="current-logo-container">
                             <img src="{{ asset('assets/modules/bank-accounts/logos/' . $bankAccount->logo) }}"
                                  alt="{{ $bankAccount->bank_name }}"
-                                 class="h-16 w-16 rounded object-cover">
-                            <span class="text-sm text-slate-600 dark:text-slate-400">Logo saat ini</span>
+                                 class="h-16 w-16 rounded-lg border border-slate-200 object-cover dark:border-slate-700">
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-slate-900 dark:text-white">Logo saat ini</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">{{ $bankAccount->bank_name }}</p>
+                            </div>
+                            <button type="button" onclick="removeCurrentLogo()" class="rounded-lg p-2 text-slate-500 hover:bg-slate-200 hover:text-red-600 dark:hover:bg-slate-700 dark:hover:text-red-400">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
                         </div>
                     @endif
-                    <input type="file" id="logo" name="logo" accept="image/*"
-                           class="mt-2 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm file:border-0 file:bg-indigo-50 file:text-indigo-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">PNG, JPG, atau WebP. Maks 100KB. Kosongkan jika tidak ingin mengubah.</p>
+                    <div class="relative">
+                        <input type="file" id="logo" name="logo" accept="image/*"
+                               class="sr-only" onchange="handleLogoChange(event)">
+                        <label for="logo" class="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center cursor-pointer transition hover:border-indigo-400 hover:bg-indigo-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-indigo-400 dark:hover:bg-slate-700">
+                            <div class="rounded-lg bg-indigo-100 p-3 dark:bg-indigo-900">
+                                <i class="fa-solid fa-image text-xl text-indigo-600 dark:text-indigo-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-slate-900 dark:text-white">Pilih logo baru atau tarik ke sini</p>
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">PNG, JPG, atau WebP</p>
+                            </div>
+                        </label>
+                        <div id="logo-preview" class="hidden mt-4 flex items-center gap-4 p-4 rounded-lg bg-slate-100 dark:bg-slate-800">
+                            <img id="logo-preview-img" src="" alt="Preview" class="h-12 w-12 rounded object-cover">
+                            <div class="flex-1">
+                                <p id="logo-preview-name" class="text-sm font-medium text-slate-900 dark:text-white"></p>
+                                <p id="logo-preview-size" class="text-xs text-slate-500 dark:text-slate-400"></p>
+                            </div>
+                            <button type="button" onclick="clearNewLogoPreview()" class="text-slate-500 hover:text-red-600 dark:hover:text-red-400">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Kosongkan jika tidak ingin mengubah logo</p>
                     @error('logo')
-                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation text-xs mr-1"></i>{{ $message }}</p>
                     @enderror
                 </div>
+
+                <script>
+                    function handleLogoChange(event) {
+                        const file = event.target.files[0];
+                        if (!file) return;
+
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            document.getElementById('logo-preview-img').src = e.target.result;
+                            document.getElementById('logo-preview-name').textContent = file.name;
+                            document.getElementById('logo-preview-size').textContent = (file.size / 1024).toFixed(2) + ' KB';
+                            document.getElementById('logo-preview').classList.remove('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+
+                    function removeCurrentLogo() {
+                        document.querySelector('input[name="delete_logo"]')?.remove();
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'delete_logo';
+                        input.value = '1';
+                        document.querySelector('form').appendChild(input);
+                        document.getElementById('current-logo-container').remove();
+                    }
+
+                    function clearNewLogoPreview() {
+                        document.getElementById('logo').value = '';
+                        document.getElementById('logo-preview').classList.add('hidden');
+                    }
+                </script>
 
                 <!-- Is Active -->
                 <div>
