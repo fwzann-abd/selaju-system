@@ -72,7 +72,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('perpossagar-books/hero', [PerpossagarBookController::class, 'heroSettings'])->name('perpossagar-books.hero');
         Route::post('perpossagar-books/hero', [PerpossagarBookController::class, 'updateHero'])->name('perpossagar-books.hero.update');
         Route::resource('perpossagar-books', PerpossagarBookController::class);
-        // Donation and Manual Transfers
+        // Bank Accounts & Donation and Manual Transfers
+        Route::resource('bank-accounts', \App\Http\Controllers\Admin\BankAccountController::class);
         Route::resource('manual-transfers', ManualTransferController::class)->only(['index', 'show']);
         // Webex management
         Route::resource('webex/ekskul', WebexEkskulController::class)->names('webex.ekskul');
