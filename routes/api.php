@@ -84,6 +84,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
     Route::get('/donations', [\App\Http\Controllers\Api\DonationController::class, 'index']);
     Route::middleware('auth:sanctum')->get('/donations/history', [\App\Http\Controllers\Api\DonationController::class, 'history']);
     Route::get('/donations/banks', [\App\Http\Controllers\Api\DonationController::class, 'getAvailableBanks']);
+    Route::get('/bank-accounts', [\App\Http\Controllers\Api\BankAccountController::class, 'index']);
     Route::post('/donations', [\App\Http\Controllers\Api\DonationController::class, 'store']);
     Route::get('/donations/{id}', [\App\Http\Controllers\Api\DonationController::class, 'show'])->whereUuid('id');
     Route::post('/donations/manual-transfer', [\App\Http\Controllers\Api\DonationController::class, 'storeManualTransfer']);

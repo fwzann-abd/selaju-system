@@ -78,6 +78,11 @@
                     'href' => route('admin.manual-transfers.index'),
                     'active' => ['admin.manual-transfers.index', 'admin.manual-transfers.show'],
                 ],
+                [
+                    'label' => 'Akun Bank',
+                    'href' => route('admin.bank-accounts.index'),
+                    'active' => ['admin.bank-accounts.*'],
+                ],
             ],
         ],
         [
