@@ -297,7 +297,7 @@ class PerpossagarBookController extends Controller
         }
 
         $author = PerpossagarAuthor::firstOrCreate(
-            ['participant_id' => $user->getKey()],
+            ['account_id' => $user->getKey()],
             ['uuid' => (string) Str::uuid(), 'author_at' => now()]
         );
 
