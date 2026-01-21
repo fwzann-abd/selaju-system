@@ -71,7 +71,6 @@ class EplinViolationController extends Controller
         $query = EplinViolation::with([
             'student' => fn ($q) => $q->select('id', 'name', 'student_number'),
             'violationType',
-            'recordedByOfficer.student',
         ]);
 
         // Default: filter by today's date
@@ -96,7 +95,6 @@ class EplinViolationController extends Controller
         $violation->load([
             'student',
             'violationType',
-            'recordedByOfficer.student',
         ]);
 
         return response()->json($violation);
