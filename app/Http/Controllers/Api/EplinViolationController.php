@@ -70,7 +70,7 @@ class EplinViolationController extends Controller
     {
         $query = EplinViolation::with([
             'student' => fn ($q) => $q->select('id', 'name', 'student_number'),
-            'violationType',
+            'violationType' => fn ($q) => $q->select('id', 'name'),
         ]);
 
         // If from_date and to_date provided, filter by date range
@@ -89,7 +89,15 @@ class EplinViolationController extends Controller
 
         // Pagination with per_page parameter (default 10)
         $perPage = $request->query('per_page', 10);
-        $violations = $query->latest('created_at')->paginate($perPage);
+        $violations = $query->select([
+            'id',
+            'student_id',
+            'violation_type_id',
+            'violation_date',
+            'description',
+            'status',
+            'created_at',
+        ])->latest('created_at')->paginate($perPage);
 
         return response()->json($violations);
     }
