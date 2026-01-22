@@ -87,17 +87,49 @@ class EplinViolationController extends Controller
             $query->where('student_id', $request->query('student_id'));
         }
 
-        // Pagination with per_page parameter (default 10)
-        $perPage = $request->query('per_page', 10);
-        $violations = $query->select([
-            'id',
-            'student_id',
-            'violation_type_id',
-            'violation_date',
-            'description',
-            'status',
-            'created_at',
-        ])->latest('created_at')->paginate($perPage);
+        // Search by student name or NIS
+        if ($request->has('search') && $request->query('search')) {
+            $search = $request->query('search');
+            $query->whereHas('student', function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('student_number', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Sort by violation count (most/least)
+        $sort = $request->query('sort');
+        if ($sort === 'most' || $sort === 'least') {
+            // Group by student and count violations, then join back
+            $query->select([
+                'eplin_violations.id',
+                'eplin_violations.student_id',
+                'eplin_violations.violation_type_id',
+                'eplin_violations.violation_date',
+                'eplin_violations.description',
+                'eplin_violations.status',
+                'eplin_violations.created_at',
+            ])
+            ->selectRaw('COUNT(*) OVER (PARTITION BY student_id) as violation_count')
+            ->orderBy('violation_count', $sort === 'most' ? 'desc' : 'asc')
+            ->orderBy('eplin_violations.created_at', 'desc');
+
+            // Pagination with per_page parameter (default 10)
+            $perPage = $request->query('per_page', 10);
+            $violations = $query->paginate($perPage);
+        } else {
+            // Default sorting by created_at
+            // Pagination with per_page parameter (default 10)
+            $perPage = $request->query('per_page', 10);
+            $violations = $query->select([
+                'id',
+                'student_id',
+                'violation_type_id',
+                'violation_date',
+                'description',
+                'status',
+                'created_at',
+            ])->latest('created_at')->paginate($perPage);
+        }
 
         return response()->json($violations);
     }
