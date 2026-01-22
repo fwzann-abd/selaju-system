@@ -168,4 +168,34 @@ class EplinViolationController extends Controller
 
         return response()->json(['message' => 'Violation deleted successfully']);
     }
+
+    public function export(Request $request): JsonResponse
+    {
+        $query = EplinViolation::with([
+            'student' => fn ($q) => $q->select('id', 'name', 'student_number'),
+            'violationType' => fn ($q) => $q->select('id', 'name'),
+        ]);
+
+        // Filter by date if provided
+        if ($request->has('date')) {
+            $date = $request->query('date');
+            $query->whereDate('violation_date', $date);
+        }
+
+        // Get all violations without pagination
+        $violations = $query->select([
+            'id',
+            'student_id',
+            'violation_type_id',
+            'violation_date',
+            'description',
+            'status',
+            'created_at',
+        ])->latest('created_at')->get();
+
+        return response()->json([
+            'data' => $violations,
+            'total' => $violations->count(),
+        ]);
+    }
 }

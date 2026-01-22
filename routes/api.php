@@ -379,6 +379,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
 
     // Eplin Violations endpoints (public GET - auth required for POST/PUT/DELETE)
     Route::get('/eplin/violations', [\App\Http\Controllers\Api\EplinViolationController::class, 'index']);
+    Route::get('/eplin/violations/export', [\App\Http\Controllers\Api\EplinViolationController::class, 'export']);
     Route::get('/eplin/violations/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'show']);
 
     // Eplin Attendances endpoints (public GET - auth required for POST/PUT/DELETE)
