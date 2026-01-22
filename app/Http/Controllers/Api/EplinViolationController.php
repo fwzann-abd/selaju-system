@@ -73,19 +73,23 @@ class EplinViolationController extends Controller
             'violationType',
         ]);
 
-        // Default: filter by today's date
-        $fromDate = $request->query('from_date', today()->toDateString());
-        $toDate = $request->query('to_date', today()->toDateString());
+        // If from_date and to_date provided, filter by date range
+        if ($request->has('from_date') && $request->has('to_date')) {
+            $fromDate = $request->query('from_date');
+            $toDate = $request->query('to_date');
 
-        $query->whereDate('violation_date', '>=', $fromDate);
-        $query->whereDate('violation_date', '<=', $toDate);
+            $query->whereDate('violation_date', '>=', $fromDate);
+            $query->whereDate('violation_date', '<=', $toDate);
+        }
 
         // Filter by student
         if ($request->has('student_id')) {
             $query->where('student_id', $request->query('student_id'));
         }
 
-        $violations = $query->latest('violation_date')->paginate(20);
+        // Pagination with per_page parameter (default 10)
+        $perPage = $request->query('per_page', 10);
+        $violations = $query->latest('created_at')->paginate($perPage);
 
         return response()->json($violations);
     }
