@@ -117,18 +117,20 @@ class EplinViolationController extends Controller
             $perPage = $request->query('per_page', 10);
             $violations = $query->paginate($perPage);
         } else {
-            // Default sorting by created_at
+            // Default sorting by created_at - also include violation_count
             // Pagination with per_page parameter (default 10)
             $perPage = $request->query('per_page', 10);
             $violations = $query->select([
-                'id',
-                'student_id',
-                'violation_type_id',
-                'violation_date',
-                'description',
-                'status',
-                'created_at',
-            ])->latest('created_at')->paginate($perPage);
+                'eplin_violations.id',
+                'eplin_violations.student_id',
+                'eplin_violations.violation_type_id',
+                'eplin_violations.violation_date',
+                'eplin_violations.description',
+                'eplin_violations.status',
+                'eplin_violations.created_at',
+            ])
+            ->selectRaw('COUNT(*) OVER (PARTITION BY student_id) as violation_count')
+            ->latest('created_at')->paginate($perPage);
         }
 
         return response()->json($violations);
