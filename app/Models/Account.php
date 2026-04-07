@@ -71,6 +71,11 @@ class Account extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Student::class, 'account_id', 'uuid');
     }
 
+    public function teacher()
+    {
+        return $this->hasOne(Teacher::class, 'account_id', 'uuid');
+    }
+
     /**
      * Shortcut to access the student's school from the account.
      */

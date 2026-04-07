@@ -9,12 +9,18 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('personal_access_tokens', function (Blueprint $table) {
-            if (Schema::hasColumn('personal_access_tokens', 'tokenable_id')) {
-                DB::statement('DROP INDEX IF EXISTS tokenable_type_tokenable_id_index');
-                $table->dropColumn('tokenable_id');
-            }
+        if (Schema::hasColumn('personal_access_tokens', 'tokenable_id')) {
+            Schema::table('personal_access_tokens', function (Blueprint $table) {
+                // The morphs('tokenable') method automatically creates an index named 'personal_access_tokens_tokenable_type_tokenable_id_index'
+                $table->dropIndex('personal_access_tokens_tokenable_type_tokenable_id_index');
+            });
 
+            Schema::table('personal_access_tokens', function (Blueprint $table) {
+                $table->dropColumn('tokenable_id');
+            });
+        }
+
+        Schema::table('personal_access_tokens', function (Blueprint $table) {
             $table->uuid('tokenable_id')->nullable()->after('tokenable_type');
             $table->index(['tokenable_type', 'tokenable_id'], 'tokenable_type_tokenable_id_index');
         });
@@ -22,11 +28,19 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (Schema::hasColumn('personal_access_tokens', 'tokenable_id')) {
+            Schema::table('personal_access_tokens', function (Blueprint $table) {
+                $table->dropIndex('tokenable_type_tokenable_id_index');
+            });
+
+            Schema::table('personal_access_tokens', function (Blueprint $table) {
+                $table->dropColumn('tokenable_id');
+            });
+        }
+
         Schema::table('personal_access_tokens', function (Blueprint $table) {
-            DB::statement('DROP INDEX IF EXISTS tokenable_type_tokenable_id_index');
-            $table->dropColumn('tokenable_id');
             $table->unsignedBigInteger('tokenable_id')->after('tokenable_type');
-            $table->index(['tokenable_type', 'tokenable_id'], 'tokenable_type_tokenable_id_index');
+            $table->index(['tokenable_type', 'tokenable_id'], 'personal_access_tokens_tokenable_type_tokenable_id_index');
         });
     }
 };

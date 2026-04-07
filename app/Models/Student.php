@@ -64,4 +64,14 @@ class Student extends Model
     {
         return ! is_null($this->account_id);
     }
+
+    /**
+     * Get the classrooms this student belongs to
+     */
+    public function classrooms()
+    {
+        return $this->belongsToMany(Classroom::class, 'classroom_students')
+            ->withPivot('student_position_id')
+            ->withTimestamps();
+    }
 }

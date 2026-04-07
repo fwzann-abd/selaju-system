@@ -10,6 +10,41 @@ use App\Http\Controllers\Api\SejajanOrderController;
 use App\Http\Controllers\Api\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+
+// LMS Authentication Routes
+Route::prefix('lms')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+});
+
+// LMS Super Admin Master Data Routes
+Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('lms')->group(function () {
+    Route::apiResource('accounts', \App\Http\Controllers\Api\AccountController::class);
+    Route::apiResource('teachers', \App\Http\Controllers\Api\TeacherController::class);
+    Route::apiResource('students', \App\Http\Controllers\Api\StudentController::class);
+    Route::apiResource('classrooms', \App\Http\Controllers\Api\ClassroomController::class);
+    Route::apiResource('subjects', \App\Http\Controllers\Api\SubjectController::class);
+    Route::apiResource('student-positions', \App\Http\Controllers\Api\StudentPositionController::class);
+    Route::apiResource('schedules', \App\Http\Controllers\Api\ScheduleController::class);
+    
+    Route::post('classrooms/assign-student', [\App\Http\Controllers\Api\ClassroomAssignmentController::class, 'assignStudent']);
+});
+
+// LMS Teacher Routes
+Route::middleware(['auth:sanctum', 'role:teacher'])->prefix('lms/teacher')->group(function () {
+    Route::get('schedules', [\App\Http\Controllers\Api\Teacher\TeacherScheduleController::class, 'index']);
+    Route::apiResource('materials', \App\Http\Controllers\Api\Teacher\TeacherMaterialController::class);
+    Route::post('attendances', [\App\Http\Controllers\Api\Teacher\TeacherAttendanceController::class, 'store']);
+});
+
+// LMS Student Routes
+Route::middleware(['auth:sanctum', 'role:student'])->prefix('lms/student')->group(function () {
+    Route::get('schedules', [\App\Http\Controllers\Api\Student\StudentScheduleController::class, 'index']);
+    Route::get('materials', [\App\Http\Controllers\Api\Student\StudentMaterialController::class, 'index']);
+    Route::get('materials/{material}', [\App\Http\Controllers\Api\Student\StudentMaterialController::class, 'show']);
+    Route::get('attendances', [\App\Http\Controllers\Api\Student\StudentAttendanceController::class, 'index']);
+});
 
 Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(function () {
     // Public routes

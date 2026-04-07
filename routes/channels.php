@@ -15,3 +15,10 @@ Broadcast::channel('orders.buyer.{userId}', function ($user, $userId) {
 Broadcast::channel('orders.seller.{userId}', function ($user, $userId) {
     return (string) $user->id === (string) $userId;
 });
+
+// LMS - Notifikasi materi ke kelas
+Broadcast::channel('classroom.{id}', function ($user, $id) {
+    if (!$user->student) return false;
+    
+    return $user->student->classrooms()->where('classrooms.id', $id)->exists();
+});

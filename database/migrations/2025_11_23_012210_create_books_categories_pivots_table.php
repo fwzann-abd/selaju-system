@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('perpossagar_book_categories_pivots', function (Blueprint $table) {
-            $table->uuid('uuid')->default(DB::raw('gen_random_uuid()'))->primary();
+            $table->uuid('uuid')->primary();
             $table->uuid('category_id');
             $table->uuid('book_id');
             $table->timestamps();
