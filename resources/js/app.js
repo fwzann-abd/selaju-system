@@ -1,9 +1,14 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import Swal from 'sweetalert2';
+import { setupLmsClassroomListener, cleanupLmsListener } from './lms-listener';
 
 window.Alpine = Alpine;
 window.Swal = Swal;
+window.LmsUtils = {
+    setupLmsClassroomListener,
+    cleanupLmsListener,
+};
 
 Alpine.store('layout', {
     sidebarExpanded: true,

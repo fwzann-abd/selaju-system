@@ -1,4 +1,4 @@
-@php
+<?php
     $brandName = config('app.name', 'Selaju Admin');
     $brandInitials = (string) \Illuminate\Support\Str::of($brandName)
         ->replaceMatches('/[^A-Za-z0-9]/', '')
@@ -216,7 +216,7 @@
     $iconActiveClasses = 'text-indigo-600 dark:text-indigo-300';
     $iconInactiveClasses = 'text-slate-400 group-hover:text-indigo-600 dark:text-slate-500 dark:group-hover:text-indigo-200';
     $currentUrl = url()->current();
-@endphp
+?>
 
 <div x-data="{ openAccordion: null }" x-cloak>
     <!-- Mobile sidebar -->
@@ -240,9 +240,9 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-300">
-                    <span class="text-lg font-semibold">{{ $brandInitials }}</span>
+                    <span class="text-lg font-semibold"><?php echo e($brandInitials); ?></span>
                 </div>
-                <span class="text-lg font-semibold text-slate-900 dark:text-white">{{ $brandName }}</span>
+                <span class="text-lg font-semibold text-slate-900 dark:text-white"><?php echo e($brandName); ?></span>
             </div>
             <button
                 type="button"
@@ -258,8 +258,8 @@
 
         <nav class="mt-6 flex-1 overflow-y-auto">
             <div class="space-y-1">
-                @foreach ($menus as $menu)
-                    @php
+                <?php $__currentLoopData = $menus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $menu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $hasChildren = isset($menu['children']) && is_array($menu['children']);
                         $childActive = false;
                         $menuActivePatterns = $menu['active'] ?? [];
@@ -285,56 +285,94 @@
                         $isActive = $hasChildren
                             ? ($childActive || $patternMatches)
                             : ($routeMatches || $patternMatches);
-                    @endphp
+                    ?>
 
-                    @if ($hasChildren)
-                        <div x-data="{ menuId: '{{ $loop->index }}' }" class="space-y-1">
+                    <?php if($hasChildren): ?>
+                        <div x-data="{ menuId: '<?php echo e($loop->index); ?>' }" class="space-y-1">
                             <button
                                 type="button"
-                                class="{{ $navBaseClasses }} {{ $isActive ? $navActiveClasses : $navInactiveClasses }} px-4 gap-3 justify-between"
+                                class="<?php echo e($navBaseClasses); ?> <?php echo e($isActive ? $navActiveClasses : $navInactiveClasses); ?> px-4 gap-3 justify-between"
                                 @click="openAccordion = openAccordion === menuId ? null : menuId"
                             >
                                 <span class="flex items-center gap-3">
-                                    <x-icon :name="$menu['icon']" class="{{ $iconBaseClasses }} {{ $isActive ? $iconActiveClasses : $iconInactiveClasses }}" />
-                                    <span>{{ $menu['label'] }}</span>
+                                    <?php if (isset($component)) { $__componentOriginalce262628e3a8d44dc38fd1f3965181bc = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalce262628e3a8d44dc38fd1f3965181bc = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icon','data' => ['name' => $menu['icon'],'class' => ''.e($iconBaseClasses).' '.e($isActive ? $iconActiveClasses : $iconInactiveClasses).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['name' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($menu['icon']),'class' => ''.e($iconBaseClasses).' '.e($isActive ? $iconActiveClasses : $iconInactiveClasses).'']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalce262628e3a8d44dc38fd1f3965181bc)): ?>
+<?php $attributes = $__attributesOriginalce262628e3a8d44dc38fd1f3965181bc; ?>
+<?php unset($__attributesOriginalce262628e3a8d44dc38fd1f3965181bc); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalce262628e3a8d44dc38fd1f3965181bc)): ?>
+<?php $component = $__componentOriginalce262628e3a8d44dc38fd1f3965181bc; ?>
+<?php unset($__componentOriginalce262628e3a8d44dc38fd1f3965181bc); ?>
+<?php endif; ?>
+                                    <span><?php echo e($menu['label']); ?></span>
                                 </span>
                                 <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="openAccordion === menuId ? 'rotate-180' : ''"></i>
                             </button>
 
                             <div class="space-y-1 pl-11" x-show="openAccordion === menuId" x-transition.opacity x-transition.duration.150ms>
-                                @foreach ($menu['children'] as $child)
-                                    @php
+                                <?php $__currentLoopData = $menu['children']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $childHref = $child['href'] ?? '#';
                                         $childActivePatterns = $child['active'] ?? [];
                                         $childIsActive = ($childHref !== '#' && $childHref !== '' && $currentUrl === $childHref)
                                             || (!empty($childActivePatterns) && request()->routeIs(...$childActivePatterns));
-                                    @endphp
+                                    ?>
 
                                     <a
-                                        href="{{ $childHref }}"
-                                        title="{{ $child['label'] }}"
-                                        class="{{ $childNavBaseClasses }} {{ $childIsActive ? $childNavActiveClasses : $childNavInactiveClasses }}"
+                                        href="<?php echo e($childHref); ?>"
+                                        title="<?php echo e($child['label']); ?>"
+                                        class="<?php echo e($childNavBaseClasses); ?> <?php echo e($childIsActive ? $childNavActiveClasses : $childNavInactiveClasses); ?>"
                                         @click="$store.layout.closeMobileSidebar()"
-                                        @if($childIsActive) aria-current="page" @endif
+                                        <?php if($childIsActive): ?> aria-current="page" <?php endif; ?>
                                     >
                                         <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
-                                        <span>{{ $child['label'] }}</span>
+                                        <span><?php echo e($child['label']); ?></span>
                                     </a>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
                         </div>
-                    @else
+                    <?php else: ?>
                         <a
-                            href="{{ $href }}"
-                            title="{{ $menu['label'] }}"
-                            class="{{ $navBaseClasses }} {{ $isActive ? $navActiveClasses : $navInactiveClasses }} px-4 gap-3 justify-start"
-                            @if($isActive) aria-current="page" @endif
+                            href="<?php echo e($href); ?>"
+                            title="<?php echo e($menu['label']); ?>"
+                            class="<?php echo e($navBaseClasses); ?> <?php echo e($isActive ? $navActiveClasses : $navInactiveClasses); ?> px-4 gap-3 justify-start"
+                            <?php if($isActive): ?> aria-current="page" <?php endif; ?>
                         >
-                            <x-icon :name="$menu['icon']" class="{{ $iconBaseClasses }} {{ $isActive ? $iconActiveClasses : $iconInactiveClasses }}" />
-                            <span>{{ $menu['label'] }}</span>
+                            <?php if (isset($component)) { $__componentOriginalce262628e3a8d44dc38fd1f3965181bc = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalce262628e3a8d44dc38fd1f3965181bc = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icon','data' => ['name' => $menu['icon'],'class' => ''.e($iconBaseClasses).' '.e($isActive ? $iconActiveClasses : $iconInactiveClasses).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['name' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($menu['icon']),'class' => ''.e($iconBaseClasses).' '.e($isActive ? $iconActiveClasses : $iconInactiveClasses).'']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalce262628e3a8d44dc38fd1f3965181bc)): ?>
+<?php $attributes = $__attributesOriginalce262628e3a8d44dc38fd1f3965181bc; ?>
+<?php unset($__attributesOriginalce262628e3a8d44dc38fd1f3965181bc); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalce262628e3a8d44dc38fd1f3965181bc)): ?>
+<?php $component = $__componentOriginalce262628e3a8d44dc38fd1f3965181bc; ?>
+<?php unset($__componentOriginalce262628e3a8d44dc38fd1f3965181bc); ?>
+<?php endif; ?>
+                            <span><?php echo e($menu['label']); ?></span>
                         </a>
-                    @endif
-                @endforeach
+                    <?php endif; ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </nav>
 
@@ -361,14 +399,14 @@
         <div class="flex items-center justify-between" :class="$store.layout.sidebarExpanded ? '' : 'justify-center'">
             <div class="flex items-center gap-3" :class="$store.layout.sidebarExpanded ? '' : 'justify-center'">
                 <div class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-300">
-                    <span class="text-lg font-semibold">{{ $brandInitials }}</span>
+                    <span class="text-lg font-semibold"><?php echo e($brandInitials); ?></span>
                 </div>
                 <span
                     class="text-lg font-semibold text-slate-900 dark:text-white"
                     x-show="$store.layout.sidebarExpanded"
                     x-transition.opacity
-                >{{ $brandName }}</span>
-                <span class="sr-only" x-show="!$store.layout.sidebarExpanded">{{ $brandName }}</span>
+                ><?php echo e($brandName); ?></span>
+                <span class="sr-only" x-show="!$store.layout.sidebarExpanded"><?php echo e($brandName); ?></span>
             </div>
 
             <button
@@ -385,8 +423,8 @@
 
         <nav class="mt-6 flex-1 overflow-y-auto">
             <div class="space-y-1">
-                @foreach ($menus as $menu)
-                    @php
+                <?php $__currentLoopData = $menus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $menu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $hasChildren = isset($menu['children']) && is_array($menu['children']);
                         $childActive = false;
                         $menuActivePatterns = $menu['active'] ?? [];
@@ -412,14 +450,14 @@
                         $isActive = $hasChildren
                             ? ($childActive || $patternMatches)
                             : ($routeMatches || $patternMatches);
-                    @endphp
+                    ?>
 
-                    @if ($hasChildren)
-                        <div x-data="{ menuId: '{{ $loop->index }}' }" class="space-y-1">
+                    <?php if($hasChildren): ?>
+                        <div x-data="{ menuId: '<?php echo e($loop->index); ?>' }" class="space-y-1">
                             <button
                                 type="button"
-                                class="{{ $navBaseClasses }} {{ $isActive ? $navActiveClasses : $navInactiveClasses }}"
-                                :class="$store.layout.sidebarExpanded ? '{{ $navExpandedSpacing }} justify-between' : '{{ $navCollapsedSpacing }}'"
+                                class="<?php echo e($navBaseClasses); ?> <?php echo e($isActive ? $navActiveClasses : $navInactiveClasses); ?>"
+                                :class="$store.layout.sidebarExpanded ? '<?php echo e($navExpandedSpacing); ?> justify-between' : '<?php echo e($navCollapsedSpacing); ?>'"
                                 @click="
                                     if (!$store.layout.sidebarExpanded) {
                                         $store.layout.sidebarExpanded = true;
@@ -431,12 +469,31 @@
                                 "
                             >
                                 <span class="flex items-center gap-3">
-                                    <x-icon :name="$menu['icon']" class="{{ $iconBaseClasses }} {{ $isActive ? $iconActiveClasses : $iconInactiveClasses }}" />
+                                    <?php if (isset($component)) { $__componentOriginalce262628e3a8d44dc38fd1f3965181bc = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalce262628e3a8d44dc38fd1f3965181bc = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icon','data' => ['name' => $menu['icon'],'class' => ''.e($iconBaseClasses).' '.e($isActive ? $iconActiveClasses : $iconInactiveClasses).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['name' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($menu['icon']),'class' => ''.e($iconBaseClasses).' '.e($isActive ? $iconActiveClasses : $iconInactiveClasses).'']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalce262628e3a8d44dc38fd1f3965181bc)): ?>
+<?php $attributes = $__attributesOriginalce262628e3a8d44dc38fd1f3965181bc; ?>
+<?php unset($__attributesOriginalce262628e3a8d44dc38fd1f3965181bc); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalce262628e3a8d44dc38fd1f3965181bc)): ?>
+<?php $component = $__componentOriginalce262628e3a8d44dc38fd1f3965181bc; ?>
+<?php unset($__componentOriginalce262628e3a8d44dc38fd1f3965181bc); ?>
+<?php endif; ?>
                                     <span
                                         x-show="$store.layout.sidebarExpanded"
                                         x-transition.opacity
-                                    >{{ $menu['label'] }}</span>
-                                    <span x-show="!$store.layout.sidebarExpanded" class="sr-only">{{ $menu['label'] }}</span>
+                                    ><?php echo e($menu['label']); ?></span>
+                                    <span x-show="!$store.layout.sidebarExpanded" class="sr-only"><?php echo e($menu['label']); ?></span>
                                 </span>
                                 <i
                                     x-show="$store.layout.sidebarExpanded"
@@ -450,46 +507,66 @@
                                 x-show="openAccordion === menuId && $store.layout.sidebarExpanded"
                                 x-transition.opacity
                             >
-                                @foreach ($menu['children'] as $child)
-                                    @php
+                                <?php $__currentLoopData = $menu['children']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $childHref = $child['href'] ?? '#';
                                         $childActivePatterns = $child['active'] ?? [];
                                         $childIsActive = ($childHref !== '#' && $childHref !== '' && $currentUrl === $childHref)
                                             || (!empty($childActivePatterns) && request()->routeIs(...$childActivePatterns));
-                                    @endphp
+                                    ?>
 
                                     <a
-                                        href="{{ $childHref }}"
-                                        title="{{ $child['label'] }}"
-                                        class="ml-11 {{ $childNavBaseClasses }} {{ $childIsActive ? $childNavActiveClasses : $childNavInactiveClasses }}"
-                                        @if($childIsActive) aria-current="page" @endif
+                                        href="<?php echo e($childHref); ?>"
+                                        title="<?php echo e($child['label']); ?>"
+                                        class="ml-11 <?php echo e($childNavBaseClasses); ?> <?php echo e($childIsActive ? $childNavActiveClasses : $childNavInactiveClasses); ?>"
+                                        <?php if($childIsActive): ?> aria-current="page" <?php endif; ?>
                                     >
                                         <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
-                                        <span>{{ $child['label'] }}</span>
+                                        <span><?php echo e($child['label']); ?></span>
                                     </a>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
                         </div>
-                    @else
+                    <?php else: ?>
                         <a
-                            href="{{ $href }}"
-                            title="{{ $menu['label'] }}"
-                            class="{{ $navBaseClasses }} {{ $isActive ? $navActiveClasses : $navInactiveClasses }}"
-                            :class="$store.layout.sidebarExpanded ? '{{ $navExpandedSpacing }} justify-start' : '{{ $navCollapsedSpacing }}'"
-                            @if($isActive) aria-current="page" @endif
+                            href="<?php echo e($href); ?>"
+                            title="<?php echo e($menu['label']); ?>"
+                            class="<?php echo e($navBaseClasses); ?> <?php echo e($isActive ? $navActiveClasses : $navInactiveClasses); ?>"
+                            :class="$store.layout.sidebarExpanded ? '<?php echo e($navExpandedSpacing); ?> justify-start' : '<?php echo e($navCollapsedSpacing); ?>'"
+                            <?php if($isActive): ?> aria-current="page" <?php endif; ?>
                         >
-                            <x-icon :name="$menu['icon']" class="{{ $iconBaseClasses }} {{ $isActive ? $iconActiveClasses : $iconInactiveClasses }}" />
+                            <?php if (isset($component)) { $__componentOriginalce262628e3a8d44dc38fd1f3965181bc = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalce262628e3a8d44dc38fd1f3965181bc = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icon','data' => ['name' => $menu['icon'],'class' => ''.e($iconBaseClasses).' '.e($isActive ? $iconActiveClasses : $iconInactiveClasses).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['name' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($menu['icon']),'class' => ''.e($iconBaseClasses).' '.e($isActive ? $iconActiveClasses : $iconInactiveClasses).'']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalce262628e3a8d44dc38fd1f3965181bc)): ?>
+<?php $attributes = $__attributesOriginalce262628e3a8d44dc38fd1f3965181bc; ?>
+<?php unset($__attributesOriginalce262628e3a8d44dc38fd1f3965181bc); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalce262628e3a8d44dc38fd1f3965181bc)): ?>
+<?php $component = $__componentOriginalce262628e3a8d44dc38fd1f3965181bc; ?>
+<?php unset($__componentOriginalce262628e3a8d44dc38fd1f3965181bc); ?>
+<?php endif; ?>
                             <span
                                 x-show="$store.layout.sidebarExpanded"
                                 x-transition.opacity
-                            >{{ $menu['label'] }}</span>
-                            <span x-show="!$store.layout.sidebarExpanded" class="sr-only">{{ $menu['label'] }}</span>
+                            ><?php echo e($menu['label']); ?></span>
+                            <span x-show="!$store.layout.sidebarExpanded" class="sr-only"><?php echo e($menu['label']); ?></span>
                         </a>
-                    @endif
-                @endforeach
+                    <?php endif; ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </nav>
 
 
     </aside>
 </div>
+<?php /**PATH C:\folder-v2\resources\views/layouts/sidebar.blade.php ENDPATH**/ ?>

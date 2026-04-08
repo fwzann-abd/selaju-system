@@ -22,10 +22,13 @@ return new class extends Migration
         \DB::table('students')->update(['generation_id' => $generationId]);
 
         // Step 3: Drop foreign keys from accounts table using raw SQL (old constraint names)
-        \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS participants_school_id_foreign');
-        \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS participants_generation_id_foreign');
-        \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS accounts_school_id_foreign');
-        \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS accounts_generation_id_foreign');
+        // Only for non-SQLite databases (SQLite doesn't support DROP CONSTRAINT)
+        if (\DB::connection()->getDriverName() !== 'sqlite') {
+            \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS participants_school_id_foreign');
+            \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS participants_generation_id_foreign');
+            \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS accounts_school_id_foreign');
+            \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS accounts_generation_id_foreign');
+        }
 
         // Step 4: Drop school_id and generation_id columns from accounts table
         Schema::table('accounts', function (Blueprint $table) {

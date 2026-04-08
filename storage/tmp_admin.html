@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="ZVFrhhh7rZfUfMzn8YicIaRY7xC7FC8L9LbpSltg">
+
+        <title>Selaju Team</title>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700&display=swap" rel="stylesheet" />
+
+        <!-- Scripts -->
+        <script type="module" src="http://[::1]:5173/@vite/client"></script><link rel="stylesheet" href="http://[::1]:5173/resources/css/app.css" /><script type="module" src="http://[::1]:5173/resources/js/app.js"></script>
+        <style>
+            body {
+                font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            }
+        </style>
+    <script id="browser-logger-active">
+(function() {
+    const ENDPOINT = 'http://127.0.0.1:8000/_boost/browser-logs';
+    const logQueue = [];
+    let flushTimeout = null;
+
+    console.log('🔍 Browser logger active (MCP server detected). Posting to: ' + ENDPOINT);
+
+    // Store original console methods
+    const originalConsole = {
+        log: console.log,
+        info: console.info,
+        error: console.error,
+        warn: console.warn,
+        table: console.table
+    };
+
+    // Helper to safely stringify values
+    function safeStringify(obj) {
+        const seen = new WeakSet();
+        return JSON.stringify(obj, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[Circular]';
+                seen.add(value);
+            }
+            if (value instanceof Error) {
+                return {
+                    name: value.name,
+                    message: value.message,
+                    stack: value.stack
+                };
+            }
+            return value;
+        });
+    }
+
+    // Batch and send logs
+    function flushLogs() {
+        if (logQueue.length === 0) return;
+
+        const batch = logQueue.splice(0, logQueue.length);
+
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ logs: batch })
+        }).catch(err => {
+            // Silently fail to avoid infinite loops
+            originalConsole.error('Failed to send logs:', err);
+        });
+    }
+
+    // Debounced flush (100ms)
+    function scheduleFlush() {
+        if (flushTimeout) clearTimeout(flushTimeout);
+        flushTimeout = setTimeout(flushLogs, 100);
+    }
+
+    // Intercept console methods
+    ['log', 'info', 'error', 'warn', 'table'].forEach(method => {
+        console[method] = function(...args) {
+            // Call original method
+            originalConsole[method].apply(console, args);
+
+            // Capture log data
+            try {
+                logQueue.push({
+                    type: method,
+                    timestamp: new Date().toISOString(),
+                    data: args.map(arg => {
+                        try {
+                            return typeof arg === 'object' ? JSON.parse(safeStringify(arg)) : arg;
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }),
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            } catch (e) {
+                // Fail silently
+            }
+        };
+    });
+
+    // Global error handlers for uncaught errors
+    const originalOnError = window.onerror;
+    window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
+        try {
+            logQueue.push({
+                type: 'uncaught_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: errorMsg,
+                    filename: url,
+                    lineno: lineNumber,
+                    colno: colNumber,
+                    error: error ? {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Call original handler if it exists
+        if (originalOnError && typeof originalOnError === 'function') {
+            return originalOnError(errorMsg, url, lineNumber, colNumber, error);
+        }
+
+        // Let the error continue to propagate
+        return false;
+    }
+    window.addEventListener('error', (event) => {
+        try {
+            logQueue.push({
+                type: 'window_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error ? {
+                        name: event.error.name,
+                        message: event.error.message,
+                        stack: event.error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the error continue to propagate
+        return false;
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+        try {
+            logQueue.push({
+                type: 'error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: 'Unhandled Promise Rejection',
+                    reason: event.reason instanceof Error ? {
+                        name: event.reason.name,
+                        message: event.reason.message,
+                        stack: event.reason.stack
+                    } : event.reason
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the rejection continue to propagate
+        return false;
+    });
+
+    // Flush on page unload
+    window.addEventListener('beforeunload', () => {
+        if (logQueue.length > 0) {
+            navigator.sendBeacon(ENDPOINT, JSON.stringify({ logs: logQueue }));
+        }
+    });
+})();
+</script>
+</head>
+    <body class="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full space-y-8">
+                <div class="text-center">
+                    <a href="/" class="inline-block">
+                        <img src="http://127.0.0.1:8000/assets/logo.svg" alt="Selaju Logo" class="mx-auto h-16 w-auto hover:scale-105 transition-transform duration-200">
+                    </a>
+                    <h2 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+                        Selamat Datang
+                    </h2>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        Silakan masuk ke akun Anda
+                    </p>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-2xl border border-gray-200 dark:border-gray-700">
+                    <!-- Session Status -->
+    
+    <form method="POST" action="http://127.0.0.1:8000/login" class="space-y-6">
+        <input type="hidden" name="_token" value="ZVFrhhh7rZfUfMzn8YicIaRY7xC7FC8L9LbpSltg" autocomplete="off">
+        <!-- Email Address -->
+        <div class="space-y-2">
+            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Email
+            </label>
+            <div class="relative">
+                <input id="email" type="email" name="email" value="" required autofocus autocomplete="username"
+                    class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white dark:placeholder-gray-300 transition-all duration-200"
+                    placeholder="masukkan email Anda">
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                    </svg>
+                </div>
+            </div>
+                    </div>
+
+        <!-- Password -->
+        <div class="space-y-2">
+            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Password
+            </label>
+            <div class="relative">
+                <input id="password" type="password" name="password" required autocomplete="current-password"
+                    class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white dark:placeholder-gray-300 transition-all duration-200"
+                    placeholder="masukkan password Anda">
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <button type="button" onclick="togglePassword()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                        <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+                    </div>
+
+        <!-- Remember Me & Forgot Password -->
+        <div class="flex items-center justify-between">
+            <label for="remember_me" class="flex items-center">
+                <input id="remember_me" type="checkbox" name="remember"
+                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700">
+                <span class="ml-2 block text-sm text-gray-700 dark:text-gray-300">Ingat saya</span>
+            </label>
+
+                            <a href="http://127.0.0.1:8000/forgot-password" class="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200">
+                    Lupa password?
+                </a>
+                    </div>
+
+        <!-- Login Button -->
+        <div>
+            <button type="submit"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-all duration-200 transform hover:scale-[1.02] cursor-pointer">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                </svg>
+                Masuk
+            </button>
+        </div>
+    </form>
+
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const eyeIcon = document.getElementById('eye-icon');
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+                `;
+            } else {
+                passwordField.type = 'password';
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                `;
+            }
+        }
+    </script>
+                </div>
+
+                <div class="text-center">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        © 2026 Selaju. Semua hak dilindungi.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

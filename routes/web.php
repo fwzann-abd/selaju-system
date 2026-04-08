@@ -4,6 +4,10 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EplinOfficerController;
 use App\Http\Controllers\Admin\EplinViolatorController;
 use App\Http\Controllers\Admin\GenerationController;
+use App\Http\Controllers\Admin\Lms\ClassroomController as LmsClassroomController;
+use App\Http\Controllers\Admin\Lms\ScheduleController as LmsScheduleController;
+use App\Http\Controllers\Admin\Lms\StudentController as LmsStudentController;
+use App\Http\Controllers\Admin\Lms\TeacherController as LmsTeacherController;
 use App\Http\Controllers\Admin\ManualTransferController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
@@ -83,6 +87,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('eplin/violators/{violation}/force', [EplinViolatorController::class, 'forceDestroy'])->name('eplin.violators.force-delete');
         Route::delete('eplin/violator-students/{student}', [EplinViolatorController::class, 'destroyViolator'])->name('eplin.violators.destroy-violator');
         Route::delete('eplin/violator-students/{student}/force', [EplinViolatorController::class, 'forceDestroyViolator'])->name('eplin.violators.force-destroy-violator');
+
+        // LMS Management
+        Route::prefix('lms')->name('lms.')->group(function () {
+            Route::get('classrooms', [LmsClassroomController::class, 'index'])->name('classrooms.index');
+            Route::get('teachers', [LmsTeacherController::class, 'index'])->name('teachers.index');
+            Route::get('students', [LmsStudentController::class, 'index'])->name('students.index');
+            Route::get('schedules', [LmsScheduleController::class, 'index'])->name('schedules.index');
+        });
     });
 });
 
