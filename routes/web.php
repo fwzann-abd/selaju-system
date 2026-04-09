@@ -4,10 +4,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EplinOfficerController;
 use App\Http\Controllers\Admin\EplinViolatorController;
 use App\Http\Controllers\Admin\GenerationController;
-use App\Http\Controllers\Admin\Lms\ClassroomController as LmsClassroomController;
 use App\Http\Controllers\Admin\Lms\ScheduleController as LmsScheduleController;
-use App\Http\Controllers\Admin\Lms\StudentController as LmsStudentController;
-use App\Http\Controllers\Admin\Lms\TeacherController as LmsTeacherController;
 use App\Http\Controllers\Admin\ManualTransferController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
@@ -18,6 +15,7 @@ use App\Http\Controllers\Admin\PerpossagarCategoryController;
 use App\Http\Controllers\Admin\SchoolController;
 use App\Http\Controllers\Admin\SejajanController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\WebexEkskulController;
 use App\Http\Controllers\MenuController;
@@ -55,6 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('article-categories', \App\Http\Controllers\Admin\ArticleCategoryController::class);
         Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
         Route::resource('schools', SchoolController::class)->except('show');
+        Route::resource('teachers', TeacherController::class)->except('show');
         Route::resource('generations', GenerationController::class)->except('show');
         Route::patch('generations/{generation}/toggle-active', [GenerationController::class, 'toggleActive'])->name('generations.toggle-active');
         Route::patch('generations/{generation}/set-as-current', [GenerationController::class, 'setAsCurrent'])->name('generations.set-as-current');
@@ -90,9 +89,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // LMS Management
         Route::prefix('lms')->name('lms.')->group(function () {
-            Route::get('classrooms', [LmsClassroomController::class, 'index'])->name('classrooms.index');
-            Route::get('teachers', [LmsTeacherController::class, 'index'])->name('teachers.index');
-            Route::get('students', [LmsStudentController::class, 'index'])->name('students.index');
             Route::get('schedules', [LmsScheduleController::class, 'index'])->name('schedules.index');
         });
     });

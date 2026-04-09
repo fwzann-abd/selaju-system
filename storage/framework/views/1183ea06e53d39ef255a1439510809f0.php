@@ -153,7 +153,12 @@
                     'active' => ['admin.schools.*'],
                 ],
                 [
-                    'label' => 'Daftar Siswa',
+                    'label' => 'Daftar Guru',
+                    'href' => route('admin.teachers.index'),
+                    'active' => ['admin.teachers.*'],
+                ],
+                [
+                    'label' => 'Data Siswa',
                     'href' => route('admin.students.index'),
                     'active' => ['admin.students.*'],
                 ],
@@ -163,21 +168,6 @@
             'icon' => 'book-open',
             'label' => 'LMS Melesat 🎓',
             'children' => [
-                [
-                    'label' => 'Daftar Kelas',
-                    'href' => '/admin/lms/classrooms',
-                    'active' => ['admin.lms.classrooms.*'],
-                ],
-                [
-                    'label' => 'Data Guru',
-                    'href' => '/admin/lms/teachers',
-                    'active' => ['admin.lms.teachers.*'],
-                ],
-                [
-                    'label' => 'Data Siswa',
-                    'href' => '/admin/lms/students',
-                    'active' => ['admin.lms.students.*'],
-                ],
                 [
                     'label' => 'Jadwal KBM',
                     'href' => '/admin/lms/schedules',

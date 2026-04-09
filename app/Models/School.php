@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class School extends Model
 {
@@ -18,4 +19,9 @@ class School extends Model
         'slug',
         'name',
     ];
+
+    public function teachers(): HasMany
+    {
+        return $this->hasMany(Teacher::class);
+    }
 }
