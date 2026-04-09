@@ -3,26 +3,26 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTeacherRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
+        $teacher = $this->route('teacher');
+
         return [
-            //
+            'school_id' => ['required', 'uuid', 'exists:schools,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'nip' => ['nullable', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', Rule::unique('accounts', 'username')->ignore($teacher->account_id, 'uuid')],
+            'email' => ['required', 'email', 'max:255', Rule::unique('accounts', 'email')->ignore($teacher->account_id, 'uuid')],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
     }
 }

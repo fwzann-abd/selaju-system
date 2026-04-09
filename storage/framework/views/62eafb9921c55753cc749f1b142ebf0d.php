@@ -123,7 +123,8 @@
                         const response = await axios.get('/api/lms/students', {
                             params: {
                                 search: this.search,
-                            }
+                            },
+                            withCredentials: true,
                         });
                         this.students = response.data.data || [];
                     } catch (error) {

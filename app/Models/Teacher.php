@@ -14,6 +14,7 @@ class Teacher extends Model
 
     protected $fillable = [
         'account_id',
+        'school_id',
         'nip',
         'name',
     ];
@@ -21,6 +22,11 @@ class Teacher extends Model
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'account_id', 'uuid');
+    }
+
+    public function school(): BelongsTo
+    {
+        return $this->belongsTo(School::class);
     }
 
     public function classrooms(): HasMany
