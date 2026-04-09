@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Teacher;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TeacherController extends Controller
@@ -10,9 +12,13 @@ class TeacherController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        $teachers = Teacher::orderBy('name')->get(['id', 'name']);
+
+        return response()->json([
+            'data' => $teachers,
+        ]);
     }
 
     /**
@@ -20,7 +26,7 @@ class TeacherController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return response()->json(['message' => 'Not implemented'], 501);
     }
 
     /**
@@ -28,7 +34,7 @@ class TeacherController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return response()->json(['message' => 'Not implemented'], 501);
     }
 
     /**
@@ -36,7 +42,7 @@ class TeacherController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        return response()->json(['message' => 'Not implemented'], 501);
     }
 
     /**
@@ -44,6 +50,6 @@ class TeacherController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        return response()->json(['message' => 'Not implemented'], 501);
     }
 }

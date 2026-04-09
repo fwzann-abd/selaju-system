@@ -73,23 +73,28 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('admin.teachers.index', ['school_id' => $school->id]) }}"
-                                       class="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
-                                       title="Kelola Guru">
-                                        <i class="fa-solid fa-chalkboard-user text-xs"></i>
-                                    </a>
-                                    <a href="{{ route('admin.schools.edit', $school) }}"
-                                       class="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
-                                        <i class="fa-solid fa-pen text-xs"></i>
-                                    </a>
-                                    <form action="{{ route('admin.schools.destroy', $school) }}" method="POST"
-                                          onsubmit="return confirm('Yakin ingin menghapus sekolah ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="rounded-lg p-1.5 text-red-500 transition hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-200">
-                                            <i class="fa-solid fa-trash text-xs"></i>
-                                        </button>
-                                    </form>
+                                           class="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                                           title="Kelola Guru">
+                                            <i class="fa-solid fa-chalkboard-user text-xs"></i>
+                                        </a>
+                                        <a href="{{ route('admin.classrooms.index') }}"
+                                           class="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                                           title="Kelola Kelas">
+                                            <i class="fa-solid fa-door-open text-xs"></i>
+                                        </a>
+                                        <a href="{{ route('admin.schools.edit', $school) }}"
+                                           class="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
+                                            <i class="fa-solid fa-pen text-xs"></i>
+                                        </a>
+                                        <form action="{{ route('admin.schools.destroy', $school) }}" method="POST"
+                                              onsubmit="return confirm('Yakin ingin menghapus sekolah ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="rounded-lg p-1.5 text-red-500 transition hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-200">
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

@@ -43,14 +43,8 @@
                     <input type="text" name="q" value="{{ $search }}" placeholder="Cari nama, national_id atau student_number"
                            class="w-full border-none bg-transparent text-sm text-slate-700 placeholder-slate-400 focus:ring-0 dark:text-slate-200"
                            autocomplete="off">
-                    <select name="school_id" class="ml-2 rounded-md border border-slate-200 bg-transparent px-2 py-1 text-sm dark:border-slate-700">
-                        <option value="">-- Semua Sekolah --</option>
-                        @foreach($schools as $sch)
-                            <option value="{{ $sch->id }}" @if($selectedSchool == $sch->id) selected @endif>{{ $sch->name }}</option>
-                        @endforeach
-                    </select>
                     <button type="submit" class="ml-2 rounded-md bg-indigo-600 px-3 py-1 text-sm text-white">Filter</button>
-                    @if($search || $selectedSchool)
+                    @if($search)
                         <a href="{{ route('admin.students.index') }}" class="ml-2 text-xs text-indigo-500 hover:underline">Reset</a>
                     @endif
                 </div>

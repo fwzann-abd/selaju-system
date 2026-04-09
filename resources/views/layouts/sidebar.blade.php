@@ -158,6 +158,11 @@
                     'active' => ['admin.teachers.*'],
                 ],
                 [
+                    'label' => 'Daftar Kelas',
+                    'href' => route('admin.classrooms.index'),
+                    'active' => ['admin.classrooms.*'],
+                ],
+                [
                     'label' => 'Data Siswa',
                     'href' => route('admin.students.index'),
                     'active' => ['admin.students.*'],

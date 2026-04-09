@@ -40,40 +40,40 @@
                 </div>
 
                 <div>
-                    <label for="nama" class="text-sm font-semibold text-slate-600 dark:text-slate-200">Nama</label>
-                    <input id="nama" name="nama" type="text" value="{{ old('nama', $student->nama) }}" required
+                    <label for="name" class="text-sm font-semibold text-slate-600 dark:text-slate-200">Nama</label>
+                    <input id="name" name="name" type="text" value="{{ old('name', $student->name) }}" required
                         class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white" placeholder="Nama Siswa">
-                    @error('nama')
+                    @error('name')
                         <p class="mt-1 text-xs text-[#EF4444]">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="nipd" class="text-sm font-semibold text-slate-600 dark:text-slate-200">NIPD</label>
-                    <input id="nipd" name="nipd" type="text" value="{{ old('nipd', $student->nipd) }}"
+                    <label for="student_number" class="text-sm font-semibold text-slate-600 dark:text-slate-200">NIPD</label>
+                    <input id="student_number" name="student_number" type="text" value="{{ old('student_number', $student->student_number) }}"
                         class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white" placeholder="Nomor Induk Peserta Didik (opsional)">
-                    @error('nipd')
+                    @error('student_number')
                         <p class="mt-1 text-xs text-[#EF4444]">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="nisn" class="text-sm font-semibold text-slate-600 dark:text-slate-200">NISN</label>
-                    <input id="nisn" name="nisn" type="text" value="{{ old('nisn', $student->nisn) }}" required
+                    <label for="national_id" class="text-sm font-semibold text-slate-600 dark:text-slate-200">NISN</label>
+                    <input id="national_id" name="national_id" type="text" value="{{ old('national_id', $student->national_id) }}" required
                         class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white" placeholder="Nomor Induk Siswa Nasional">
-                    @error('nisn')
+                    @error('national_id')
                         <p class="mt-1 text-xs text-[#EF4444]">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="jk" class="text-sm font-semibold text-slate-600 dark:text-slate-200">Jenis Kelamin</label>
-                    <select id="jk" name="jk" required class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                    <label for="gender" class="text-sm font-semibold text-slate-600 dark:text-slate-200">Jenis Kelamin</label>
+                    <select id="gender" name="gender" required class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                         <option value="">-- Pilih Jenis Kelamin --</option>
-                        <option value="L" @if(old('jk', $student->jk) == 'L') selected @endif>Laki-laki</option>
-                        <option value="P" @if(old('jk', $student->jk) == 'P') selected @endif>Perempuan</option>
+                        <option value="L" @if(old('gender', $student->gender) == 'L') selected @endif>Laki-laki</option>
+                        <option value="P" @if(old('gender', $student->gender) == 'P') selected @endif>Perempuan</option>
                     </select>
-                    @error('jk')
+                    @error('gender')
                         <p class="mt-1 text-xs text-[#EF4444]">{{ $message }}</p>
                     @enderror
                 </div>

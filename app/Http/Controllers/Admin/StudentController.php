@@ -22,7 +22,6 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $search = $request->query('q', '');
-        $schoolId = $request->query('school_id', '');
 
         $students = Student::query()
             ->when($search, function ($query) use ($search) {
@@ -30,20 +29,13 @@ class StudentController extends Controller
                     ->orWhere('national_id', 'like', "%{$search}%")
                     ->orWhere('student_number', 'like', "%{$search}%");
             })
-            ->when($schoolId, function ($query) use ($schoolId) {
-                $query->where('school_id', $schoolId);
-            })
             ->with(['school:id,name', 'account:uuid,username,email'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        $schools = School::select('id', 'name')->orderBy('name')->get();
-
         return view('admin.students.index', [
             'students' => $students,
-            'schools' => $schools,
             'search' => $search,
-            'selectedSchool' => $schoolId,
             'pageTitle' => 'Daftar Siswa',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => route('dashboard')],
@@ -58,10 +50,7 @@ class StudentController extends Controller
      */
     public function create()
     {
-        $schools = School::select('id', 'name')->orderBy('name')->get();
-
         return view('admin.students.create', [
-            'schools' => $schools,
             'pageTitle' => 'Tambah Siswa',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => route('dashboard')],
@@ -101,12 +90,13 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'school_id' => ['required', 'uuid', 'exists:schools,id'],
             'name' => ['required', 'string', 'max:255'],
             'student_number' => ['nullable', 'string', 'max:255'],
             'national_id' => ['required', 'string', 'max:255', 'unique:students,national_id'],
             'gender' => ['required', 'in:L,P'],
         ]);
+
+        $validated['school_id'] = School::query()->value('id');
 
         Student::create($validated);
 
@@ -119,11 +109,8 @@ class StudentController extends Controller
      */
     public function edit(Student $student)
     {
-        $schools = School::select('id', 'name')->orderBy('name')->get();
-
         return view('admin.students.edit', [
             'student' => $student,
-            'schools' => $schools,
             'pageTitle' => 'Edit Siswa',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => route('dashboard')],
@@ -150,7 +137,6 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $validated = $request->validate([
-            'school_id' => ['required', 'uuid', 'exists:schools,id'],
             'name' => ['required', 'string', 'max:255'],
             'student_number' => ['nullable', 'string', 'max:255'],
             'national_id' => ['required', 'string', 'max:255', 'unique:students,national_id,'.$student->id],

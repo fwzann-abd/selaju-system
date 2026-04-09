@@ -126,15 +126,20 @@
                 </div>
 
                 <div class="space-y-4 px-6 py-6 text-sm text-slate-700 dark:text-slate-200">
-                    <div class="grid gap-4 md:grid-cols-3">
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Nama Kelas</label>
+                            <input type="text" x-model="newClassroom.name" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="Kelas 12 IPA 1">
+                            <p x-text="errors.name ?? ''" class="mt-1 text-xs text-red-500"></p>
+                        </div>
                         <div>
                             <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Tingkat</label>
-                            <input type="text" x-model="newClassroom.tingkat" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="10">
+                            <input type="text" x-model="newClassroom.tingkat" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="12">
                             <p x-text="errors.tingkat ?? ''" class="mt-1 text-xs text-red-500"></p>
                         </div>
                         <div>
                             <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Jurusan</label>
-                            <input type="text" x-model="newClassroom.jurusan" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="PPLG">
+                            <input type="text" x-model="newClassroom.jurusan" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="IPA">
                             <p x-text="errors.jurusan ?? ''" class="mt-1 text-xs text-red-500"></p>
                         </div>
                         <div>
@@ -143,11 +148,6 @@
                             <p x-text="errors.rombel ?? ''" class="mt-1 text-xs text-red-500"></p>
                         </div>
                         <div class="md:col-span-2">
-                            <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Tahun Ajaran</label>
-                            <input type="text" x-model="newClassroom.academic_year" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="2025/2026">
-                            <p x-text="errors.academic_year ?? ''" class="mt-1 text-xs text-red-500"></p>
-                        </div>
-                        <div class="md:col-span-3">
                             <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Wali Kelas</label>
                             <select x-model="newClassroom.teacher_id" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
                                 <option value="">Pilih wali kelas</option>
@@ -156,6 +156,11 @@
                                 </template>
                             </select>
                             <p x-text="errors.teacher_id ?? ''" class="mt-1 text-xs text-red-500"></p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Tahun Ajaran</label>
+                            <input type="text" x-model="newClassroom.academic_year" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="2025/2026">
+                            <p x-text="errors.academic_year ?? ''" class="mt-1 text-xs text-red-500"></p>
                         </div>
                     </div>
                 </div>
@@ -183,15 +188,20 @@
                 </div>
 
                 <div class="space-y-4 px-6 py-6 text-sm text-slate-700 dark:text-slate-200">
-                    <div class="grid gap-4 md:grid-cols-3">
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Nama Kelas</label>
+                            <input type="text" x-model="editClassroom.name" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="Kelas 12 IPA 1">
+                            <p x-text="editErrors.name ?? ''" class="mt-1 text-xs text-red-500"></p>
+                        </div>
                         <div>
                             <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Tingkat</label>
-                            <input type="text" x-model="editClassroom.tingkat" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="10">
+                            <input type="text" x-model="editClassroom.tingkat" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="12">
                             <p x-text="editErrors.tingkat ?? ''" class="mt-1 text-xs text-red-500"></p>
                         </div>
                         <div>
                             <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Jurusan</label>
-                            <input type="text" x-model="editClassroom.jurusan" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="PPLG">
+                            <input type="text" x-model="editClassroom.jurusan" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="IPA">
                             <p x-text="editErrors.jurusan ?? ''" class="mt-1 text-xs text-red-500"></p>
                         </div>
                         <div>
@@ -200,11 +210,6 @@
                             <p x-text="editErrors.rombel ?? ''" class="mt-1 text-xs text-red-500"></p>
                         </div>
                         <div class="md:col-span-2">
-                            <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Tahun Ajaran</label>
-                            <input type="text" x-model="editClassroom.academic_year" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="2025/2026">
-                            <p x-text="editErrors.academic_year ?? ''" class="mt-1 text-xs text-red-500"></p>
-                        </div>
-                        <div class="md:col-span-3">
                             <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Wali Kelas</label>
                             <select x-model="editClassroom.teacher_id" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
                                 <option value="">Pilih wali kelas</option>
@@ -213,6 +218,11 @@
                                 </template>
                             </select>
                             <p x-text="editErrors.teacher_id ?? ''" class="mt-1 text-xs text-red-500"></p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Tahun Ajaran</label>
+                            <input type="text" x-model="editClassroom.academic_year" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="2025/2026">
+                            <p x-text="editErrors.academic_year ?? ''" class="mt-1 text-xs text-red-500"></p>
                         </div>
                     </div>
                 </div>
@@ -242,6 +252,7 @@
                 editErrors: {},
                 listeners: [],
                 newClassroom: {
+                    name: '',
                     tingkat: '',
                     jurusan: '',
                     rombel: '',
@@ -250,6 +261,7 @@
                 },
                 editClassroom: {
                     id: '',
+                    name: '',
                     tingkat: '',
                     jurusan: '',
                     rombel: '',
@@ -326,6 +338,7 @@
 
                 resetForm() {
                     this.newClassroom = {
+                        name: '',
                         tingkat: '',
                         jurusan: '',
                         rombel: '',
@@ -338,6 +351,7 @@
                 resetEditForm() {
                     this.editClassroom = {
                         id: '',
+                        name: '',
                         tingkat: '',
                         jurusan: '',
                         rombel: '',
@@ -351,6 +365,7 @@
                     this.resetEditForm();
                     this.editClassroom = {
                         id: classroom.id,
+                        name: classroom.name || '',
                         tingkat: classroom.tingkat || '',
                         jurusan: classroom.jurusan || '',
                         rombel: classroom.rombel || '',
@@ -365,12 +380,7 @@
                         this.updating = true;
                         this.editErrors = {};
 
-                        const payload = {
-                            ...this.editClassroom,
-                            name: `${this.editClassroom.tingkat} ${this.editClassroom.jurusan} ${this.editClassroom.rombel}`,
-                        };
-                        delete payload.id;
-                        const response = await axios.put(`/api/lms/classrooms/${this.editClassroom.id}`, payload);
+                        const response = await axios.put(`/api/lms/classrooms/${this.editClassroom.id}`, this.editClassroom);
 
                         this.isEditModalVisible = false;
                         await Swal.fire('Sukses', response.data.message || 'Kelas berhasil diperbarui', 'success');
@@ -421,11 +431,7 @@
                         this.saving = true;
                         this.errors = {};
 
-                        const payload = {
-                            ...this.newClassroom,
-                            name: `${this.newClassroom.tingkat} ${this.newClassroom.jurusan} ${this.newClassroom.rombel}`,
-                        };
-                        const response = await axios.post('/api/lms/classrooms', payload);
+                        const response = await axios.post('/api/lms/classrooms', this.newClassroom);
 
                         this.isAddModalVisible = false;
                         await Swal.fire('Sukses', response.data.message || 'Kelas berhasil dibuat', 'success');

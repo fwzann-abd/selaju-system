@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+
+    <title><?php echo e(config('app.name', 'Laravel')); ?></title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- jQuery (required by some icon pickers) and FontAwesome IconPicker (CDN) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fontawesome-iconpicker/3.2.0/css/fontawesome-iconpicker.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontawesome-iconpicker/3.2.0/js/fontawesome-iconpicker.min.js" crossorigin="anonymous"></script>
+
+    <!-- Scripts -->
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+</head>
+
+<body class="font-sans antialiased bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-200"
+    x-data="{}" x-bind:class="{ 'overflow-hidden': $store.layout.mobileSidebarOpen }"
+    x-on:keydown.window.escape="$store.layout.closeMobileSidebar()">
+    <div class="min-h-screen">
+        <?php echo $__env->make('layouts.sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+        <!-- Floating sidebar toggle button (when sidebar is hidden) -->
+        <button type="button"
+            x-show="!$store.layout.sidebarVisible"
+            x-transition.opacity
+            class="fixed bottom-6 left-6 z-50 hidden lg:flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition-all hover:bg-indigo-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            @click="$store.layout.showSidebar()"
+            aria-label="Show sidebar"
+            title="Show sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+        </button>
+
+        <div class="flex min-h-screen flex-1 flex-col transition-all duration-200"
+             :class="{
+                'lg:ml-72': $store.layout.sidebarVisible && $store.layout.sidebarExpanded,
+                'lg:ml-20': $store.layout.sidebarVisible && !$store.layout.sidebarExpanded,
+                'lg:ml-0': !$store.layout.sidebarVisible
+             }">
+            <?php echo $__env->make('layouts.navigation', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+            <?php if(isset($header)): ?>
+                <header class="border-b border-slate-200 bg-transparent dark:border-slate-800 dark:bg-transparent">
+                    <div class="mx-auto flex w-full items-center px-6 py-6 lg:px-8">
+                        <?php echo e($header); ?>
+
+                    </div>
+                </header>
+            <?php endif; ?>
+
+            <main class="flex-1">
+                <div class="mx-auto min-h-full w-full px-6 py-8 lg:px-8">
+                    <?php echo e($slot); ?>
+
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        // Delegated confirmation handlers for approve/delete buttons.
+        document.addEventListener('click', function (e) {
+            const approveBtn = e.target.closest('[data-confirm-approve]');
+            if (approveBtn) {
+                e.preventDefault();
+                const formId = approveBtn.dataset.confirmApprove;
+                const form = formId ? document.getElementById(formId) : approveBtn.closest('form');
+                if (!form) {
+                    console.warn('Confirm approve target missing form reference');
+                    return;
+                }
+
+                const name = approveBtn.dataset.participantName || '';
+                const customTitle = approveBtn.dataset.confirmTitle;
+                const customMessage = approveBtn.dataset.confirmMessage;
+                const customButton = approveBtn.dataset.confirmButton;
+                const customColor = approveBtn.dataset.confirmColor;
+
+                const title = customTitle ?? (name ? `Setujui pengajuan ${name}?` : 'Setujui pengajuan ini?');
+                const message = customMessage ?? 'Tindakan ini akan menyetujui pengajuan peserta.';
+                const confirmText = customButton ?? 'Setujui';
+                const confirmColor = customColor ?? '#10B981';
+
+                const doSubmit = () => form.submit();
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title,
+                        text: message,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: confirmText,
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: confirmColor,
+                    }).then((result) => {
+                        if (result.isConfirmed) doSubmit();
+                    });
+                } else {
+                    if (confirm(`${title}\n\n${message}`)) doSubmit();
+                }
+            }
+
+            const deleteBtn = e.target.closest('[data-confirm-delete]');
+            if (deleteBtn) {
+                e.preventDefault();
+                const formId = deleteBtn.dataset.confirmDelete;
+                const form = formId ? document.getElementById(formId) : deleteBtn.closest('form');
+                if (!form) {
+                    console.warn('Confirm delete target missing form reference');
+                    return;
+                }
+
+                const name = deleteBtn.dataset.participantName || '';
+                const customTitle = deleteBtn.dataset.confirmTitle;
+                const customMessage = deleteBtn.dataset.confirmMessage;
+                const title = customTitle ?? (name ? `Hapus peserta ${name}?` : 'Hapus peserta ini?');
+                const message = customMessage ?? 'Tindakan ini tidak dapat dikembalikan.';
+
+                const doSubmit = () => form.submit();
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title,
+                        text: message,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Hapus',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#DC2626',
+                    }).then((result) => {
+                        if (result.isConfirmed) doSubmit();
+                    });
+                } else {
+                    if (confirm(`${title}\n\n${message}`)) doSubmit();
+                }
+            }
+
+            const rejectBtn = e.target.closest('[data-confirm-reject]');
+            if (rejectBtn) {
+                e.preventDefault();
+                const requestId = rejectBtn.dataset.confirmReject;
+                const name = rejectBtn.dataset.participantName || '';
+                const title = name ? `Tolak pengajuan ${name}?` : 'Tolak pengajuan ini?';
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: title,
+                        text: 'Berikan alasan penolakan (opsional)',
+                        input: 'textarea',
+                        inputPlaceholder: 'Jelaskan alasan penolakan...',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Tolak Pengajuan',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#DC2626',
+                        inputValidator: () => {
+                            // Allow empty notes
+                            return null;
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = `/position-requests/${requestId}/reject`;
+
+                            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                            const csrfInput = document.createElement('input');
+                            csrfInput.type = 'hidden';
+                            csrfInput.name = '_token';
+                            csrfInput.value = csrfToken;
+                            form.appendChild(csrfInput);
+
+                            if (result.value) {
+                                const notesInput = document.createElement('input');
+                                notesInput.type = 'hidden';
+                                notesInput.name = 'notes';
+                                notesInput.value = result.value;
+                                form.appendChild(notesInput);
+                            }
+
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
+                } else {
+                    const notes = prompt(title + '\n\nBerikan alasan penolakan (opsional):');
+                    if (notes !== null) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/position-requests/${requestId}/reject`;
+
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = '_token';
+                        csrfInput.value = csrfToken;
+                        form.appendChild(csrfInput);
+
+                        if (notes) {
+                            const notesInput = document.createElement('input');
+                            notesInput.type = 'hidden';
+                            notesInput.name = 'notes';
+                            notesInput.value = notes;
+                            form.appendChild(notesInput);
+                        }
+
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                }
+            }
+        });
+    </script>
+
+    <?php echo $__env->yieldPushContent('scripts'); ?>
+</body>
+
+</html>
+<?php /**PATH D:\shei\folder-v2\resources\views/layouts/app.blade.php ENDPATH**/ ?>

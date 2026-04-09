@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ClassroomController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EplinOfficerController;
 use App\Http\Controllers\Admin\EplinViolatorController;
@@ -53,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('article-categories', \App\Http\Controllers\Admin\ArticleCategoryController::class);
         Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
         Route::resource('schools', SchoolController::class)->except('show');
+        Route::resource('classrooms', ClassroomController::class);
         Route::resource('teachers', TeacherController::class)->except('show');
         Route::resource('generations', GenerationController::class)->except('show');
         Route::patch('generations/{generation}/toggle-active', [GenerationController::class, 'toggleActive'])->name('generations.toggle-active');

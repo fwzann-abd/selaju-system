@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreClassroomRequest;
+use App\Http\Requests\UpdateClassroomRequest;
 use App\Models\Classroom;
-use Illuminate\Http\Request;
 
 class ClassroomController extends Controller
 {
@@ -26,18 +27,9 @@ class ClassroomController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): \Illuminate\Http\JsonResponse
+    public function store(StoreClassroomRequest $request): \Illuminate\Http\JsonResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'tingkat' => ['required', 'string', 'max:255'],
-            'jurusan' => ['required', 'string', 'max:255'],
-            'rombel' => ['nullable', 'string', 'max:255'],
-            'teacher_id' => ['required', 'string', 'exists:teachers,id'],
-            'academic_year' => ['required', 'string', 'max:255'],
-        ]);
-
-        $classroom = Classroom::create($validated);
+        $classroom = Classroom::create($request->validated());
 
         return response()->json([
             'message' => 'Kelas berhasil dibuat',
@@ -65,7 +57,7 @@ class ClassroomController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id): \Illuminate\Http\JsonResponse
+    public function update(UpdateClassroomRequest $request, string $id): \Illuminate\Http\JsonResponse
     {
         $classroom = Classroom::find($id);
 
@@ -73,16 +65,7 @@ class ClassroomController extends Controller
             return response()->json(['message' => 'Kelas tidak ditemukan'], 404);
         }
 
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'tingkat' => ['sometimes', 'string', 'max:255'],
-            'jurusan' => ['sometimes', 'string', 'max:255'],
-            'rombel' => ['nullable', 'string', 'max:255'],
-            'teacher_id' => ['sometimes', 'string', 'exists:teachers,id'],
-            'academic_year' => ['sometimes', 'string', 'max:255'],
-        ]);
-
-        $classroom->update($validated);
+        $classroom->update($request->validated());
 
         return response()->json([
             'message' => 'Kelas berhasil diperbarui',
