@@ -89,7 +89,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // LMS Management
         Route::prefix('lms')->name('lms.')->group(function () {
-            Route::get('schedules', [LmsScheduleController::class, 'index'])->name('schedules.index');
+            Route::resource('schedules', LmsScheduleController::class)
+                ->only(['index', 'store', 'update', 'destroy']);
         });
     });
 });

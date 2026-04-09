@@ -22,8 +22,9 @@ class DatabaseSeeder extends Seeder
         $this->call(MenuSeeder::class);
         $this->call(ModuleSeeder::class);
         $this->call(UserGroupSeeder::class);
-        
+
         // LMS Specific Seeder
         $this->call(LmsSeeder::class);
+        $this->call(ScheduleSeeder::class);
     }
 }

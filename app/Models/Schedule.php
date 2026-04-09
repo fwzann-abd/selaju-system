@@ -15,6 +15,7 @@ class Schedule extends Model
         'classroom_id',
         'teacher_id',
         'subject_id',
+        'room_id',
         'day',
         'start_time',
         'end_time',
@@ -33,6 +34,11 @@ class Schedule extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(Room::class);
     }
 
     public function attendances(): HasMany
