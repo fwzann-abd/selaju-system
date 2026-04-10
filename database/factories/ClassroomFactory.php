@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Classroom>
@@ -16,13 +18,19 @@ class ClassroomFactory extends Factory
      */
     public function definition(): array
     {
+        $tingkat = $this->faker->randomElement(['10', '11', '12']);
+        $jurusan = $this->faker->randomElement(['PPLG', 'TJKT', 'DKV', 'MPLB', 'AKL', 'BDP']);
+        $rombel = $this->faker->randomElement(['1', '2', '3']);
+        $name = "$tingkat $jurusan $rombel";
+
         return [
-            'name' => $this->faker->words(3, true),
-            'tingkat' => $this->faker->randomElement(['10', '11', '12']),
-            'jurusan' => $this->faker->randomElement(['IPA', 'IPS', 'Bahasa']),
-            'rombel' => $this->faker->randomElement(['1', '2', '3']),
-            'teacher_id' => \App\Models\Teacher::factory(),
-            'academic_year' => '2024/2025',
+            'name' => $name,
+            'tingkat' => $tingkat,
+            'jurusan' => $jurusan,
+            'rombel' => $rombel,
+            'slug' => Str::slug($name),
+            'teacher_id' => Teacher::factory(),
+            'academic_year' => '2025/2026',
         ];
     }
 }

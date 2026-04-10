@@ -2,24 +2,28 @@
 
 namespace Database\Factories;
 
+use App\Models\Account;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Teacher>
- */
 class TeacherFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
+        $firstName = $this->faker->firstName();
+        $lastName = $this->faker->lastName();
+        $name = "$firstName $lastName";
+
+        $account = Account::factory()->create([
+            'username' => 'guru_'.Str::slug($name),
+            'email' => 'guru.'.Str::slug($name).'@sekolah.com',
+        ]);
+
         return [
-            'account_id' => \App\Models\Account::factory(),
-            'nip' => $this->faker->unique()->numerify('##########'),
-            'name' => $this->faker->name(),
+            'account_id' => $account->uuid,
+            'school_id' => $this->faker->uuid(),
+            'nip' => '19'.rand(70, 95).'0101'.rand(1000, 9999),
+            'name' => $name,
         ];
     }
 }

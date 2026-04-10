@@ -64,21 +64,6 @@ class LmsSeeder extends Seeder
         }
 
         // 4. Dummy Users (5 Teachers, 35 Students)
-        $teachers = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $acc = Account::create([
-                'username' => 'guru'.$i,
-                'email' => "guru$i@sekolah.com",
-                'password' => Hash::make('password123'),
-                'is_active' => true,
-            ]);
-            $teachers[] = Teacher::create([
-                'account_id' => $acc->uuid,
-                'nip' => '19800101'.rand(1000, 9999),
-                'name' => 'Guru '.$i,
-            ]);
-        }
-
         // 0. Dummy Environment (School & Generation)
         $school = \DB::table('schools')->first();
         $schoolId = $school ? $school->id : Str::uuid();
@@ -91,6 +76,22 @@ class LmsSeeder extends Seeder
         if (! $gen) {
             \DB::table('generations')->insert([
                 'id' => $genId, 'name' => 'Angkatan 1', 'start_years' => 2024, 'end_years' => 2027, 'is_active' => true,
+            ]);
+        }
+
+        $teachers = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $acc = Account::create([
+                'username' => 'guru'.$i,
+                'email' => "guru$i@sekolah.com",
+                'password' => Hash::make('password123'),
+                'is_active' => true,
+            ]);
+            $teachers[] = Teacher::create([
+                'account_id' => $acc->uuid,
+                'school_id' => $schoolId,
+                'nip' => '19800101'.rand(1000, 9999),
+                'name' => 'Guru '.$i,
             ]);
         }
 

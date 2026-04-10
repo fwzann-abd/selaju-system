@@ -1,0 +1,2 @@
+<img src="<?php echo e(asset('assets/logo.svg')); ?>" alt="Selaju Logo" <?php echo e($attributes); ?>>
+<?php /**PATH C:\fwzan\selaju-system\resources\views/components/application-logo.blade.php ENDPATH**/ ?>
