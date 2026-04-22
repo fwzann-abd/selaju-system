@@ -122,9 +122,11 @@ Route::middleware(['api'])->group(function () {
     Route::middleware('auth:sanctum')->get('/donations/history', [\App\Http\Controllers\Api\DonationController::class, 'history']);
     Route::get('/donations/banks', [\App\Http\Controllers\Api\DonationController::class, 'getAvailableBanks']);
     Route::get('/bank-accounts', [\App\Http\Controllers\Api\BankAccountController::class, 'index']);
-    Route::post('/donations', [\App\Http\Controllers\Api\DonationController::class, 'store']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/donations', [\App\Http\Controllers\Api\DonationController::class, 'store']);
+        Route::post('/donations/manual-transfer', [\App\Http\Controllers\Api\DonationController::class, 'storeManualTransfer']);
+    });
     Route::get('/donations/{id}', [\App\Http\Controllers\Api\DonationController::class, 'show'])->whereUuid('id');
-    Route::post('/donations/manual-transfer', [\App\Http\Controllers\Api\DonationController::class, 'storeManualTransfer']);
     Route::post('/payment/callback', [\App\Http\Controllers\Api\DonationController::class, 'paymentCallback']);
     Route::post('/payment/token', [\App\Http\Controllers\Api\DonationController::class, 'generateToken']);
 
@@ -364,64 +366,64 @@ Route::middleware(['api'])->group(function () {
     // Webex Ekskul endpoints
     Route::prefix('/webex/ekskuls')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'store']);
         Route::get('/{ekskul}', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'show']);
+
+        // Participants — read
+        Route::get('/{ekskul}/participants', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'index']);
+
+        // Pengurus — read
+        Route::get('/{ekskul}/pengurus', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'index']);
+
+        // Reports — read
+        Route::get('/{ekskul}/reports', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'index']);
+        Route::get('/{ekskul}/reports/{report}', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'show']);
+
+        // Attendances — read
+        Route::get('/{ekskul}/attendances', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'index']);
+    });
+
+    // Webex Ekskul mutating endpoints (auth required)
+    Route::middleware('auth:sanctum')->prefix('/webex/ekskuls')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'store']);
         Route::put('/{ekskul}', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'update']);
         Route::delete('/{ekskul}', [\App\Http\Controllers\Api\WebexEkskul\EkskulController::class, 'destroy']);
 
-        // Participants
-        Route::prefix('/{ekskul}/participants')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'index']);
-            Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'store']);
-            Route::put('/{participant}', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'update']);
-            Route::delete('/{participant}', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'destroy']);
-        });
+        // Participants — mutate
+        Route::post('/{ekskul}/participants', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'store']);
+        Route::put('/{ekskul}/participants/{participant}', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'update']);
+        Route::delete('/{ekskul}/participants/{participant}', [\App\Http\Controllers\Api\WebexEkskul\ParticipantController::class, 'destroy']);
 
-        // Pengurus
-        Route::prefix('/{ekskul}/pengurus')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'index']);
-            Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'store']);
-            Route::put('/{pengurus}', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'update']);
-            Route::delete('/{pengurus}', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'destroy']);
-        });
+        // Pengurus — mutate
+        Route::post('/{ekskul}/pengurus', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'store']);
+        Route::put('/{ekskul}/pengurus/{pengurus}', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'update']);
+        Route::delete('/{ekskul}/pengurus/{pengurus}', [\App\Http\Controllers\Api\WebexEkskul\PengurusController::class, 'destroy']);
 
-        // Reports
-        Route::prefix('/{ekskul}/reports')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'index']);
-            Route::get('/{report}', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'show']);
-            Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'store']);
-            Route::put('/{report}', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'update']);
-            Route::delete('/{report}', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'destroy']);
-        });
+        // Reports — mutate
+        Route::post('/{ekskul}/reports', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'store']);
+        Route::put('/{ekskul}/reports/{report}', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'update']);
+        Route::delete('/{ekskul}/reports/{report}', [\App\Http\Controllers\Api\WebexEkskul\ReportController::class, 'destroy']);
 
-        // Attendances
-        Route::prefix('/{ekskul}/attendances')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'index']);
-            Route::post('/', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'store']);
-            Route::put('/{attendance}', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'update']);
-            Route::delete('/{attendance}', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'destroy']);
-        });
+        // Attendances — mutate
+        Route::post('/{ekskul}/attendances', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'store']);
+        Route::put('/{ekskul}/attendances/{attendance}', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'update']);
+        Route::delete('/{ekskul}/attendances/{attendance}', [\App\Http\Controllers\Api\WebexEkskul\AttendanceController::class, 'destroy']);
     });
 
-    // Eplin Violation Types endpoints (public - no auth required)
+    // Eplin public read endpoints
     Route::get('/eplin/violation-types', [\App\Http\Controllers\Api\EplinOfficerController::class, 'getViolationTypes']);
-
-    // Eplin Officers endpoints (public - for checking officer status)
     Route::get('/eplin/officers', [\App\Http\Controllers\Api\EplinOfficerController::class, 'index']);
-
-    // Eplin Violations endpoints (public - no auth required for reading)
     Route::get('/eplin/violations', [\App\Http\Controllers\Api\EplinViolationController::class, 'index']);
     Route::get('/eplin/violations/export', [\App\Http\Controllers\Api\EplinViolationController::class, 'export']);
     Route::get('/eplin/violations/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'show']);
-
-    // Eplin Attendances endpoints (public GET - auth required for POST/PUT/DELETE)
     Route::get('/eplin/attendances', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'index']);
     Route::get('/eplin/attendances/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'show']);
 
-    // Book endpoints
+    // Book endpoints — read public, mutate requires auth
     Route::get('/books', [BookController::class, 'index']);
     Route::get('/books/{uuid}', [BookController::class, 'show']);
-    Route::post('/books', [BookController::class, 'store']);
-    Route::put('/books/{uuid}', [BookController::class, 'update']);
-    Route::delete('/books/{uuid}', [BookController::class, 'destroy']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/books', [BookController::class, 'store']);
+        Route::put('/books/{uuid}', [BookController::class, 'update']);
+        Route::delete('/books/{uuid}', [BookController::class, 'destroy']);
+    });
 });

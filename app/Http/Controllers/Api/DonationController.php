@@ -9,8 +9,8 @@ use App\Models\Donation;
 use App\Models\ManualTransfer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class DonationController extends Controller
@@ -33,7 +33,7 @@ class DonationController extends Controller
 
         return response()->json([
             'data' => [
-                'donations' => $donations->map(fn($donation) => [
+                'donations' => $donations->map(fn ($donation) => [
                     'id' => $donation->id,
                     'donor_name' => $donation->donor_name,
                     'amount' => $donation->amount,
@@ -112,10 +112,10 @@ class DonationController extends Controller
                 // Keep manual transfer logic if implemented or add TODO
                 // Assuming generateManualPayment exists or we just return basic info
                 $paymentData = [
-                    'transaction_id' => 'MANUAL-' . time(),
+                    'transaction_id' => 'MANUAL-'.time(),
                     'status' => 'PENDING',
                     'type' => 'MANUAL',
-                    'instructions' => 'Silakan transfer manual ke rekening tertera.'
+                    'instructions' => 'Silakan transfer manual ke rekening tertera.',
                 ];
                 // Or call existing method if available? Previous code had it?
                 // Checking previous view: line 110 called generateQrisPayment, 112 generateVirtualAccountPayment.
@@ -148,10 +148,10 @@ class DonationController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Gagal membuat donasi', ['error' => $e->getMessage()]);
 
             return response()->json([
                 'message' => 'Gagal membuat donasi',
-                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -203,12 +203,49 @@ class DonationController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Gagal mengirim bukti transfer', ['error' => $e->getMessage()]);
 
             return response()->json([
                 'message' => 'Gagal mengirim bukti transfer',
-                'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Verify DOKU callback signature (HMAC-SHA256).
+     *
+     * @see https://jokul.doku.com/docs — Handling HTTP Notification
+     */
+    private function verifyDokuSignature(Request $request): bool
+    {
+        $secretKey = config('doku.secret_key');
+        if (empty($secretKey)) {
+            return false;
+        }
+
+        $clientId = $request->header('Client-Id');
+        $requestId = $request->header('Request-Id');
+        $requestTimestamp = $request->header('Request-Timestamp');
+        $requestTarget = '/'.ltrim($request->path(), '/');
+        $incomingSignature = $request->header('Signature');
+
+        if (! $clientId || ! $requestId || ! $requestTimestamp || ! $incomingSignature) {
+            return false;
+        }
+
+        $digest = base64_encode(hash('sha256', $request->getContent(), true));
+
+        $rawSignature = "Client-Id:{$clientId}\n"
+            ."Request-Id:{$requestId}\n"
+            ."Request-Timestamp:{$requestTimestamp}\n"
+            ."Request-Target:{$requestTarget}\n"
+            ."Digest:{$digest}";
+
+        $expectedSignature = 'HMACSHA256='.base64_encode(
+            hash_hmac('sha256', $rawSignature, $secretKey, true)
+        );
+
+        return hash_equals($expectedSignature, $incomingSignature);
     }
 
     /**
@@ -216,8 +253,21 @@ class DonationController extends Controller
      */
     public function paymentCallback(Request $request)
     {
-        // Verify DOKU signature
-        // TODO: Implement DOKU signature verification
+        $isSandbox = config('doku.env') !== 'production';
+
+        if (! $this->verifyDokuSignature($request)) {
+            if ($isSandbox) {
+                Log::warning('DOKU callback signature verification failed (sandbox — proceeding)', [
+                    'headers' => $request->headers->all(),
+                ]);
+            } else {
+                Log::error('DOKU callback signature verification failed', [
+                    'ip' => $request->ip(),
+                ]);
+
+                return response()->json(['message' => 'Invalid signature'], 403);
+            }
+        }
 
         try {
             $transactionId = $request->input('TRANSIDMERCHANT');
@@ -235,26 +285,41 @@ class DonationController extends Controller
                 'message' => 'Payment status updated',
             ]);
         } catch (\Exception $e) {
+            Log::error('DOKU callback processing failed', ['error' => $e->getMessage()]);
+
             return response()->json([
                 'message' => 'Failed to process callback',
-                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * Generate QRIS payment using DOKU.
+     * Generate QRIS payment.
+     *
+     * In sandbox mode, returns mock QRIS data matching DOKU sandbox response format.
+     * In production, this would call the DOKU QRIS API.
      */
     protected function generateQrisPayment(Donation $donation): array
     {
-        // TODO: Implement DOKU QRIS generation when library is installed
-        // For now, return dummy data
-        return [
-            'transaction_id' => 'TRX-' . time() . '-' . $donation->id,
-            'qris_string' => 'dummy_qris_string',
-            'qris_url' => 'https://example.com/qris.png',
-            'expired_at' => now()->addMinutes(30),
-        ];
+        $isSandbox = config('doku.env') !== 'production';
+        $invoiceNumber = 'QRIS-'.time().'-'.$donation->id;
+
+        if ($isSandbox) {
+            Log::info('DOKU QRIS: sandbox mode — returning mock data', ['donation_id' => $donation->id]);
+
+            return [
+                'transaction_id' => $invoiceNumber,
+                'qris_string' => '00020101021226660014ID.CO.DOKU.WWW011893600914300000001020210000000030303UMI51440014ID.CO.QRIS.WWW0215ID20200000000000303UMI5204541253033605802ID5913SANDBOX DOKU6007JAKARTA61051017062070703A0163040B7E',
+                'qris_url' => 'https://api-sandbox.doku.com/checkout/link/'.$invoiceNumber,
+                'amount' => $donation->amount,
+                'expired_at' => now()->addMinutes(30),
+                'type' => 'QRIS',
+                'status' => 'PENDING',
+                'sandbox' => true,
+            ];
+        }
+
+        return $this->generateCheckoutPayment($donation);
     }
 
     /**
@@ -271,9 +336,10 @@ class DonationController extends Controller
             $publicKeyPath = config('doku.merchant_public_key'); // Merchant Public Key (Optional for Snap? Snap constructor needs it)
             $dokuPublicKeyPath = config('doku.doku_public_key');
 
-            if (!file_exists($privateKeyPath) || !file_exists($publicKeyPath) || !file_exists($dokuPublicKeyPath)) {
+            if (! file_exists($privateKeyPath) || ! file_exists($publicKeyPath) || ! file_exists($dokuPublicKeyPath)) {
                 // If keys are missing (dev environment without keys), fallback to mock with warning
-                Log::warning('DOKU Keys not found. Returning Mock VA. Path: ' . $privateKeyPath);
+                Log::warning('DOKU Keys not found. Returning Mock VA. Path: '.$privateKeyPath);
+
                 // Return Mock Data (Same as before but consistent)
                 return $this->generateMockVa($donation, $bankCode);
             }
@@ -318,8 +384,8 @@ class DonationController extends Controller
             // Note: If spaces are in partnerServiceId, they are part of the number string?
             // Usually VA number in banking app excludes spaces. But API might require them for matching.
             // Let's assume standard string concatenation.
-            $virtualAccountNo = $partnerServiceId . $customerNo;
-            $trxId = 'DONATION-' . $donation->id;
+            $virtualAccountNo = $partnerServiceId.$customerNo;
+            $trxId = 'DONATION-'.$donation->id;
 
             // Amount string with 2 decimals
             $amountStr = number_format($donation->amount, 2, '.', '');
@@ -332,8 +398,8 @@ class DonationController extends Controller
             $channelMap = [
                 'PERMATA' => 'VIRTUAL_ACCOUNT_BANK_PERMATA',
                 'MANDIRI' => 'VIRTUAL_ACCOUNT_BANK_MANDIRI',
-                'BRI'     => 'VIRTUAL_ACCOUNT_BANK_BRI',
-                'BNI'     => 'VIRTUAL_ACCOUNT_BANK_BNI',
+                'BRI' => 'VIRTUAL_ACCOUNT_BANK_BRI',
+                'BNI' => 'VIRTUAL_ACCOUNT_BANK_BNI',
             ];
             $channel = $channelMap[$bankCode] ?? 'VIRTUAL_ACCOUNT_BANK_PERMATA';
 
@@ -373,19 +439,19 @@ class DonationController extends Controller
                     'amount' => $donation->amount,
                     'expired_at' => date('c', strtotime('+1 day')),
                     'payment_instructions' => [
-                        'Transfer ke nomor Virtual Account ' . $this->getBankName($bankCode),
-                        'Nomor VA: ' . $vaNo,
-                        'Total: Rp ' . number_format($donation->amount, 0, ',', '.'),
-                    ]
+                        'Transfer ke nomor Virtual Account '.$this->getBankName($bankCode),
+                        'Nomor VA: '.$vaNo,
+                        'Total: Rp '.number_format($donation->amount, 0, ',', '.'),
+                    ],
                 ];
             } else {
                 // Handle error structure
                 // Response might be array if error simulation?
-                Log::error('DOKU VA Error', (array)$response);
+                Log::error('DOKU VA Error', (array) $response);
                 throw new \Exception('Gagal membuat VA DOKU. Response invalid.');
             }
         } catch (\Exception $e) {
-            Log::error('Failed to generate VA Real: ' . $e->getMessage());
+            Log::error('Failed to generate VA Real: '.$e->getMessage());
             // Fallback to Mock if Real fails? Or throw?
             // If user wants REAL, throwing is better to debug key issues.
             // But for reliability, maybe Mock?
@@ -398,10 +464,10 @@ class DonationController extends Controller
     {
         $partnerServiceId = '89656';
         $customerNo = $donation->payment_code;
-        $virtualAccountNo = $partnerServiceId . $customerNo;
+        $virtualAccountNo = $partnerServiceId.$customerNo;
 
         return [
-            'transaction_id' => 'MOCK-' . time(),
+            'transaction_id' => 'MOCK-'.time(),
             'va_number' => $virtualAccountNo,
             'bank_code' => $bankCode,
             'bank_name' => $this->getBankName($bankCode),
@@ -441,7 +507,7 @@ class DonationController extends Controller
 
             // Generate token (JWT or simple token based on DOKU requirement)
             $timestamp = time();
-            $token = base64_encode($clientId . ':' . $timestamp . ':' . $secretKey);
+            $token = base64_encode($clientId.':'.$timestamp.':'.$secretKey);
 
             return response()->json([
                 'token' => $token,
@@ -449,9 +515,10 @@ class DonationController extends Controller
                 'timestamp' => $timestamp,
             ]);
         } catch (\Exception $e) {
+            Log::error('Failed to generate token', ['error' => $e->getMessage()]);
+
             return response()->json([
                 'message' => 'Failed to generate token',
-                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -465,7 +532,7 @@ class DonationController extends Controller
         // Example: 24010712345
         // Total 11 digits. Combined with Company Code (5 digits) = 16 digits (Max for Permata)
         do {
-            $code = date('ymd') . mt_rand(10000, 99999);
+            $code = date('ymd').mt_rand(10000, 99999);
             $exists = Donation::where('payment_code', $code)->exists();
         } while ($exists);
 
@@ -486,9 +553,9 @@ class DonationController extends Controller
             : 'https://api-sandbox.doku.com';
 
         $path = '/checkout/v1/payment';
-        $url = $baseUrl . $path;
+        $url = $baseUrl.$path;
 
-        $invoiceNumber = 'DON-' . time() . '-' . $donation->id; // Unique invoice
+        $invoiceNumber = 'DON-'.time().'-'.$donation->id; // Unique invoice
         $amount = $donation->amount;
 
         // Request Body
@@ -509,9 +576,9 @@ class DonationController extends Controller
             'additional_info' => [
                 'integration' => [
                     'name' => 'php-library',
-                    'version' => '2.1.0'
-                ]
-            ]
+                    'version' => '2.1.0',
+                ],
+            ],
         ];
 
         // Generate Signature V2 (HMAC-SHA256)
@@ -532,15 +599,15 @@ class DonationController extends Controller
         // Raw Signature String
         // Client-Id + Request-Id + Request-Timestamp + Request-Target + Digest
         // Ensure \n is used as separator per Doku spec (Jokul)
-        $rawSignature = "Client-Id:" . $clientId . "\n" .
-            "Request-Id:" . $requestId . "\n" .
-            "Request-Timestamp:" . $timestamp . "\n" .
-            "Request-Target:" . $target . "\n" .
-            "Digest:" . $digest;
+        $rawSignature = 'Client-Id:'.$clientId."\n".
+            'Request-Id:'.$requestId."\n".
+            'Request-Timestamp:'.$timestamp."\n".
+            'Request-Target:'.$target."\n".
+            'Digest:'.$digest;
 
         // HMAC using Secret Key
         $signature = base64_encode(hash_hmac('sha256', $rawSignature, $secretKey, true));
-        $finalSignature = 'HMACSHA256=' . $signature;
+        $finalSignature = 'HMACSHA256='.$signature;
 
         try {
             $response = Http::withHeaders([
@@ -563,7 +630,7 @@ class DonationController extends Controller
                         'payment_url' => $json['response']['payment']['url'],
                         'amount' => $amount,
                         'status' => 'PENDING',
-                        'type' => 'CHECKOUT_URL'
+                        'type' => 'CHECKOUT_URL',
                     ];
                 }
             }
@@ -573,12 +640,12 @@ class DonationController extends Controller
                 'status' => $response->status(),
                 'body' => $response->body(),
                 'headers' => $response->headers(),
-                'request_signature_string' => $rawSignature
+                'request_signature_string' => $rawSignature,
             ]);
 
             throw new \Exception('Maaf, gagal membuat Link Pembayaran (DOKU Checkout).');
         } catch (\Exception $e) {
-            Log::error('DOKU Checkout Exception: ' . $e->getMessage());
+            Log::error('DOKU Checkout Exception: '.$e->getMessage());
             throw $e;
         }
     }
