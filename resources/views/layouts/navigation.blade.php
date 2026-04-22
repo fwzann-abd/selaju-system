@@ -3,7 +3,7 @@
     <div class="flex items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <!-- Toggle sidebar visibility (hide/show completely) -->
         <button type="button"
-            class="hidden lg:block -ml-2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+            class="hidden lg:block -ml-2 cursor-pointer rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
             @click="$store.layout.toggleSidebarVisibility()"
             :aria-label="$store.layout.sidebarVisible ? 'Hide sidebar' : 'Show sidebar'"
             :title="$store.layout.sidebarVisible ? 'Hide sidebar' : 'Show sidebar'">
@@ -20,7 +20,7 @@
 
         <!-- Mobile sidebar toggle -->
         <button type="button"
-            class="-ml-2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 sm:-ml-3 lg:hidden"
+            class="-ml-2 cursor-pointer rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 sm:-ml-3 lg:hidden"
             @click="$store.layout.toggleMobileSidebar()" aria-label="Toggle mobile sidebar">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -93,7 +93,7 @@
 
                 <div class="-me-2 flex items-center sm:hidden">
                     <button @click="open = ! open"
-                        class="inline-flex items-center justify-center rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                        class="inline-flex cursor-pointer items-center justify-center rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                         aria-label="Toggle user menu">
                         <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                             <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"

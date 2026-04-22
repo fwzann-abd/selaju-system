@@ -1,7 +1,7 @@
 @props(['class' => ''])
 
 <button type="button"
-    {{ $attributes->merge(['class' => 'rounded-full p-2.5 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ' . $class]) }}
+    {{ $attributes->merge(['class' => 'cursor-pointer rounded-full p-2.5 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ' . $class]) }}
     @click="$store.layout.toggleTheme()" aria-label="Ganti mode tampilan">
     <svg x-show="$store.layout.theme === 'light'" x-cloak xmlns="http://www.w3.org/2000/svg"
         class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
