@@ -17,7 +17,10 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/framework/views/*.php
 /vendor
+/docs/info_LMS/WORKFLOW_DEV_A_ABSENSI.md
+/docs/info_LMS/WORKFLOW_DEV_B_MATERI.md
 Homestead.json
 Homestead.yaml
 Thumbs.db
