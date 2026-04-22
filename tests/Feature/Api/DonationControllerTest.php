@@ -108,7 +108,7 @@ class DonationControllerTest extends TestCase
     }
 
     #[Test]
-    public function creating_donation_requires_auth(): void
+    public function creating_donation_is_publicly_accessible(): void
     {
         $response = $this->postJson('/api/donations', [
             'donor_name' => 'Test',
@@ -116,18 +116,21 @@ class DonationControllerTest extends TestCase
             'payment_method' => 'va',
         ]);
 
-        $response->assertStatus(401);
+        // Should reach validation (422) or succeed, not auth rejection (401)
+        // Donations are public per DONATION_FEATURE.md — anonymous donors supported
+        $this->assertNotEquals(401, $response->status());
     }
 
     #[Test]
-    public function manual_transfer_requires_auth(): void
+    public function manual_transfer_is_publicly_accessible(): void
     {
         $response = $this->postJson('/api/donations/manual-transfer', [
             'donor_name' => 'Test',
             'amount' => 50000,
         ]);
 
-        $response->assertStatus(401);
+        // Should reach validation (422) or succeed, not auth rejection (401)
+        $this->assertNotEquals(401, $response->status());
     }
 
     #[Test]

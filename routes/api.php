@@ -79,16 +79,14 @@ Route::middleware(['api'])->group(function () {
     Route::get('/articles', [ArticleController::class, 'index']);
     Route::get('/articles/{slug}', [ArticleController::class, 'show']);
 
-    // Donation public endpoints
+    // Donation endpoints — public (anonymous donors supported per DONATION_FEATURE.md)
     Route::get('/donations', [\App\Http\Controllers\Api\DonationController::class, 'index']);
     Route::middleware('auth:sanctum')->get('/donations/history', [\App\Http\Controllers\Api\DonationController::class, 'history']);
     Route::get('/donations/banks', [\App\Http\Controllers\Api\DonationController::class, 'getAvailableBanks']);
     Route::get('/bank-accounts', [\App\Http\Controllers\Api\BankAccountController::class, 'index']);
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/donations', [\App\Http\Controllers\Api\DonationController::class, 'store']);
-        Route::post('/donations/manual-transfer', [\App\Http\Controllers\Api\DonationController::class, 'storeManualTransfer']);
-    });
+    Route::post('/donations', [\App\Http\Controllers\Api\DonationController::class, 'store']);
     Route::get('/donations/{id}', [\App\Http\Controllers\Api\DonationController::class, 'show'])->whereUuid('id');
+    Route::post('/donations/manual-transfer', [\App\Http\Controllers\Api\DonationController::class, 'storeManualTransfer']);
     Route::post('/payment/callback', [\App\Http\Controllers\Api\DonationController::class, 'paymentCallback']);
     Route::post('/payment/token', [\App\Http\Controllers\Api\DonationController::class, 'generateToken']);
 
@@ -158,6 +156,7 @@ Route::middleware(['api'])->group(function () {
         Route::get('/sejajans/my-orders', [SejajanOrderController::class, 'myOrders']);
         Route::get('/sejajans/{sejajanSlug}/orders', [SejajanOrderController::class, 'index']);
         Route::put('/sejajans/{sejajanSlug}/orders/{orderId}/status', [SejajanOrderController::class, 'updateStatus']);
+        Route::put('/sejajans/{sejajanSlug}/orders/{orderId}', [SejajanOrderController::class, 'update']);
 
         Route::get('/sejajans/cart', [SejajanCartController::class, 'index']);
         Route::post('/sejajans/cart', [SejajanCartController::class, 'store']);
@@ -166,31 +165,22 @@ Route::middleware(['api'])->group(function () {
         Route::delete('/sejajans/cart', [SejajanCartController::class, 'destroyAll']);
 
         Route::delete('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'destroy']);
-        // Eplin Violation Types endpoints
-        Route::get('/eplin/violation-types', [\App\Http\Controllers\Api\EplinOfficerController::class, 'getViolationTypes']);
 
-        // Eplin Officers endpoints
-        Route::prefix('/eplin/officers')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\EplinOfficerController::class, 'index']);
-            Route::post('/', [\App\Http\Controllers\Api\EplinOfficerController::class, 'store']);
-            Route::get('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'show']);
-            Route::put('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'update']);
-            Route::delete('/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'destroy']);
-        });
+        // Eplin Officers mutating endpoints (auth required)
+        Route::post('/eplin/officers', [\App\Http\Controllers\Api\EplinOfficerController::class, 'store']);
+        Route::get('/eplin/officers/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'show']);
+        Route::put('/eplin/officers/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'update']);
+        Route::delete('/eplin/officers/{officer}', [\App\Http\Controllers\Api\EplinOfficerController::class, 'destroy']);
 
-        // Eplin Violations CREATE/UPDATE/DELETE (auth required)
+        // Eplin Violations mutating endpoints (auth required)
         Route::post('/eplin/violations', [\App\Http\Controllers\Api\EplinViolationController::class, 'store']);
         Route::put('/eplin/violations/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'update']);
         Route::delete('/eplin/violations/{violation}', [\App\Http\Controllers\Api\EplinViolationController::class, 'destroy']);
 
-        // Eplin Attendances endpoints
-        Route::prefix('/eplin/attendances')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'index']);
-            Route::post('/', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'store']);
-            Route::get('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'show']);
-            Route::put('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'update']);
-            Route::delete('/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'destroy']);
-        });
+        // Eplin Attendances mutating endpoints (auth required)
+        Route::post('/eplin/attendances', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'store']);
+        Route::put('/eplin/attendances/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'update']);
+        Route::delete('/eplin/attendances/{attendance}', [\App\Http\Controllers\Api\EplinAttendanceController::class, 'destroy']);
     });
 
     Route::get('/sejajans/{sejajan}', [\App\Http\Controllers\Api\SejajanController::class, 'show']);

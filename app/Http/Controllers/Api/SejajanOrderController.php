@@ -6,6 +6,7 @@ use App\Events\NewOrderReceived;
 use App\Events\OrderStatusUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
+use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Models\Sejajan;
 use App\Models\SejajanOrder;
@@ -111,6 +112,30 @@ class SejajanOrderController extends Controller
         return response()->json([
             'message' => 'Status pesanan berhasil diperbarui',
             'data' => $order,
+        ]);
+    }
+
+    /**
+     * Update order details (notes, pickup time, location).
+     */
+    public function update(UpdateOrderRequest $request, string $sejajanSlug, string $orderId): JsonResponse
+    {
+        $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+
+        // Verify ownership
+        if ($sejajan->account_id !== $request->user()->getKey()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $order = SejajanOrder::where('sejajan_id', $sejajan->id)
+            ->where('id', $orderId)
+            ->firstOrFail();
+
+        $order->update($request->validated());
+
+        return response()->json([
+            'message' => 'Pesanan berhasil diperbarui',
+            'data' => $order->load(['items.product', 'participant', 'sejajan']),
         ]);
     }
 
