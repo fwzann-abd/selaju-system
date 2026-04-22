@@ -228,7 +228,7 @@
     $currentUrl = url()->current();
 @endphp
 
-<div x-data="{ openAccordion: null }" x-cloak>
+<div x-data="{ openAccordion: null }">
     <!-- Mobile sidebar -->
     <div
         x-show="$store.layout.mobileSidebarOpen"
@@ -360,10 +360,9 @@
     </aside>
 
     <aside
-        class="fixed inset-y-0 left-0 z-40 h-screen w-20 flex-col border-r border-slate-200 bg-white/90 px-3 py-6 text-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/90"
+        class="fixed inset-y-0 left-0 z-40 hidden h-screen w-20 flex-col border-r border-slate-200 bg-white/90 px-3 py-6 text-sm backdrop-blur lg:flex dark:border-slate-800 dark:bg-slate-900/90"
         :class="{
-            'hidden lg:flex': $store.layout.sidebarVisible,
-            'hidden': !$store.layout.sidebarVisible,
+            'lg:!hidden': !$store.layout.sidebarVisible,
             'lg:w-72 lg:px-5': $store.layout.sidebarExpanded,
             'lg:w-20': !$store.layout.sidebarExpanded
         }"

@@ -350,13 +350,32 @@ Classroom (classrooms)
 
 ## Broadcasting & Real-time
 
-### Setup
+### Status: ⚠️ Dikonfigurasi Minimal — Belum Aktif
 
-Menggunakan **Laravel Reverb** sebagai WebSocket server.
+Reverb/Echo sudah ter-install dan **non-breaking** (tidak menyebabkan error), namun **belum aktif** karena:
+- `.env` belum memiliki `VITE_REVERB_*` vars (Echo gracefully skip)
+- `BROADCAST_CONNECTION=log` (events hanya di-log, tidak di-broadcast)
+- Reverb server belum dijalankan
 
-```bash
-# Start Reverb server
-php artisan reverb:start
+> **📌 TODO — Aktifkan saat fitur Sejajan siap production:**
+> Fitur real-time order notification (buyer ↔ seller) membutuhkan Reverb aktif.
+> Lihat panduan setup lengkap di bawah.
+
+### Arsitektur
+
+```
+Browser (Alpine.js)                        Laravel Backend
+┌───────────────────┐                     ┌──────────────────────┐
+│  laravel-echo     │ ◄── WebSocket ──►   │  Laravel Reverb      │
+│  pusher-js        │                     │  (php artisan        │
+│                   │                     │   reverb:start)      │
+└───────────────────┘                     └──────────┬───────────┘
+                                                     │
+                                          ┌──────────▼───────────┐
+                                          │  Events              │
+                                          │  - NewOrderReceived  │
+                                          │  - OrderStatusUpdated│
+                                          └──────────────────────┘
 ```
 
 ### Private Channels
@@ -372,6 +391,81 @@ php artisan reverb:start
 |-------|---------|---------|
 | `NewOrderReceived` | `orders.seller.*` | Pesanan baru dibuat |
 | `OrderStatusUpdated` | `orders.buyer.*` + `orders.seller.*` | Status pesanan berubah |
+
+### Safe Guard (Non-breaking)
+
+File `resources/js/echo.js` memiliki guard:
+
+```javascript
+const reverbAppKey = import.meta.env.VITE_REVERB_APP_KEY;
+if (reverbAppKey) {
+    window.Echo = new Echo({ ... });
+} else {
+    console.info('[Echo] Reverb not configured. Real-time features disabled.');
+}
+```
+
+Artinya: **jika `VITE_REVERB_APP_KEY` tidak diset, Echo tidak diinisialisasi** dan tidak ada error. Sidebar, navigation, dan seluruh Alpine.js tetap berfungsi normal.
+
+### Panduan Setup Lengkap (Ketika Siap Mengaktifkan)
+
+**1. Tambahkan env vars ke `.env`** (lihat template di `.env.example`):
+
+```env
+BROADCAST_CONNECTION=reverb
+
+REVERB_APP_ID=selaju-local
+REVERB_APP_KEY=selaju-local-key
+REVERB_APP_SECRET=selaju-local-secret
+REVERB_HOST=localhost
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+VITE_REVERB_HOST="${REVERB_HOST}"
+VITE_REVERB_PORT="${REVERB_PORT}"
+VITE_REVERB_SCHEME="${REVERB_SCHEME}"
+```
+
+**2. Rebuild frontend assets:**
+
+```bash
+npm run build
+```
+
+**3. Jalankan services (3 terminal):**
+
+```bash
+# Terminal 1: Laravel app
+php artisan serve
+
+# Terminal 2: Reverb WebSocket server
+php artisan reverb:start --debug
+
+# Terminal 3: Queue worker (events ShouldBroadcast butuh queue)
+php artisan queue:work
+```
+
+**4. Tambahkan listener di frontend** (contoh untuk halaman seller):
+
+```javascript
+// Di Blade view toko seller
+Echo.private(`orders.seller.${sellerId}`)
+    .listen('.order.new', (data) => {
+        // Tampilkan toast notification
+        alert(`Pesanan baru dari ${data.customer_name}!`);
+    });
+```
+
+**5. Dispatch event dari controller** (belum diimplementasi):
+
+```php
+// Di SejajanOrderController@store, setelah order berhasil dibuat:
+event(new NewOrderReceived($order));
+
+// Di SejajanOrderController@updateStatus:
+event(new OrderStatusUpdated($order));
+```
 
 ---
 
@@ -399,12 +493,19 @@ DOKU_SECRET_KEY=<dari-dashboard-doku>
 DOKU_ENV=sandbox
 DOKU_NOTIFICATION_URL=https://yourdomain.com/api/payment/callback
 
-# Reverb (WebSocket)
-REVERB_APP_ID=<generate>
-REVERB_APP_KEY=<generate>
-REVERB_APP_SECRET=<generate>
+# Reverb (WebSocket) — opsional, untuk fitur real-time Sejajan
+# Lihat bagian "Broadcasting & Real-time" untuk panduan lengkap
+BROADCAST_CONNECTION=log  # Ganti ke 'reverb' saat siap mengaktifkan
+REVERB_APP_ID=selaju-local
+REVERB_APP_KEY=selaju-local-key
+REVERB_APP_SECRET=selaju-local-secret
 REVERB_HOST=localhost
 REVERB_PORT=8080
+REVERB_SCHEME=http
+VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+VITE_REVERB_HOST="${REVERB_HOST}"
+VITE_REVERB_PORT="${REVERB_PORT}"
+VITE_REVERB_SCHEME="${REVERB_SCHEME}"
 ```
 
 ### DOKU Payment (Sandbox vs Production)
