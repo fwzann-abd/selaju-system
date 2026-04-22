@@ -128,11 +128,11 @@ System menggunakan Laravel Reverb untuk real-time notifications:
 
 ### Entity Relationship Diagram (ERD)
 
-![ERD](erd.png)
+![ERD](docs/erd.png)
 
 ### UML Diagram
 
-![UML](uml.png)
+![UML](docs/uml.png)
 
 ## 🛠 Tech Stack
 
@@ -153,6 +153,12 @@ System menggunakan Laravel Reverb untuk real-time notifications:
 - **Version Control**: Git
 - **API Pattern**: RESTful API dengan resource controllers
 - **Error Handling**: Global exception handler dengan custom responses
+
+## 📖 Dokumentasi Lengkap
+
+Dokumentasi lengkap aplikasi (arsitektur, semua modul, API reference, database schema, testing, deployment) tersedia di:
+
+➡️ **[`docs/DOKUMENTASI_APLIKASI.md`](docs/DOKUMENTASI_APLIKASI.md)**
 
 ---
 **Status**: ✅ Active Development | Laravel 12 | PHP 8.2+
