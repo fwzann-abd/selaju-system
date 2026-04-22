@@ -10,46 +10,77 @@ use Illuminate\Http\Request;
 class TeacherController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of teachers with LMS context.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $teachers = Teacher::orderBy('name')->get(['id', 'name']);
+        $query = Teacher::with(['school:id,name', 'account:uuid,email', 'classrooms:id,name'])
+            ->select('id', 'account_id', 'school_id', 'nip', 'name');
+
+        if ($request->has('search')) {
+            $search = strtolower($request->query('search'));
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(nip) LIKE ?', ["%{$search}%"]);
+            });
+        }
+
+        $teachers = $query->orderBy('name')->get();
 
         return response()->json([
-            'data' => $teachers,
+            'data' => $teachers->map(function (Teacher $teacher) {
+                return [
+                    'id' => $teacher->id,
+                    'name' => $teacher->name,
+                    'nip' => $teacher->nip,
+                    'school' => $teacher->school->name ?? '-',
+                    'email' => $teacher->account->email ?? '-',
+                    'classrooms' => $teacher->classrooms->pluck('name')->join(', ') ?: '-',
+                ];
+            }),
         ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Display the specified teacher.
      */
-    public function store(Request $request)
+    public function show(Teacher $teacher): JsonResponse
     {
-        return response()->json(['message' => 'Not implemented'], 501);
+        $teacher->load(['school:id,name', 'account:uuid,email', 'classrooms:id,name', 'schedules']);
+
+        return response()->json([
+            'data' => [
+                'id' => $teacher->id,
+                'name' => $teacher->name,
+                'nip' => $teacher->nip,
+                'school' => $teacher->school->name ?? '-',
+                'email' => $teacher->account->email ?? '-',
+                'classrooms' => $teacher->classrooms->pluck('name')->toArray(),
+            ],
+        ]);
     }
 
     /**
-     * Display the specified resource.
+     * Store a newly created teacher.
      */
-    public function show(string $id)
+    public function store(Request $request): JsonResponse
     {
-        return response()->json(['message' => 'Not implemented'], 501);
+        return response()->json(['message' => 'Use admin/teachers for creating teachers'], 501);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified teacher.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): JsonResponse
     {
-        return response()->json(['message' => 'Not implemented'], 501);
+        return response()->json(['message' => 'Use admin/teachers for updating teachers'], 501);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified teacher.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
-        return response()->json(['message' => 'Not implemented'], 501);
+        return response()->json(['message' => 'Use admin/teachers for deleting teachers'], 501);
     }
 }

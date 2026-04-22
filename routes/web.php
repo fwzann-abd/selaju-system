@@ -1,12 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\ClassroomController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EplinOfficerController;
 use App\Http\Controllers\Admin\EplinViolatorController;
 use App\Http\Controllers\Admin\GenerationController;
+use App\Http\Controllers\Admin\Lms\ClassroomController as LmsClassroomController;
 use App\Http\Controllers\Admin\Lms\ScheduleController as LmsScheduleController;
+use App\Http\Controllers\Admin\Lms\StudentController as LmsStudentController;
+use App\Http\Controllers\Admin\Lms\TeacherController as LmsTeacherController;
 use App\Http\Controllers\Admin\ManualTransferController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
@@ -22,6 +24,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\WebexEkskulController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -94,6 +97,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('lms')->name('lms.')->group(function () {
             Route::resource('schedules', LmsScheduleController::class)
                 ->only(['index', 'store', 'update', 'destroy']);
+            Route::get('classrooms', [LmsClassroomController::class, 'index'])->name('classrooms.index');
+            Route::get('teachers', [LmsTeacherController::class, 'index'])->name('teachers.index');
+            Route::get('students', [LmsStudentController::class, 'index'])->name('students.index');
         });
     });
 });

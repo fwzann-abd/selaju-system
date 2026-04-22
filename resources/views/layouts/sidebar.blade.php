@@ -178,6 +178,21 @@
                     'href' => '/admin/lms/schedules',
                     'active' => ['admin.lms.schedules.*'],
                 ],
+                [
+                    'label' => 'Daftar Kelas',
+                    'href' => '/admin/lms/classrooms',
+                    'active' => ['admin.lms.classrooms.*'],
+                ],
+                [
+                    'label' => 'Data Guru',
+                    'href' => '/admin/lms/teachers',
+                    'active' => ['admin.lms.teachers.*'],
+                ],
+                [
+                    'label' => 'Data Siswa',
+                    'href' => '/admin/lms/students',
+                    'active' => ['admin.lms.students.*'],
+                ],
             ],
         ],
         [
