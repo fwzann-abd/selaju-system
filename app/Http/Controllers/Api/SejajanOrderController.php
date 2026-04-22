@@ -6,6 +6,7 @@ use App\Events\NewOrderReceived;
 use App\Events\OrderStatusUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
+use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Models\Sejajan;
 use App\Models\SejajanOrder;
 use App\Models\SejajanOrderItem;
@@ -15,7 +16,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class SejajanOrderController extends Controller
@@ -88,7 +88,7 @@ class SejajanOrderController extends Controller
     /**
      * Update order status.
      */
-    public function updateStatus(Request $request, string $sejajanSlug, string $orderId): JsonResponse
+    public function updateStatus(UpdateOrderStatusRequest $request, string $sejajanSlug, string $orderId): JsonResponse
     {
         $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
 
@@ -101,9 +101,7 @@ class SejajanOrderController extends Controller
             ->where('id', $orderId)
             ->firstOrFail();
 
-        $validated = $request->validate([
-            'status' => ['required', Rule::in(['pending', 'processing', 'ready', 'completed', 'cancelled'])],
-        ]);
+        $validated = $request->validated();
 
         $order->update(['status' => $validated['status']]);
 

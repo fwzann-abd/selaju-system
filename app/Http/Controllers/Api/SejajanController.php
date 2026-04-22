@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSejajanRequest;
+use App\Http\Requests\UpdateSejajanRequest;
 use App\Models\Sejajan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class SejajanController extends Controller
@@ -77,26 +78,10 @@ class SejajanController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreSejajanRequest $request)
     {
-        $user = $request->user();
-        if (! $user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
-        }
+        $data = $request->validated();
 
-        $v = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:sejajans,slug',
-            'description' => 'nullable|string',
-            'photo' => 'nullable|image|max:2048', // accept uploaded image
-            'is_active' => 'nullable|boolean',
-        ]);
-
-        if ($v->fails()) {
-            return response()->json(['errors' => $v->errors()], 422);
-        }
-
-        $data = $v->validated();
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
             // ensure unique
@@ -107,7 +92,7 @@ class SejajanController extends Controller
             }
         }
 
-        $data['account_id'] = $user->getKey();
+        $data['account_id'] = $request->user()->getKey();
 
         // Handle uploaded photo if present
         if ($request->hasFile('photo')) {
@@ -137,29 +122,9 @@ class SejajanController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, Sejajan $sejajan)
+    public function update(UpdateSejajanRequest $request, Sejajan $sejajan)
     {
-        $user = $request->user();
-        if (! $user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
-        }
-        if ($sejajan->account_id !== $user->getKey()) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
-        $v = Validator::make($request->all(), [
-            'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|nullable|string|max:255|unique:sejajans,slug,'.$sejajan->id.',id',
-            'description' => 'nullable|string',
-            'photo' => 'nullable|image|max:2048',
-            'is_active' => 'nullable|boolean',
-        ]);
-
-        if ($v->fails()) {
-            return response()->json(['errors' => $v->errors()], 422);
-        }
-
-        $data = $v->validated();
+        $data = $request->validated();
 
         // Handle uploaded photo if present
         if ($request->hasFile('photo')) {

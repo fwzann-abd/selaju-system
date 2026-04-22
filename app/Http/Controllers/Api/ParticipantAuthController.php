@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginParticipantRequest;
 use App\Models\Participant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,12 +15,9 @@ class ParticipantAuthController extends Controller
     /**
      * API login for SPA clients.
      */
-    public function login(Request $request): JsonResponse
+    public function login(LoginParticipantRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $validated = $request->validated();
 
         $user = Participant::where('email', $validated['email'])->first();
         if (! $user || ! Hash::check($validated['password'], $user->password)) {
