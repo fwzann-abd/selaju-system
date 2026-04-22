@@ -367,7 +367,7 @@ class PerpossagarBookController extends Controller
         $language = PerpossagarBookLanguage::where('uuid', $validated['language_id'])->firstOrFail();
 
         $author = PerpossagarAuthor::firstOrCreate(
-            ['participant_id' => $user->getKey()],
+            ['account_id' => $user->getKey()],
             ['uuid' => (string) Str::uuid(), 'author_at' => now()]
         );
 

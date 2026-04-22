@@ -28,7 +28,7 @@ class SejajanOrderController extends Controller
         $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
 
         // Verify ownership
-        if ($sejajan->participant_id !== $request->user()->getKey()) {
+        if ($sejajan->account_id !== $request->user()->getKey()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -45,7 +45,7 @@ class SejajanOrderController extends Controller
      */
     public function myOrders(Request $request): JsonResponse
     {
-        $orders = SejajanOrder::where('participant_id', $request->user()->getKey())
+        $orders = SejajanOrder::where('account_id', $request->user()->getKey())
             ->with(['items.product', 'sejajan'])
             ->latest()
             ->get();
@@ -93,7 +93,7 @@ class SejajanOrderController extends Controller
         $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
 
         // Verify ownership
-        if ($sejajan->participant_id !== $request->user()->getKey()) {
+        if ($sejajan->account_id !== $request->user()->getKey()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -162,7 +162,7 @@ class SejajanOrderController extends Controller
     {
         return SejajanOrder::create([
             'sejajan_id' => $sejajan->id,
-            'participant_id' => $user->getKey(),
+            'account_id' => $user->getKey(),
             'status' => 'pending',
             'total_price' => $total,
             'notes' => $data['note'] ?? null,
@@ -209,8 +209,8 @@ class SejajanOrderController extends Controller
 
         Log::info('Broadcasting new order', [
             'order_id' => $order->id,
-            'seller_channel' => 'orders.seller.'.$order->sejajan->participant_id,
-            'buyer_id' => $order->participant_id,
+            'seller_channel' => 'orders.seller.'.$order->sejajan->account_id,
+            'buyer_id' => $order->account_id,
         ]);
 
         broadcast(new NewOrderReceived($order));

@@ -32,7 +32,7 @@ class NewOrderReceived implements ShouldBroadcastNow
     {
         return [
             // Seller channel - notif untuk owner toko ada order baru
-            new PrivateChannel('orders.seller.'.$this->order->sejajan->participant_id),
+            new PrivateChannel('orders.seller.'.$this->order->sejajan->account_id),
         ];
     }
 

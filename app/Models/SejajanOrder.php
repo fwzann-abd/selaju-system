@@ -11,7 +11,7 @@ class SejajanOrder extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['sejajan_id', 'participant_id', 'status', 'total_price', 'notes', 'pickup_time', 'location_pickup'];
+    protected $fillable = ['sejajan_id', 'account_id', 'status', 'total_price', 'notes', 'pickup_time', 'location_pickup'];
 
     protected $casts = [
         'total_price' => 'decimal:2',
@@ -31,7 +31,7 @@ class SejajanOrder extends Model
      */
     public function account(): BelongsTo
     {
-        return $this->belongsTo(Account::class, 'participant_id', 'uuid');
+        return $this->belongsTo(Account::class, 'account_id', 'uuid');
     }
 
     /**

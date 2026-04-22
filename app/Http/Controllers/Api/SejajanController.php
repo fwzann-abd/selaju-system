@@ -44,7 +44,7 @@ class SejajanController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $stores = Sejajan::where('participant_id', $user->getKey())
+        $stores = Sejajan::where('account_id', $user->getKey())
             ->withCount('products')
             ->get();
 
@@ -107,7 +107,7 @@ class SejajanController extends Controller
             }
         }
 
-        $data['participant_id'] = $user->getKey();
+        $data['account_id'] = $user->getKey();
 
         // Handle uploaded photo if present
         if ($request->hasFile('photo')) {
@@ -143,7 +143,7 @@ class SejajanController extends Controller
         if (! $user) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
-        if ($sejajan->participant_id !== $user->getKey()) {
+        if ($sejajan->account_id !== $user->getKey()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -204,7 +204,7 @@ class SejajanController extends Controller
         if (! $user) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
-        if ($sejajan->participant_id !== $user->getKey()) {
+        if ($sejajan->account_id !== $user->getKey()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
