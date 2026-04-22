@@ -8,7 +8,7 @@
         <!-- Password -->
         <div class="space-y-1.5">
             <x-input-label for="password" value="Password" />
-            <x-text-input id="password" type="password" name="password" required autocomplete="current-password" placeholder="••••••••" />
+            <x-password-input id="password" name="password" required autocomplete="current-password" placeholder="••••••••" />
             <x-input-error :messages="$errors->get('password')" class="mt-1" />
         </div>
 

@@ -18,14 +18,14 @@
         <!-- Password -->
         <div class="space-y-1.5">
             <x-input-label for="password" value="Password Baru" />
-            <x-text-input id="password" type="password" name="password" required autocomplete="new-password" placeholder="••••••••" />
+            <x-password-input id="password" name="password" required autocomplete="new-password" placeholder="••••••••" />
             <x-input-error :messages="$errors->get('password')" class="mt-1" />
         </div>
 
         <!-- Confirm Password -->
         <div class="space-y-1.5">
             <x-input-label for="password_confirmation" value="Konfirmasi Password" />
-            <x-text-input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="••••••••" />
+            <x-password-input id="password_confirmation" name="password_confirmation" required autocomplete="new-password" placeholder="••••••••" />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1" />
         </div>
 

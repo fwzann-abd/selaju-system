@@ -35,9 +35,7 @@
     <nav class="fixed top-0 inset-x-0 z-50 glass">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <a href="/" class="flex items-center gap-3">
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#136dec] shadow-lg shadow-blue-500/25">
-                    <span class="text-lg font-bold text-white">S</span>
-                </div>
+                <x-application-logo class="h-10 w-auto" />
                 <span class="text-xl font-bold tracking-tight">Selaju<span class="text-[#38bdf8]">System</span></span>
             </a>
 
@@ -48,17 +46,31 @@
             </div>
 
             <div class="flex items-center gap-3">
+                <x-theme-toggle class="text-slate-300 hover:bg-white/10 hover:text-white" />
                 @auth
-                    <a href="{{ url('/admin') }}"
-                       class="rounded-xl bg-[#136dec] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:bg-[#1a7fff]">
-                        Dashboard
-                    </a>
+                    @if(auth()->user()->userGroup && auth()->user()->userGroup->name === 'Super Admin')
+                        <a href="{{ url('/admin') }}"
+                           class="rounded-xl bg-[#136dec] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:bg-[#1a7fff]">
+                            Dashboard
+                        </a>
+                    @else
+                        <span class="px-3 py-2 text-sm font-medium text-white">
+                            {{ auth()->user()->name }}
+                        </span>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit"
+                                    class="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white">
+                                Logout
+                            </button>
+                        </form>
+                    @endif
                 @else
                     <a href="{{ route('login') }}" class="px-4 py-2 text-sm text-slate-300 transition hover:text-white">Login</a>
                     @if (Route::has('register'))
                         <a href="{{ route('register') }}"
                            class="rounded-xl bg-[#136dec] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:bg-[#1a7fff]">
-                            Register
+                            Daftar
                         </a>
                     @endif
                 @endauth
@@ -226,9 +238,7 @@
     <footer class="border-t border-white/5 px-6 py-12">
         <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
             <div class="flex items-center gap-3">
-                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#136dec]">
-                    <span class="text-sm font-bold text-white">S</span>
-                </div>
+                <x-application-logo class="h-8 w-auto" />
                 <span class="text-sm font-semibold text-slate-400">Selaju System</span>
             </div>
             <p class="text-xs text-slate-500">&copy; {{ date('Y') }} Selaju System — Platform Digital Sekolah.</p>

@@ -29,7 +29,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect()->route('dashboard');
+        $user = Auth::user();
+        if ($user->userGroup && $user->userGroup->name === 'Super Admin') {
+            return redirect()->route('dashboard');
+        }
     }
 
     return view('welcome');

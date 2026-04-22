@@ -16,37 +16,35 @@
 
         <style>
             body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-            .auth-gradient { background: linear-gradient(135deg, #0f172a 0%, #0d1a3a 50%, #112a5c 100%); }
-            .glass-card { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
-            @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-            .fade-up { animation: fadeUp 0.5s ease both; }
         </style>
     </head>
-    <body class="auth-gradient min-h-screen text-white antialiased">
-        <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div class="max-w-md w-full space-y-8 fade-up">
+    <body class="min-h-screen bg-gray-50 antialiased dark:bg-gray-900">
+        <!-- Theme Toggle -->
+        <div class="fixed right-4 top-4 z-50">
+            <x-theme-toggle />
+        </div>
+
+        <div class="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+            <div class="w-full max-w-md space-y-8">
                 <div class="text-center">
-                    <a href="/" class="inline-flex items-center gap-3 group">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#136dec] shadow-lg shadow-blue-500/25 transition-transform group-hover:scale-105">
-                            <span class="text-lg font-bold text-white">S</span>
-                        </div>
-                        <span class="text-xl font-bold tracking-tight text-white">Selaju<span class="text-sky-400">System</span></span>
+                    <a href="/" class="inline-block">
+                        <x-application-logo class="mx-auto h-16 w-auto transition-transform duration-200 hover:scale-105" />
                     </a>
-                    <h2 class="mt-8 text-3xl font-bold text-white">
+                    <h2 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
                         {{ $heading ?? 'Selamat Datang' }}
                     </h2>
-                    <p class="mt-2 text-sm text-slate-400">
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         {{ $subheading ?? 'Silakan masuk ke akun Anda' }}
                     </p>
                 </div>
 
-                <div class="glass-card py-8 px-6 rounded-2xl shadow-xl shadow-black/20">
+                <div class="rounded-2xl border border-gray-200 bg-white px-6 py-8 shadow-xl dark:border-gray-700 dark:bg-gray-800">
                     {{ $slot }}
                 </div>
 
                 <div class="text-center">
-                    <p class="text-xs text-slate-500">
-                        &copy; {{ date('Y') }} Selaju System. Semua hak dilindungi.
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        &copy; {{ date('Y') }} Selaju. Semua hak dilindungi.
                     </p>
                 </div>
             </div>
