@@ -28,11 +28,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    if (Auth::check()) { // <--- Pakai A besar (Facade)
+    if (Auth::check()) {
         return redirect()->route('dashboard');
     }
 
-    return view('auth.login');
+    return view('welcome');
 });
 
 // Menu API Routes
