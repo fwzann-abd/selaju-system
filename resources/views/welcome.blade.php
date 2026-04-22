@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id" class="scroll-smooth" x-data x-bind:class="{ 'dark': $store.layout.theme === 'dark' }">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,12 +14,30 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
 
+    <script>
+        (function() {
+            const t = localStorage.getItem('theme');
+            if (t === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+
     <style>
         body { font-family: 'Lexend', system-ui, sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #0a0f1e 0%, #0d1a3a 40%, #112a5c 70%, #0d1a3a 100%); }
-        .gradient-text { background: linear-gradient(135deg, #136dec, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.07); }
-        .glow-blue { box-shadow: 0 0 80px rgba(19,109,236,0.12); }
+
+        /* Light mode gradients */
+        .hero-bg { background: linear-gradient(135deg, #f0f4ff 0%, #e0ecff 40%, #dbeafe 70%, #eff6ff 100%); }
+        .dark .hero-bg { background: linear-gradient(135deg, #0a0f1e 0%, #0d1a3a 40%, #112a5c 70%, #0d1a3a 100%); }
+
+        .gradient-text { background: linear-gradient(135deg, #136dec, #2563eb, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .dark .gradient-text { background: linear-gradient(135deg, #136dec, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+        /* Glass cards */
+        .glass-light { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(0,0,0,0.06); }
+        .dark .glass-light { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); }
+
+        .glow-blue { box-shadow: 0 0 60px rgba(19,109,236,0.08); }
+        .dark .glow-blue { box-shadow: 0 0 80px rgba(19,109,236,0.12); }
+
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
         @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
         .float { animation: float 6s ease-in-out infinite; }
@@ -29,24 +47,24 @@
         .delay-3 { animation-delay: .45s; }
     </style>
 </head>
-<body class="gradient-bg text-white antialiased">
+<body class="hero-bg text-slate-800 antialiased transition-colors duration-300 dark:text-white">
 
     {{-- ═══════════════════ NAVBAR ═══════════════════ --}}
-    <nav class="fixed top-0 inset-x-0 z-50 glass">
+    <nav class="fixed inset-x-0 top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-white/[0.04]">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <a href="/" class="flex items-center gap-3">
                 <x-application-logo class="h-10 w-auto" />
-                <span class="text-xl font-bold tracking-tight">Selaju<span class="text-[#38bdf8]">System</span></span>
+                <span class="text-xl font-bold tracking-tight text-slate-800 dark:text-white">Selaju<span class="text-[#136dec] dark:text-[#38bdf8]">System</span></span>
             </a>
 
             <div class="hidden items-center gap-8 md:flex">
-                <a href="#features" class="text-sm text-slate-300 transition hover:text-white">Fitur</a>
-                <a href="#modules" class="text-sm text-slate-300 transition hover:text-white">Modul</a>
-                <a href="#tech" class="text-sm text-slate-300 transition hover:text-white">Teknologi</a>
+                <a href="#features" class="text-sm text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">Fitur</a>
+                <a href="#modules" class="text-sm text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">Modul</a>
+                <a href="#tech" class="text-sm text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">Teknologi</a>
             </div>
 
             <div class="flex items-center gap-3">
-                <x-theme-toggle class="text-slate-300 hover:bg-white/10 hover:text-white" />
+                <x-theme-toggle class="text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white" />
                 @auth
                     @if(auth()->user()->userGroup && auth()->user()->userGroup->name === 'Super Admin')
                         <a href="{{ url('/admin') }}"
@@ -54,19 +72,19 @@
                             Dashboard
                         </a>
                     @else
-                        <span class="px-3 py-2 text-sm font-medium text-white">
+                        <span class="px-3 py-2 text-sm font-medium text-slate-700 dark:text-white">
                             {{ auth()->user()->name }}
                         </span>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
                             <button type="submit"
-                                    class="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white">
+                                    class="rounded-xl border border-slate-300 px-4 py-2 text-sm text-slate-600 transition hover:bg-slate-100 dark:border-white/20 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white">
                                 Logout
                             </button>
                         </form>
                     @endif
                 @else
-                    <a href="{{ route('login') }}" class="px-4 py-2 text-sm text-slate-300 transition hover:text-white">Login</a>
+                    <a href="{{ route('login') }}" class="px-4 py-2 text-sm text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">Login</a>
                     @if (Route::has('register'))
                         <a href="{{ route('register') }}"
                            class="rounded-xl bg-[#136dec] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:bg-[#1a7fff]">
@@ -81,21 +99,21 @@
     {{-- ═══════════════════ HERO ═══════════════════ --}}
     <section class="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-20">
         {{-- Orbs --}}
-        <div class="pointer-events-none absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-[#136dec]/10 blur-3xl float"></div>
-        <div class="pointer-events-none absolute bottom-1/4 right-1/4 h-80 w-80 rounded-full bg-sky-400/8 blur-3xl float" style="animation-delay:3s"></div>
+        <div class="pointer-events-none absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-[#136dec]/8 blur-3xl float dark:bg-[#136dec]/10"></div>
+        <div class="pointer-events-none absolute bottom-1/4 right-1/4 h-80 w-80 rounded-full bg-sky-400/6 blur-3xl float dark:bg-sky-400/8" style="animation-delay:3s"></div>
 
         <div class="relative mx-auto max-w-5xl text-center fade-up">
-            <div class="mb-8 inline-flex items-center gap-2 rounded-full glass px-5 py-2.5 text-sm text-sky-300">
+            <div class="mb-8 inline-flex items-center gap-2 rounded-full glass-light px-5 py-2.5 text-sm text-[#136dec] dark:text-sky-300">
                 <i class="fa-solid fa-rocket"></i>
                 <span>Platform Digital Terintegrasi untuk Sekolah</span>
             </div>
 
-            <h1 class="mb-6 text-5xl font-extrabold leading-tight tracking-tight md:text-7xl">
+            <h1 class="mb-6 text-5xl font-extrabold leading-tight tracking-tight text-slate-900 md:text-7xl dark:text-white">
                 Ekosistem <span class="gradient-text">Digital</span><br>
                 untuk Pelajar Indonesia
             </h1>
 
-            <p class="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-400 md:text-xl">
+            <p class="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-500 md:text-xl dark:text-slate-400">
                 Selaju System menyatukan marketplace pelajar, perpustakaan digital, LMS, manajemen ekstrakurikuler, dan sistem pelanggaran dalam satu platform terpadu.
             </p>
 
@@ -112,7 +130,7 @@
                     </a>
                 @endauth
                 <a href="#features"
-                   class="rounded-2xl glass px-8 py-4 text-base font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white">
+                   class="rounded-2xl glass-light px-8 py-4 text-base font-semibold text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white">
                     Pelajari Lebih Lanjut
                 </a>
             </div>
@@ -123,8 +141,8 @@
     <section id="features" class="px-6 py-24">
         <div class="mx-auto max-w-7xl">
             <div class="mb-16 text-center fade-up">
-                <h2 class="mb-4 text-3xl font-bold md:text-4xl">Satu Platform, <span class="gradient-text">Banyak Solusi</span></h2>
-                <p class="mx-auto max-w-xl text-slate-400">Selaju System dirancang untuk mendigitalisasi seluruh aspek kegiatan sekolah secara terintegrasi.</p>
+                <h2 class="mb-4 text-3xl font-bold text-slate-900 md:text-4xl dark:text-white">Satu Platform, <span class="gradient-text">Banyak Solusi</span></h2>
+                <p class="mx-auto max-w-xl text-slate-500 dark:text-slate-400">Selaju System dirancang untuk mendigitalisasi seluruh aspek kegiatan sekolah secara terintegrasi.</p>
             </div>
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -137,13 +155,13 @@
                 @endphp
 
                 @foreach ($features as $i => $f)
-                    <div class="glass rounded-2xl p-8 transition hover:-translate-y-1 hover:border-[#136dec]/30 hover:bg-white/[0.06] fade-up delay-{{ $i + 1 }}">
+                    <div class="glass-light rounded-2xl p-8 transition hover:-translate-y-1 hover:shadow-lg dark:hover:border-[#136dec]/30 dark:hover:bg-white/[0.06] fade-up delay-{{ $i + 1 }}">
                         <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl shadow-lg"
                              style="background: linear-gradient(135deg, {{ $f['from'] }}, {{ $f['to'] }}); box-shadow: 0 8px 24px {{ $f['from'] }}33;">
                             <i class="fa-solid {{ $f['icon'] }} text-lg text-white"></i>
                         </div>
-                        <h3 class="mb-2 text-lg font-bold">{{ $f['title'] }}</h3>
-                        <p class="text-sm leading-relaxed text-slate-400">{{ $f['desc'] }}</p>
+                        <h3 class="mb-2 text-lg font-bold text-slate-800 dark:text-white">{{ $f['title'] }}</h3>
+                        <p class="text-sm leading-relaxed text-slate-500 dark:text-slate-400">{{ $f['desc'] }}</p>
                     </div>
                 @endforeach
             </div>
@@ -154,8 +172,8 @@
     <section id="modules" class="px-6 py-24">
         <div class="mx-auto max-w-7xl">
             <div class="mb-16 text-center fade-up">
-                <h2 class="mb-4 text-3xl font-bold md:text-4xl">8 Modul <span class="gradient-text">Terintegrasi</span></h2>
-                <p class="mx-auto max-w-xl text-slate-400">Setiap modul dirancang untuk saling terhubung dan memberikan pengalaman digital yang menyeluruh.</p>
+                <h2 class="mb-4 text-3xl font-bold text-slate-900 md:text-4xl dark:text-white">8 Modul <span class="gradient-text">Terintegrasi</span></h2>
+                <p class="mx-auto max-w-xl text-slate-500 dark:text-slate-400">Setiap modul dirancang untuk saling terhubung dan memberikan pengalaman digital yang menyeluruh.</p>
             </div>
 
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -173,13 +191,13 @@
                 @endphp
 
                 @foreach ($modules as $m)
-                    <div class="group glass cursor-default rounded-2xl p-6 transition hover:-translate-y-1 hover:border-[#136dec]/20 hover:bg-white/[0.06]">
+                    <div class="group glass-light cursor-default rounded-2xl p-6 transition hover:-translate-y-1 hover:shadow-lg dark:hover:border-[#136dec]/20 dark:hover:bg-white/[0.06]">
                         <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl shadow-lg transition-transform group-hover:scale-110"
                              style="background: linear-gradient(135deg, {{ $m['from'] }}, {{ $m['to'] }});">
                             <i class="fa-solid {{ $m['icon'] }} text-white"></i>
                         </div>
-                        <h3 class="mb-1 text-base font-bold">{{ $m['name'] }}</h3>
-                        <p class="text-xs leading-relaxed text-slate-400">{{ $m['desc'] }}</p>
+                        <h3 class="mb-1 text-base font-bold text-slate-800 dark:text-white">{{ $m['name'] }}</h3>
+                        <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">{{ $m['desc'] }}</p>
                     </div>
                 @endforeach
             </div>
@@ -190,7 +208,7 @@
     <section id="tech" class="px-6 py-24">
         <div class="mx-auto max-w-5xl">
             <div class="mb-12 text-center fade-up">
-                <h2 class="mb-4 text-3xl font-bold md:text-4xl">Dibangun dengan <span class="gradient-text">Teknologi Modern</span></h2>
+                <h2 class="mb-4 text-3xl font-bold text-slate-900 md:text-4xl dark:text-white">Dibangun dengan <span class="gradient-text">Teknologi Modern</span></h2>
             </div>
 
             <div class="grid grid-cols-2 gap-5 md:grid-cols-4">
@@ -204,9 +222,9 @@
                 @endphp
 
                 @foreach ($stats as $s)
-                    <div class="glow-blue rounded-2xl p-6 text-center glass">
+                    <div class="glow-blue glass-light rounded-2xl p-6 text-center">
                         <div class="mb-1 text-3xl font-extrabold" style="color: {{ $s['color'] }}">{{ $s['value'] }}</div>
-                        <div class="text-xs uppercase tracking-wider text-slate-400">{{ $s['label'] }}</div>
+                        <div class="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ $s['label'] }}</div>
                     </div>
                 @endforeach
             </div>
@@ -216,9 +234,9 @@
     {{-- ═══════════════════ CTA ═══════════════════ --}}
     <section class="px-6 py-24">
         <div class="mx-auto max-w-4xl">
-            <div class="glow-blue glass rounded-3xl px-8 py-16 text-center md:px-16">
-                <h2 class="mb-4 text-3xl font-bold md:text-4xl">Siap <span class="gradient-text">Transformasi Digital</span> Sekolah Anda?</h2>
-                <p class="mx-auto mb-8 max-w-lg text-slate-400">Bergabunglah dengan ekosistem Selaju System dan wujudkan sekolah digital yang terintegrasi.</p>
+            <div class="glow-blue glass-light rounded-3xl px-8 py-16 text-center md:px-16">
+                <h2 class="mb-4 text-3xl font-bold text-slate-900 md:text-4xl dark:text-white">Siap <span class="gradient-text">Transformasi Digital</span> Sekolah Anda?</h2>
+                <p class="mx-auto mb-8 max-w-lg text-slate-500 dark:text-slate-400">Bergabunglah dengan ekosistem Selaju System dan wujudkan sekolah digital yang terintegrasi.</p>
                 @guest
                     <a href="{{ route('register') }}"
                        class="inline-flex items-center gap-2 rounded-2xl bg-[#136dec] px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/30 transition hover:bg-[#1a7fff]">
@@ -235,14 +253,14 @@
     </section>
 
     {{-- ═══════════════════ FOOTER ═══════════════════ --}}
-    <footer class="border-t border-white/5 px-6 py-12">
+    <footer class="border-t border-slate-200/60 px-6 py-12 dark:border-white/5">
         <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
             <div class="flex items-center gap-3">
                 <x-application-logo class="h-8 w-auto" />
-                <span class="text-sm font-semibold text-slate-400">Selaju System</span>
+                <span class="text-sm font-semibold text-slate-600 dark:text-slate-400">Selaju System</span>
             </div>
             <p class="text-xs text-slate-500">&copy; {{ date('Y') }} Selaju System — Platform Digital Sekolah.</p>
-            <a href="{{ url('/admin') }}" class="text-xs text-slate-500 transition hover:text-slate-300">Admin Panel</a>
+            <a href="{{ url('/admin') }}" class="text-xs text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-300">Admin Panel</a>
         </div>
     </footer>
 

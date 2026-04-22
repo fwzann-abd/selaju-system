@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data x-bind:class="{ 'dark': $store.layout.theme === 'dark' }">
 
 <head>
     <meta charset="utf-8">
@@ -24,6 +24,13 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <script>
+        (function() {
+            const t = localStorage.getItem('theme');
+            if (t === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
 </head>
 
 <body class="font-sans antialiased bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-200"
