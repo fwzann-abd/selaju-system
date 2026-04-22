@@ -1,5 +1,5 @@
 @props(['status'])
 
 @if ($status)
-    <span {{ $attributes->merge(['class' => 'inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400']) }}>{{ $status }}</span>
+    <span {{ $attributes->merge(['class' => 'inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/10 ring-inset dark:bg-green-400/10 dark:text-green-400 dark:ring-green-400/20']) }}>{{ $status }}</span>
 @endif

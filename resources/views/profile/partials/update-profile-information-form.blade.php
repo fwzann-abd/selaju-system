@@ -39,9 +39,8 @@
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
+                        <div x-data x-init="setTimeout(() => $dispatch('toast', { code: 200, message: 'Link verifikasi baru telah dikirim ke email Anda.', type: 'success' }), 150)" class="hidden"></div>
+                        <span class="mt-2 inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/10 ring-inset dark:bg-green-400/10 dark:text-green-400 dark:ring-green-400/20">Link verifikasi terkirim</span>
                     @endif
                 </div>
             @endif
@@ -51,13 +50,8 @@
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
             @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
-                >{{ __('Saved.') }}</p>
+                <div x-data x-init="setTimeout(() => $dispatch('toast', { code: 200, message: 'Profil berhasil diperbarui.', type: 'success' }), 150)" class="hidden"></div>
+                <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/10 ring-inset dark:bg-green-400/10 dark:text-green-400 dark:ring-green-400/20">Tersimpan</span>
             @endif
         </div>
     </form>

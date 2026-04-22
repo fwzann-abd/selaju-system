@@ -8,9 +8,8 @@
         </p>
 
         @if (session('status') == 'verification-link-sent')
-            <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-600 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400">
-                Link verifikasi baru telah dikirim ke alamat email yang Anda daftarkan.
-            </div>
+            <div x-data x-init="setTimeout(() => $dispatch('toast', { code: 200, message: 'Link verifikasi baru telah dikirim ke email Anda.', type: 'success' }), 150)" class="hidden"></div>
+            <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/10 ring-inset dark:bg-green-400/10 dark:text-green-400 dark:ring-green-400/20">Link verifikasi terkirim</span>
         @endif
 
         <div class="flex items-center justify-between gap-4">

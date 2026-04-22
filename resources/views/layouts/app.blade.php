@@ -230,6 +230,9 @@
         });
     </script>
 
+    {{-- Global Toast (Sonner-style) --}}
+    <x-toast />
+
     @stack('scripts')
 </body>
 

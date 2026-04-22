@@ -271,4 +271,28 @@ protected function isAccessible(User $user, ?string $path = null): bool
 | overflow-ellipsis | text-ellipsis |
 | decoration-slice | box-decoration-slice |
 | decoration-clone | box-decoration-clone |
+
+=== tailwindcss/ui-styling rules ===
+
+## Tailwind UI Component Styling (MANDATORY)
+
+- When a UI component has an official Tailwind UI counterpart at `https://tailwindcss.com/plus/ui-blocks/application-ui` or its sub-pages, you MUST use the exact styling classes from Tailwind UI. **No improvisation or custom styling** when an official component exists.
+- Reference: https://tailwindcss.com/plus/ui-blocks/application-ui
+- Before styling any component, check whether a matching Tailwind UI block exists for: badges, buttons, dropdowns, avatars, alerts, tables, forms, navbars, modals, etc.
+- If the component already has an existing style in the codebase, follow that existing style first. Only apply Tailwind UI styles for new components or when explicitly asked to refactor.
+
+### Badge Standard (Flat with border)
+The official Tailwind UI "Flat" badge pattern MUST be used for all badge components:
+
+```html
+<!-- Light mode -->
+<span class="inline-flex items-center rounded-md bg-{color}-50 px-2 py-1 text-xs font-medium text-{color}-700 ring-1 ring-{color}-600/10 ring-inset">Badge</span>
+
+<!-- Dark mode additions -->
+<span class="... dark:bg-{color}-400/10 dark:text-{color}-400 dark:ring-{color}-400/20">Badge</span>
+```
+
+Available color variants: gray, red, yellow, green, blue, indigo, purple, pink.
+
 </laravel-boost-guidelines>
+

@@ -57,6 +57,9 @@
             </div>
         </div>
 
+        {{-- Global Toast (Sonner-style) --}}
+        <x-toast />
+
         @stack('scripts')
     </body>
 </html>
