@@ -50,7 +50,12 @@ class StudentController extends Controller
      */
     public function create()
     {
+        $schools = School::select('id', 'name')->orderBy('name')->get();
+        $generations = Generation::where('is_active', true)->select('id', 'name')->orderBy('start_years', 'desc')->get();
+
         return view('admin.students.create', [
+            'schools' => $schools,
+            'generations' => $generations,
             'pageTitle' => 'Tambah Siswa',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => route('dashboard')],
