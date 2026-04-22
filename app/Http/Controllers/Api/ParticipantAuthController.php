@@ -120,7 +120,7 @@ class ParticipantAuthController extends Controller
         }
 
         $exists = Participant::where('username', $username)
-            ->where('id', '!=', $user->id)
+            ->where('uuid', '!=', $user->getKey())
             ->exists();
 
         return response()->json(['available' => ! $exists]);

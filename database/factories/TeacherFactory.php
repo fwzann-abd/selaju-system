@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Account;
+use App\Models\School;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -14,14 +15,12 @@ class TeacherFactory extends Factory
         $lastName = $this->faker->lastName();
         $name = "$firstName $lastName";
 
-        $account = Account::factory()->create([
-            'username' => 'guru_'.Str::slug($name),
-            'email' => 'guru.'.Str::slug($name).'@sekolah.com',
-        ]);
-
         return [
-            'account_id' => $account->uuid,
-            'school_id' => $this->faker->uuid(),
+            'account_id' => Account::factory()->state([
+                'username' => 'guru_'.Str::slug($name).rand(1, 999),
+                'email' => 'guru.'.Str::slug($name).rand(1, 999).'@sekolah.com',
+            ]),
+            'school_id' => School::factory(),
             'nip' => '19'.rand(70, 95).'0101'.rand(1000, 9999),
             'name' => $name,
         ];
