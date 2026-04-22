@@ -38,7 +38,7 @@ class FrontendVerifyEmail extends BaseVerifyEmail
             ]
         );
 
-        $frontend = env('FRONTEND_URL', 'http://localhost:3000');
+        $frontend = config('app.frontend_url', 'http://localhost:3000');
 
         return rtrim($frontend, '/').'/verify-email?verify_url='.urlencode($signedUrl);
     }

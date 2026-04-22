@@ -11,7 +11,7 @@ class Sejajan extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['account_id', 'name', 'slug', 'description', 'photo', 'is_active'];
+    protected $fillable = ['participant_id', 'name', 'slug', 'description', 'photo', 'is_active'];
 
     protected $casts = [
         'is_active' => 'boolean',
@@ -22,7 +22,7 @@ class Sejajan extends Model
      */
     public function account(): BelongsTo
     {
-        return $this->belongsTo(Account::class, 'account_id', 'uuid');
+        return $this->belongsTo(Account::class, 'participant_id', 'uuid');
     }
 
     /**

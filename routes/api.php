@@ -48,7 +48,7 @@ Route::middleware(['auth:sanctum', 'role:student'])->prefix('lms/student')->grou
     Route::get('attendances', [\App\Http\Controllers\Api\Student\StudentAttendanceController::class, 'index']);
 });
 
-Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(function () {
+Route::middleware(['api'])->group(function () {
     // Public routes
     // API login for SPA clients
     Route::post('/login', function (Request $request) {
@@ -63,7 +63,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         }
 
         // Optionally check is_active
-        if (property_exists($user, 'is_active') && ! $user->is_active) {
+        if ($user->is_active === false) {
             return response()->json(['message' => 'Account is disabled'], 403);
         }
 
@@ -82,7 +82,7 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
                 'name' => $user->name,
                 'email' => $user->email,
                 'username' => $user->username,
-                'email_verified_at                                                                                      ' => $user->email_verified_at,
+                'email_verified_at' => $user->email_verified_at,
             ],
         ]);
     });
@@ -324,7 +324,6 @@ Route::middleware(['api', \App\Http\Middleware\HandleCors::class])->group(functi
         Route::get('/sejajans/my-orders', [SejajanOrderController::class, 'myOrders']);
         Route::get('/sejajans/{sejajanSlug}/orders', [SejajanOrderController::class, 'index']);
         Route::put('/sejajans/{sejajanSlug}/orders/{orderId}/status', [SejajanOrderController::class, 'updateStatus']);
-        Route::put('/sejajans/{sejajanSlug}/orders/{orderId}', [SejajanOrderController::class, 'update']);
 
         Route::get('/sejajans/cart', [SejajanCartController::class, 'index']);
         Route::post('/sejajans/cart', [SejajanCartController::class, 'store']);

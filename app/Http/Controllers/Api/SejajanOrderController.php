@@ -215,35 +215,4 @@ class SejajanOrderController extends Controller
 
         broadcast(new NewOrderReceived($order));
     }
-
-    /**
-     * Update entire order (legacy method, kept for backward compatibility).
-     */
-    public function update(Request $request, string $sejajanSlug, string $orderId): JsonResponse
-    {
-        $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
-
-        // Verify ownership
-        if ($sejajan->participant_id !== $request->user()->getKey()) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
-        $order = SejajanOrder::where('sejajan_id', $sejajan->id)
-            ->where('id', $orderId)
-            ->firstOrFail();
-
-        $validated = $request->validate([
-            'status' => ['required', Rule::in(['pending', 'processing', 'ready', 'completed', 'cancelled'])],
-        ]);
-
-        $order->update(['status' => $validated['status']]);
-
-        // Broadcast status update
-        broadcast(new OrderStatusUpdated($order->load(['items.product', 'participant', 'sejajan'])));
-
-        return response()->json([
-            'message' => 'Status pesanan berhasil diperbarui',
-            'data' => $order,
-        ]);
-    }
 }
