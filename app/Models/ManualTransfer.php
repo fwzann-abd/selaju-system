@@ -41,12 +41,12 @@ class ManualTransfer extends Model
         ];
     }
 
-    public function donation()
+    public function donation(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Donation::class);
     }
 
-    public function verifier()
+    public function verifier(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
     }

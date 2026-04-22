@@ -64,12 +64,12 @@ class Account extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Sejajan::class, 'account_id', 'uuid');
     }
 
-    public function student()
+    public function student(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Student::class, 'account_id', 'uuid');
     }
 
-    public function teacher()
+    public function teacher(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Teacher::class, 'account_id', 'uuid');
     }
@@ -77,7 +77,7 @@ class Account extends Authenticatable implements MustVerifyEmail
     /**
      * Shortcut to access the student's school from the account.
      */
-    public function school()
+    public function school(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
     {
         return $this->hasOneThrough(
             School::class,
@@ -100,7 +100,7 @@ class Account extends Authenticatable implements MustVerifyEmail
     /**
      * Mark the given user's email as verified.
      */
-    public function markEmailAsVerified()
+    public function markEmailAsVerified(): bool
     {
         if ($this->hasVerifiedEmail()) {
             return false;
@@ -115,7 +115,7 @@ class Account extends Authenticatable implements MustVerifyEmail
     /**
      * Send the email verification notification.
      */
-    public function sendEmailVerificationNotification()
+    public function sendEmailVerificationNotification(): void
     {
         // Use a frontend-friendly verification notification that points to the
         // SPA and includes the signed backend verify URL as a query parameter.
@@ -125,7 +125,7 @@ class Account extends Authenticatable implements MustVerifyEmail
     /**
      * Get the e-mail address where verification links are sent.
      */
-    public function getEmailForVerification()
+    public function getEmailForVerification(): string
     {
         return $this->email;
     }

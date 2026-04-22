@@ -63,7 +63,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function userGroup()
+    public function userGroup(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(UserGroup::class);
     }
