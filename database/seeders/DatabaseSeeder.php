@@ -26,5 +26,7 @@ class DatabaseSeeder extends Seeder
         // LMS Specific Seeder
         $this->call(LmsSeeder::class);
         $this->call(ScheduleSeeder::class);
+        $this->call(SchoolSeeder::class);
+        $this->call(CourseMaterialSeeder::class);
     }
 }

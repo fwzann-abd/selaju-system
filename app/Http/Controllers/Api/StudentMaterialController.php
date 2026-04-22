@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api\Student;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CourseMaterialResource;
 use App\Models\CourseMaterial;
 use App\Models\Student;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -15,7 +14,7 @@ class StudentMaterialController extends Controller
     /**
      * Display a listing of materials for the student's classrooms.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): object
     {
         $user = $request->user();
         $student = Student::where('account_id', $user->id)->firstOrFail();
@@ -29,16 +28,16 @@ class StudentMaterialController extends Controller
             ->latest()
             ->paginate(20);
 
-        return response()->json([
-            'data' => CourseMaterialResource::collection($materials),
-            'meta' => $materials->toArray()['meta'] ?? null,
-        ]);
+        return response()->paginate(
+            CourseMaterialResource::collection($materials),
+            'Materials retrieved successfully'
+        );
     }
 
     /**
      * Display the specified material.
      */
-    public function show(Request $request, CourseMaterial $material): JsonResponse
+    public function show(CourseMaterial $material, Request $request): object
     {
         $user = $request->user();
         $student = Student::where('account_id', $user->id)->firstOrFail();
@@ -49,18 +48,21 @@ class StudentMaterialController extends Controller
             ->exists();
 
         if (! $isInClassroom || ! $material->is_published) {
-            return response()->json(['error' => 'Material not found or access denied'], 404);
+            return response()->error('Material not found or access denied', 404);
         }
 
         $material->load(['teacher', 'classroom', 'schedule']);
 
-        return response()->json(new CourseMaterialResource($material));
+        return response()->success(
+            new CourseMaterialResource($material),
+            'Material retrieved successfully'
+        );
     }
 
     /**
      * Download the specified material.
      */
-    public function download(Request $request, CourseMaterial $material)
+    public function download(CourseMaterial $material, Request $request)
     {
         $user = $request->user();
         $student = Student::where('account_id', $user->id)->firstOrFail();
@@ -71,11 +73,11 @@ class StudentMaterialController extends Controller
             ->exists();
 
         if (! $isInClassroom || ! $material->is_published) {
-            return response()->json(['error' => 'Material not found or access denied'], 404);
+            return response()->error('Material not found or access denied', 404);
         }
 
         if (! Storage::disk('public')->exists($material->file_path)) {
-            return response()->json(['error' => 'File not found'], 404);
+            return response()->error('File not found', 404);
         }
 
         return Storage::disk('public')->download(
@@ -87,7 +89,7 @@ class StudentMaterialController extends Controller
     /**
      * Get materials filtered by classroom.
      */
-    public function byClassroom(Request $request, $classroomId): JsonResponse
+    public function byClassroom(Request $request, $classroomId): object
     {
         $user = $request->user();
         $student = Student::where('account_id', $user->id)->firstOrFail();
@@ -98,7 +100,7 @@ class StudentMaterialController extends Controller
             ->exists();
 
         if (! $isInClassroom) {
-            return response()->json(['error' => 'Access denied'], 403);
+            return response()->error('Access denied', 403);
         }
 
         $materials = CourseMaterial::where('classroom_id', $classroomId)
@@ -107,9 +109,9 @@ class StudentMaterialController extends Controller
             ->latest()
             ->paginate(15);
 
-        return response()->json([
-            'data' => CourseMaterialResource::collection($materials),
-            'meta' => $materials->toArray()['meta'] ?? null,
-        ]);
+        return response()->paginate(
+            CourseMaterialResource::collection($materials),
+            'Materials retrieved successfully'
+        );
     }
 }

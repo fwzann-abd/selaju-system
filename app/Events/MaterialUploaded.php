@@ -2,8 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Material;
-use Illuminate\Broadcasting\Channel;
+use App\Models\CourseMaterial;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
@@ -19,11 +18,11 @@ class MaterialUploaded implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(Material $material)
+    public function __construct(CourseMaterial $material)
     {
         $this->material = $material;
-        // Ensure schedule and subject are loaded for broadcast data
-        $this->material->loadMissing('schedule.subject', 'schedule.classroom');
+        // Ensure classroom is loaded
+        $this->material->loadMissing('classroom');
     }
 
     /**
@@ -34,10 +33,10 @@ class MaterialUploaded implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('classroom.' . $this->material->schedule->classroom_id),
+            new PrivateChannel('classroom.'.$this->material->classroom_id),
         ];
     }
-    
+
     /**
      * Get the data to broadcast.
      *
@@ -47,9 +46,9 @@ class MaterialUploaded implements ShouldBroadcastNow
     {
         return [
             'title' => $this->material->title,
-            'subject_name' => collect($this->material->schedule->subject)->get('name', 'Mata Pelajaran'),
-            'file_link' => $this->material->file_path ? asset('storage/' . $this->material->file_path) : null,
-            'classroom_name' => collect($this->material->schedule->classroom)->get('name', 'Kelas'),
+            'file_link' => $this->material->file_path ? asset('storage/'.$this->material->file_path) : null,
+            'classroom_name' => $this->material->classroom->name,
+            'teacher_name' => $this->material->teacher->name,
         ];
     }
 }

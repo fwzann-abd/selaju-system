@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('schools', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('account_id');
             $table->string('slug')->unique();
             $table->string('name');
             $table->timestamps();

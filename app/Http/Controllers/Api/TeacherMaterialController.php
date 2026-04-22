@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Teacher;
+namespace App\Http\Controllers\Api;
 
 use App\Events\MaterialUploaded;
 use App\Http\Controllers\Controller;
@@ -8,7 +8,6 @@ use App\Http\Requests\StoreCourseMaterialRequest;
 use App\Http\Resources\CourseMaterialResource;
 use App\Models\CourseMaterial;
 use App\Models\Teacher;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,7 +16,7 @@ class TeacherMaterialController extends Controller
     /**
      * Display a listing of materials for the authenticated teacher.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): object
     {
         $user = $request->user();
         $teacher = Teacher::where('account_id', $user->id)->firstOrFail();
@@ -27,16 +26,16 @@ class TeacherMaterialController extends Controller
             ->latest()
             ->paginate(15);
 
-        return response()->json([
-            'data' => CourseMaterialResource::collection($materials),
-            'meta' => $materials->toArray()['meta'] ?? null,
-        ]);
+        return response()->paginate(
+            CourseMaterialResource::collection($materials),
+            'Materials retrieved successfully'
+        );
     }
 
     /**
      * Store a newly created material in storage.
      */
-    public function store(StoreCourseMaterialRequest $request): JsonResponse
+    public function store(StoreCourseMaterialRequest $request): object
     {
         $user = $request->user();
         $teacher = Teacher::where('account_id', $user->id)->firstOrFail();
@@ -64,42 +63,46 @@ class TeacherMaterialController extends Controller
             // Broadcast event to notify students in real-time
             MaterialUploaded::dispatch($material);
 
-            return response()->json(
+            return response()->success(
                 new CourseMaterialResource($material),
+                'Material uploaded successfully',
                 201
             );
         }
 
-        return response()->json(['error' => 'File upload failed'], 400);
+        return response()->error('File upload failed', 400);
     }
 
     /**
      * Display the specified material.
      */
-    public function show(Request $request, CourseMaterial $material): JsonResponse
+    public function show(CourseMaterial $material): object
     {
-        $user = $request->user();
+        $user = request()->user();
         $teacher = Teacher::where('account_id', $user->id)->firstOrFail();
 
         if ($material->teacher_id !== $teacher->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->error('Unauthorized', 403);
         }
 
         $material->load(['teacher', 'classroom', 'schedule']);
 
-        return response()->json(new CourseMaterialResource($material));
+        return response()->success(
+            new CourseMaterialResource($material),
+            'Material retrieved successfully'
+        );
     }
 
     /**
      * Update the specified material in storage.
      */
-    public function update(StoreCourseMaterialRequest $request, CourseMaterial $material): JsonResponse
+    public function update(StoreCourseMaterialRequest $request, CourseMaterial $material): object
     {
         $user = $request->user();
         $teacher = Teacher::where('account_id', $user->id)->firstOrFail();
 
         if ($material->teacher_id !== $teacher->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->error('Unauthorized', 403);
         }
 
         // Handle file update
@@ -125,19 +128,22 @@ class TeacherMaterialController extends Controller
 
         $material->load(['teacher', 'classroom', 'schedule']);
 
-        return response()->json(new CourseMaterialResource($material));
+        return response()->success(
+            new CourseMaterialResource($material),
+            'Material updated successfully'
+        );
     }
 
     /**
      * Remove the specified material from storage.
      */
-    public function destroy(Request $request, CourseMaterial $material): JsonResponse
+    public function destroy(CourseMaterial $material): object
     {
-        $user = $request->user();
+        $user = request()->user();
         $teacher = Teacher::where('account_id', $user->id)->firstOrFail();
 
         if ($material->teacher_id !== $teacher->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->error('Unauthorized', 403);
         }
 
         // Delete file
@@ -147,6 +153,9 @@ class TeacherMaterialController extends Controller
 
         $material->delete();
 
-        return response()->json(null, 204);
+        return response()->success(
+            null,
+            'Material deleted successfully'
+        );
     }
 }

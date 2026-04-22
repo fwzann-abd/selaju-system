@@ -68,7 +68,18 @@ class LmsSeeder extends Seeder
         $school = \DB::table('schools')->first();
         $schoolId = $school ? $school->id : Str::uuid();
         if (! $school) {
-            \DB::table('schools')->insert(['id' => $schoolId, 'slug' => 'sekolah-dummy', 'name' => 'Sekolah Dummy']);
+            $schoolAccount = Account::create([
+                'username' => 'sekolah-dummy',
+                'email' => 'sekolah@dummy.com',
+                'password' => Hash::make('password123'),
+                'is_active' => true,
+            ]);
+            \DB::table('schools')->insert([
+                'id' => $schoolId,
+                'account_id' => $schoolAccount->uuid,
+                'slug' => 'sekolah-dummy',
+                'name' => 'Sekolah Dummy'
+            ]);
         }
 
         $gen = \DB::table('generations')->first();
