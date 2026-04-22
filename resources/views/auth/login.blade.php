@@ -19,7 +19,6 @@
                     </svg>
                 </div>
             </div>
-            <x-input-error :messages="$errors->get('email')" class="mt-1" />
         </div>
 
         <!-- Password -->
@@ -27,6 +26,7 @@
             <x-input-label for="password" value="Password" />
             <x-password-input id="password" name="password" required autocomplete="current-password" placeholder="Masukkan password Anda" />
             <x-input-error :messages="$errors->get('password')" class="mt-1" />
+            <x-input-error :messages="$errors->get('email')" class="mt-1" />
         </div>
 
         <!-- Remember Me & Forgot Password -->
