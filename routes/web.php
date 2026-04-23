@@ -99,6 +99,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('subjects', SubjectController::class);
         Route::resource('schedules', ScheduleController::class)->except('show');
         Route::post('schedules/check-conflict', [ScheduleController::class, 'checkConflict'])->name('schedules.check-conflict');
+        
+        // LMS Content & Attendance
+        Route::resource('attendances', \App\Http\Controllers\Admin\LmsAttendanceController::class);
     });
 });
 
