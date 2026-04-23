@@ -8,6 +8,39 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
+    /**
+     * Resolve the current user's role dynamically.
+     *
+     * - User model (admin dashboard) → resolve from userGroup relationship
+     * - Account model (API) → resolve from teacher/student relationships
+     *
+     * @return string|null The resolved role, or null if no role can be determined.
+     */
+    private function resolveRole(mixed $user): ?string
+    {
+        // User model — admin dashboard users with userGroup
+        if ($user instanceof \App\Models\User) {
+            $group = $user->userGroup;
+
+            return $group?->name ? strtolower($group->name) : null;
+        }
+
+        // Account model — API users (teacher, student, or plain account)
+        if ($user instanceof \App\Models\Account) {
+            if ($user->teacher()->exists()) {
+                return 'teacher';
+            }
+
+            if ($user->student()->exists()) {
+                return 'student';
+            }
+
+            return null;
+        }
+
+        return null;
+    }
+
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         $user = $request->user();
@@ -15,15 +48,9 @@ class RoleMiddleware
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        $currentRole = 'super_admin';
+        $currentRole = $this->resolveRole($user);
 
-        if (method_exists($user, 'teacher') && $user->teacher()->exists()) {
-            $currentRole = 'teacher';
-        } elseif (method_exists($user, 'student') && $user->student()->exists()) {
-            $currentRole = 'student';
-        }
-
-        if (! in_array($currentRole, $roles)) {
+        if (! $currentRole || ! in_array($currentRole, $roles)) {
             return response()->json(['message' => 'Forbidden - You do not have the required role.'], 403);
         }
 

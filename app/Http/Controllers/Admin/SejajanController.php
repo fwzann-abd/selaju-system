@@ -72,7 +72,7 @@ class SejajanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'participant_id' => 'required|exists:participants,uuid|unique:sejajans,participant_id',
+            'account_id' => 'required|exists:accounts,uuid|unique:sejajans,account_id',
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:sejajans,slug',
             'description' => 'nullable|string',
@@ -105,7 +105,7 @@ class SejajanController extends Controller
      */
     public function show(Sejajan $sejajan)
     {
-        $sejajan->load(['participant', 'products']);
+        $sejajan->load(['account', 'products']);
 
         return view('admin.sejajan.show', [
             'shop' => $sejajan,
@@ -128,7 +128,7 @@ class SejajanController extends Controller
         $participants = Participant::select('id', 'name', 'username', 'email')
             ->where(function ($query) use ($sejajan) {
                 $query->whereDoesntHave('sejajan')
-                    ->orWhere('id', $sejajan->participant_id);
+                    ->orWhere('id', $sejajan->account_id);
             })
             ->orderBy('name')
             ->get();
@@ -153,7 +153,7 @@ class SejajanController extends Controller
     public function update(Request $request, Sejajan $sejajan)
     {
         $validated = $request->validate([
-            'participant_id' => 'required|exists:participants,uuid|unique:sejajans,participant_id,'.$sejajan->id,
+            'account_id' => 'required|exists:accounts,uuid|unique:sejajans,account_id,'.$sejajan->id,
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:sejajans,slug,'.$sejajan->id,
             'description' => 'nullable|string',

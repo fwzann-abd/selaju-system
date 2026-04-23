@@ -20,7 +20,7 @@ class SejajanCartController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $items = SejajanCartItem::where('participant_id', $user->getKey())
+        $items = SejajanCartItem::where('account_id', $user->getKey())
             ->with(['product', 'sejajan'])
             ->get();
 
@@ -54,13 +54,13 @@ class SejajanCartController extends Controller
         }
 
         return DB::transaction(function () use ($user, $product, $data) {
-            $existingItems = SejajanCartItem::where('participant_id', $user->getKey())->get();
+            $existingItems = SejajanCartItem::where('account_id', $user->getKey())->get();
             if ($existingItems->isNotEmpty() && $existingItems->first()->sejajan_id !== $product->sejajan_id) {
-                SejajanCartItem::where('participant_id', $user->getKey())->delete();
+                SejajanCartItem::where('account_id', $user->getKey())->delete();
             }
 
             $item = SejajanCartItem::firstOrNew([
-                'participant_id' => $user->getKey(),
+                'account_id' => $user->getKey(),
                 'sejajan_product_id' => $product->getKey(),
             ]);
 
@@ -73,7 +73,7 @@ class SejajanCartController extends Controller
             $item->qty = max(1, $newQty);
             $item->save();
 
-            $items = SejajanCartItem::where('participant_id', $user->getKey())
+            $items = SejajanCartItem::where('account_id', $user->getKey())
                 ->with(['product', 'sejajan'])
                 ->get();
 
@@ -100,7 +100,7 @@ class SejajanCartController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $item = SejajanCartItem::where('participant_id', $user->getKey())
+        $item = SejajanCartItem::where('account_id', $user->getKey())
             ->where('id', $itemId)
             ->with('product')
             ->firstOrFail();
@@ -124,7 +124,7 @@ class SejajanCartController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $item = SejajanCartItem::where('participant_id', $user->getKey())
+        $item = SejajanCartItem::where('account_id', $user->getKey())
             ->where('id', $itemId)
             ->firstOrFail();
         $item->delete();
@@ -139,14 +139,14 @@ class SejajanCartController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        SejajanCartItem::where('participant_id', $user->getKey())->delete();
+        SejajanCartItem::where('account_id', $user->getKey())->delete();
 
         return response()->json(['data' => [], 'tokoId' => null]);
     }
 
     protected function respondCart($user)
     {
-        $items = SejajanCartItem::where('participant_id', $user->getKey())
+        $items = SejajanCartItem::where('account_id', $user->getKey())
             ->with(['product', 'sejajan'])
             ->get();
 

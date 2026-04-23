@@ -25,7 +25,7 @@ Alpine.store('layout', {
         if (storedTheme === 'dark' || storedTheme === 'light') {
             this.theme = storedTheme;
         } else {
-            this.theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            this.theme = 'light';
         }
 
         this.applyTheme();
@@ -108,7 +108,6 @@ Alpine.store('layout', {
 
 document.addEventListener('alpine:init', () => {
     const layoutStore = Alpine.store('layout');
-    layoutStore.init();
     window.addEventListener('resize', () => layoutStore.handleResize());
 
     Alpine.data('studentImportComponent', (config = {}) => ({

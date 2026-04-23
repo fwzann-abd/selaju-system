@@ -52,7 +52,7 @@ class Student extends Model
     /**
      * Get violations for this student
      */
-    public function violations()
+    public function violations(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(EplinViolation::class);
     }
@@ -68,7 +68,7 @@ class Student extends Model
     /**
      * Get the classrooms this student belongs to
      */
-    public function classrooms()
+    public function classrooms(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Classroom::class, 'classroom_students')
             ->withPivot('student_position_id')

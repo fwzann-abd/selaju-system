@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data x-bind:class="{ 'dark': $store.layout.theme === 'dark' }">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,37 +14,52 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+        <script>
+            (function() {
+                const t = localStorage.getItem('theme');
+                if (t === 'dark') document.documentElement.classList.add('dark');
+            })();
+        </script>
+
         <style>
-            body {
-                font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            }
+            body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         </style>
     </head>
-    <body class="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div class="max-w-md w-full space-y-8">
+    <body class="min-h-screen bg-gray-50 antialiased dark:bg-gray-900">
+        <!-- Theme Toggle -->
+        <div class="fixed right-4 top-4 z-50">
+            <x-theme-toggle />
+        </div>
+
+        <div class="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+            <div class="w-full max-w-md space-y-8">
                 <div class="text-center">
                     <a href="/" class="inline-block">
-                        <x-application-logo class="mx-auto h-16 w-auto hover:scale-105 transition-transform duration-200" />
+                        <x-application-logo class="mx-auto h-16 w-auto transition-transform duration-200 hover:scale-105" />
                     </a>
                     <h2 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
-                        Selamat Datang
+                        {{ $heading ?? 'Selamat Datang' }}
                     </h2>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Silakan masuk ke akun Anda
+                        {{ $subheading ?? 'Silakan masuk ke akun Anda' }}
                     </p>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-2xl border border-gray-200 dark:border-gray-700">
+                <div class="rounded-2xl border border-gray-200 bg-white px-6 py-8 shadow-xl dark:border-gray-700 dark:bg-gray-800">
                     {{ $slot }}
                 </div>
 
                 <div class="text-center">
                     <p class="text-xs text-gray-500 dark:text-gray-400">
-                        © {{ date('Y') }} Selaju. Semua hak dilindungi.
+                        &copy; {{ date('Y') }} Selaju. Semua hak dilindungi.
                     </p>
                 </div>
             </div>
         </div>
+
+        {{-- Global Toast (Sonner-style) --}}
+        <x-toast />
+
+        @stack('scripts')
     </body>
 </html>

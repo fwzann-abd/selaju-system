@@ -32,9 +32,9 @@ class OrderStatusUpdated implements ShouldBroadcastNow
     {
         return [
             // Buyer channel - untuk yang order
-            new PrivateChannel('orders.buyer.'.$this->order->participant_id),
+            new PrivateChannel('orders.buyer.'.$this->order->account_id),
             // Seller channel - untuk owner toko
-            new PrivateChannel('orders.seller.'.$this->order->sejajan->participant_id),
+            new PrivateChannel('orders.seller.'.$this->order->sejajan->account_id),
         ];
     }
 

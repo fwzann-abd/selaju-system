@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClassroomRequest;
 use App\Http\Requests\UpdateClassroomRequest;
 use App\Models\Classroom;
+use App\Models\Student;
+use App\Models\StudentPosition;
 use App\Models\Teacher;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -157,8 +159,22 @@ class ClassroomController extends Controller
 
     public function show(Classroom $classroom): View
     {
+        $classroom->load(['teacher:id,name', 'classroomStudents.student', 'classroomStudents.position']);
+
+        $assignedStudentIds = $classroom->classroomStudents->pluck('student_id')->toArray();
+
+        $availableStudents = Student::query()
+            ->whereNotIn('id', $assignedStudentIds)
+            ->orderBy('name')
+            ->select('id', 'name', 'student_number')
+            ->get();
+
+        $positions = StudentPosition::query()->orderBy('name')->get();
+
         return view('admin.classrooms.show', [
-            'classroom' => $classroom->load(['teacher:id,name', 'classroomStudents.student', 'classroomStudents.position']),
+            'classroom' => $classroom,
+            'availableStudents' => $availableStudents,
+            'positions' => $positions,
             'pageTitle' => 'Detail Kelas',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => route('dashboard')],
@@ -167,6 +183,35 @@ class ClassroomController extends Controller
                 ['label' => 'Detail', 'url' => null],
             ],
         ]);
+    }
+
+    public function bulkAssign(Request $request, Classroom $classroom): RedirectResponse
+    {
+        if ($request->has('_remove')) {
+            $request->validate(['student_id' => ['required', 'exists:students,id']]);
+            $classroom->students()->detach($request->input('student_id'));
+
+            return redirect()->route('admin.classrooms.show', $classroom)
+                ->with('success', 'Siswa berhasil dikeluarkan dari kelas.');
+        }
+
+        $validated = $request->validate([
+            'student_ids' => ['required', 'array', 'min:1'],
+            'student_ids.*' => ['required', 'exists:students,id'],
+            'position_id' => ['nullable', 'exists:student_positions,id'],
+        ]);
+
+        $pivotData = [];
+        foreach ($validated['student_ids'] as $studentId) {
+            $pivotData[$studentId] = [
+                'student_position_id' => $validated['position_id'] ?? null,
+            ];
+        }
+
+        $classroom->students()->syncWithoutDetaching($pivotData);
+
+        return redirect()->route('admin.classrooms.show', $classroom)
+            ->with('success', count($validated['student_ids']).' siswa berhasil ditambahkan ke kelas.');
     }
 
     public function destroy(Classroom $classroom): RedirectResponse

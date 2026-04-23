@@ -41,4 +41,12 @@ class SejajanOrder extends Model
     {
         return $this->hasMany(SejajanOrderItem::class);
     }
+
+    /**
+     * Alias for account — backward compatibility with controllers/events using 'participant'.
+     */
+    public function participant(): BelongsTo
+    {
+        return $this->account();
+    }
 }

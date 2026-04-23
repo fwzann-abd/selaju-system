@@ -45,12 +45,12 @@ class Donation extends Model
         ];
     }
 
-    public function account()
+    public function account(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Account::class);
     }
 
-    public function manualTransfer()
+    public function manualTransfer(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(ManualTransfer::class);
     }

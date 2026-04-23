@@ -6,6 +6,8 @@ use App\Events\NewOrderReceived;
 use App\Events\OrderStatusUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
+use App\Http\Requests\UpdateOrderRequest;
+use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Models\Sejajan;
 use App\Models\SejajanOrder;
 use App\Models\SejajanOrderItem;
@@ -15,7 +17,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class SejajanOrderController extends Controller
@@ -28,7 +29,7 @@ class SejajanOrderController extends Controller
         $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
 
         // Verify ownership
-        if ($sejajan->participant_id !== $request->user()->getKey()) {
+        if ($sejajan->account_id !== $request->user()->getKey()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -45,7 +46,7 @@ class SejajanOrderController extends Controller
      */
     public function myOrders(Request $request): JsonResponse
     {
-        $orders = SejajanOrder::where('participant_id', $request->user()->getKey())
+        $orders = SejajanOrder::where('account_id', $request->user()->getKey())
             ->with(['items.product', 'sejajan'])
             ->latest()
             ->get();
@@ -88,12 +89,12 @@ class SejajanOrderController extends Controller
     /**
      * Update order status.
      */
-    public function updateStatus(Request $request, string $sejajanSlug, string $orderId): JsonResponse
+    public function updateStatus(UpdateOrderStatusRequest $request, string $sejajanSlug, string $orderId): JsonResponse
     {
         $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
 
         // Verify ownership
-        if ($sejajan->participant_id !== $request->user()->getKey()) {
+        if ($sejajan->account_id !== $request->user()->getKey()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -101,9 +102,7 @@ class SejajanOrderController extends Controller
             ->where('id', $orderId)
             ->firstOrFail();
 
-        $validated = $request->validate([
-            'status' => ['required', Rule::in(['pending', 'processing', 'ready', 'completed', 'cancelled'])],
-        ]);
+        $validated = $request->validated();
 
         $order->update(['status' => $validated['status']]);
 
@@ -113,6 +112,30 @@ class SejajanOrderController extends Controller
         return response()->json([
             'message' => 'Status pesanan berhasil diperbarui',
             'data' => $order,
+        ]);
+    }
+
+    /**
+     * Update order details (notes, pickup time, location).
+     */
+    public function update(UpdateOrderRequest $request, string $sejajanSlug, string $orderId): JsonResponse
+    {
+        $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
+
+        // Verify ownership
+        if ($sejajan->account_id !== $request->user()->getKey()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $order = SejajanOrder::where('sejajan_id', $sejajan->id)
+            ->where('id', $orderId)
+            ->firstOrFail();
+
+        $order->update($request->validated());
+
+        return response()->json([
+            'message' => 'Pesanan berhasil diperbarui',
+            'data' => $order->load(['items.product', 'participant', 'sejajan']),
         ]);
     }
 
@@ -162,7 +185,7 @@ class SejajanOrderController extends Controller
     {
         return SejajanOrder::create([
             'sejajan_id' => $sejajan->id,
-            'participant_id' => $user->getKey(),
+            'account_id' => $user->getKey(),
             'status' => 'pending',
             'total_price' => $total,
             'notes' => $data['note'] ?? null,
@@ -209,41 +232,10 @@ class SejajanOrderController extends Controller
 
         Log::info('Broadcasting new order', [
             'order_id' => $order->id,
-            'seller_channel' => 'orders.seller.'.$order->sejajan->participant_id,
-            'buyer_id' => $order->participant_id,
+            'seller_channel' => 'orders.seller.'.$order->sejajan->account_id,
+            'buyer_id' => $order->account_id,
         ]);
 
         broadcast(new NewOrderReceived($order));
-    }
-
-    /**
-     * Update entire order (legacy method, kept for backward compatibility).
-     */
-    public function update(Request $request, string $sejajanSlug, string $orderId): JsonResponse
-    {
-        $sejajan = Sejajan::where('slug', $sejajanSlug)->firstOrFail();
-
-        // Verify ownership
-        if ($sejajan->participant_id !== $request->user()->getKey()) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
-        $order = SejajanOrder::where('sejajan_id', $sejajan->id)
-            ->where('id', $orderId)
-            ->firstOrFail();
-
-        $validated = $request->validate([
-            'status' => ['required', Rule::in(['pending', 'processing', 'ready', 'completed', 'cancelled'])],
-        ]);
-
-        $order->update(['status' => $validated['status']]);
-
-        // Broadcast status update
-        broadcast(new OrderStatusUpdated($order->load(['items.product', 'participant', 'sejajan'])));
-
-        return response()->json([
-            'message' => 'Status pesanan berhasil diperbarui',
-            'data' => $order,
-        ]);
     }
 }

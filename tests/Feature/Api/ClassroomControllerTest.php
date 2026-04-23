@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\Account;
 use App\Models\Classroom;
 use App\Models\Teacher;
+use App\Models\User;
+use App\Models\UserGroup;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -13,7 +14,9 @@ class ClassroomControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    private Account $admin;
+    private User $admin;
+
+    private User $nonAdmin;
 
     private Teacher $teacher;
 
@@ -21,10 +24,16 @@ class ClassroomControllerTest extends TestCase
     {
         parent::setUp();
 
-        // Create an admin super_admin account
-        $this->admin = Account::factory()->create([
+        // Create super_admin user group and admin user
+        $superAdminGroup = UserGroup::factory()->superAdmin()->create();
+        $this->admin = User::factory()->create([
             'email' => 'admin@test.com',
-            'role' => 'super_admin',
+            'user_group_id' => $superAdminGroup->id,
+        ]);
+
+        // Create a non-admin user (no userGroup → role resolves to null → 403)
+        $this->nonAdmin = User::factory()->create([
+            'email' => 'nonadmin@test.com',
         ]);
 
         // Create a teacher
@@ -58,9 +67,9 @@ class ClassroomControllerTest extends TestCase
     public function can_create_classroom(): void
     {
         $data = [
-            'name' => 'Kelas 12 IPA 1',
-            'tingkat' => '12',
-            'jurusan' => 'IPA',
+            'name' => 'Kelas 12 AKL 1',
+            'tingkat' => 'XII',
+            'jurusan' => 'AKL',
             'rombel' => '1',
             'teacher_id' => $this->teacher->id,
             'academic_year' => '2025/2026',
@@ -82,7 +91,7 @@ class ClassroomControllerTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('classrooms', [
-            'name' => 'Kelas 12 IPA 1',
+            'name' => 'Kelas 12 AKL 1',
         ]);
     }
 
@@ -115,6 +124,9 @@ class ClassroomControllerTest extends TestCase
 
         $data = [
             'name' => 'Updated Classroom Name',
+            'tingkat' => 'XI',
+            'jurusan' => 'MPL',
+            'academic_year' => '2025/2026',
         ];
 
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -172,11 +184,7 @@ class ClassroomControllerTest extends TestCase
     #[Test]
     public function requires_super_admin_role(): void
     {
-        $teacher = Account::factory()->create([
-            'role' => 'teacher',
-        ]);
-
-        $response = $this->actingAs($teacher, 'sanctum')
+        $response = $this->actingAs($this->nonAdmin, 'sanctum')
             ->getJson('/api/lms/classrooms');
 
         $response->assertStatus(403);
