@@ -5,10 +5,6 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EplinOfficerController;
 use App\Http\Controllers\Admin\EplinViolatorController;
 use App\Http\Controllers\Admin\GenerationController;
-use App\Http\Controllers\Admin\Lms\ClassroomController as LmsClassroomController;
-use App\Http\Controllers\Admin\Lms\ScheduleController as LmsScheduleController;
-use App\Http\Controllers\Admin\Lms\StudentController as LmsStudentController;
-use App\Http\Controllers\Admin\Lms\TeacherController as LmsTeacherController;
 use App\Http\Controllers\Admin\ManualTransferController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
@@ -16,9 +12,11 @@ use App\Http\Controllers\Admin\ParticipantController;
 use App\Http\Controllers\Admin\PerpossagarBookController;
 use App\Http\Controllers\Admin\PerpossagarBookLanguageController;
 use App\Http\Controllers\Admin\PerpossagarCategoryController;
+use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SchoolController;
 use App\Http\Controllers\Admin\SejajanController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\WebexEkskulController;
@@ -61,8 +59,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('article-categories', \App\Http\Controllers\Admin\ArticleCategoryController::class);
         Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
         Route::resource('schools', SchoolController::class)->except('show');
+        Route::post('classrooms/{classroom}/bulk-assign', [ClassroomController::class, 'bulkAssign'])->name('classrooms.bulk-assign');
         Route::resource('classrooms', ClassroomController::class);
-        Route::resource('teachers', TeacherController::class)->except('show');
+        Route::resource('teachers', TeacherController::class);
         Route::resource('generations', GenerationController::class)->except('show');
         Route::patch('generations/{generation}/toggle-active', [GenerationController::class, 'toggleActive'])->name('generations.toggle-active');
         Route::patch('generations/{generation}/set-as-current', [GenerationController::class, 'setAsCurrent'])->name('generations.set-as-current');
@@ -96,14 +95,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('eplin/violator-students/{student}', [EplinViolatorController::class, 'destroyViolator'])->name('eplin.violators.destroy-violator');
         Route::delete('eplin/violator-students/{student}/force', [EplinViolatorController::class, 'forceDestroyViolator'])->name('eplin.violators.force-destroy-violator');
 
-        // LMS Management
-        Route::prefix('lms')->name('lms.')->group(function () {
-            Route::resource('schedules', LmsScheduleController::class)
-                ->only(['index', 'store', 'update', 'destroy']);
-            Route::get('classrooms', [LmsClassroomController::class, 'index'])->name('classrooms.index');
-            Route::get('teachers', [LmsTeacherController::class, 'index'])->name('teachers.index');
-            Route::get('students', [LmsStudentController::class, 'index'])->name('students.index');
-        });
+        // LMS Management (consolidated into Admin/ namespace)
+        Route::resource('subjects', SubjectController::class);
+        Route::resource('schedules', ScheduleController::class)->except('show');
+        Route::post('schedules/check-conflict', [ScheduleController::class, 'checkConflict'])->name('schedules.check-conflict');
     });
 });
 

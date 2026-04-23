@@ -133,7 +133,18 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        return redirect()->route('admin.students.edit', $student);
+        $student->load(['school:id,name', 'account:uuid,username,email', 'classrooms']);
+
+        return view('admin.students.show', [
+            'student' => $student,
+            'pageTitle' => $student->name,
+            'breadcrumb' => [
+                ['label' => 'Dashboard', 'url' => route('dashboard')],
+                ['label' => 'Master Data', 'url' => null],
+                ['label' => 'Siswa', 'url' => route('admin.students.index')],
+                ['label' => 'Detail', 'url' => null],
+            ],
+        ]);
     }
 
     /**

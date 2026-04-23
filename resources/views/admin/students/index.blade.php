@@ -90,7 +90,9 @@
                     <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
                         @forelse($students as $student)
                             <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
-                                <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $student->name }}</td>
+                                <td class="px-6 py-4 text-sm font-semibold">
+                                    <a href="{{ route('admin.students.show', $student) }}" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200">{{ $student->name }}</a>
+                                </td>
                                 <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $student->national_id }}</td>
                                 <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $student->student_number ?? '-' }}</td>
                                 <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $student->school->name ?? '-' }}</td>

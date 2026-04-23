@@ -154,18 +154,21 @@
                 ],
                 [
                     'label' => 'Daftar Guru',
-                    'href' => route('admin.teachers.index'),
+                    'href' => route('admin.teachers.index', ['via' => 'sekolah']),
                     'active' => ['admin.teachers.*'],
+                    'via' => 'sekolah',
                 ],
                 [
                     'label' => 'Daftar Kelas',
-                    'href' => route('admin.classrooms.index'),
+                    'href' => route('admin.classrooms.index', ['via' => 'sekolah']),
                     'active' => ['admin.classrooms.*'],
+                    'via' => 'sekolah',
                 ],
                 [
                     'label' => 'Data Siswa',
-                    'href' => route('admin.students.index'),
+                    'href' => route('admin.students.index', ['via' => 'sekolah']),
                     'active' => ['admin.students.*'],
+                    'via' => 'sekolah',
                 ],
             ],
         ],
@@ -175,23 +178,31 @@
             'children' => [
                 [
                     'label' => 'Jadwal KBM',
-                    'href' => '/admin/lms/schedules',
-                    'active' => ['admin.lms.schedules.*'],
+                    'href' => route('admin.schedules.index'),
+                    'active' => ['admin.schedules.*'],
                 ],
                 [
                     'label' => 'Daftar Kelas',
-                    'href' => '/admin/lms/classrooms',
-                    'active' => ['admin.lms.classrooms.*'],
+                    'href' => route('admin.classrooms.index', ['via' => 'lms']),
+                    'active' => ['admin.classrooms.*'],
+                    'via' => 'lms',
                 ],
                 [
                     'label' => 'Data Guru',
-                    'href' => '/admin/lms/teachers',
-                    'active' => ['admin.lms.teachers.*'],
+                    'href' => route('admin.teachers.index', ['via' => 'lms']),
+                    'active' => ['admin.teachers.*'],
+                    'via' => 'lms',
                 ],
                 [
                     'label' => 'Data Siswa',
-                    'href' => '/admin/lms/students',
-                    'active' => ['admin.lms.students.*'],
+                    'href' => route('admin.students.index', ['via' => 'lms']),
+                    'active' => ['admin.students.*'],
+                    'via' => 'lms',
+                ],
+                [
+                    'label' => 'Mata Pelajaran',
+                    'href' => route('admin.subjects.index'),
+                    'active' => ['admin.subjects.*'],
                 ],
             ],
         ],
@@ -228,7 +239,32 @@
     $currentUrl = url()->current();
 @endphp
 
-<div x-data="{ openAccordion: null }">
+@php
+    $defaultOpenAccordion = null;
+    foreach ($menus as $idx => $menu) {
+        if (isset($menu['children']) && is_array($menu['children'])) {
+            $currentVia = request()->query('via', '');
+            foreach ($menu['children'] as $child) {
+                $childActivePatterns = $child['active'] ?? [];
+                $childVia = $child['via'] ?? null;
+                $matchesName = !empty($childActivePatterns) && request()->routeIs(...$childActivePatterns);
+                if ($matchesName) {
+                    if ($childVia) {
+                        $isChildActive = $currentVia === $childVia || (!$currentVia && $childVia === 'lms');
+                    } else {
+                        $isChildActive = true;
+                    }
+                    if ($isChildActive) {
+                        $defaultOpenAccordion = (string) $idx;
+                        break 2;
+                    }
+                }
+            }
+        }
+    }
+@endphp
+
+<div x-data="{ openAccordion: {{ $defaultOpenAccordion !== null ? "'$defaultOpenAccordion'" : 'null' }} }">
     <!-- Mobile sidebar -->
     <div
         x-show="$store.layout.mobileSidebarOpen"
@@ -273,17 +309,22 @@
                         $hasChildren = isset($menu['children']) && is_array($menu['children']);
                         $childActive = false;
                         $menuActivePatterns = $menu['active'] ?? [];
+                        $currentVia = request()->query('via', '');
 
                         if ($hasChildren) {
                             foreach ($menu['children'] as $child) {
-                                $childHref = $child['href'] ?? '#';
                                 $childActivePatterns = $child['active'] ?? [];
-                                $matchesRoute = $childHref !== '#' && $childHref !== '' && $currentUrl === $childHref;
+                                $childVia = $child['via'] ?? null;
                                 $matchesName = !empty($childActivePatterns) && request()->routeIs(...$childActivePatterns);
 
-                                if ($matchesRoute || $matchesName) {
-                                    $childActive = true;
-                                    break;
+                                if ($matchesName) {
+                                    if ($childVia) {
+                                        // via-aware: only mark active if via matches, or default to 'lms' when no via param
+                                        $childActive = $currentVia === $childVia || (!$currentVia && $childVia === 'lms');
+                                    } else {
+                                        $childActive = true;
+                                    }
+                                    if ($childActive) break;
                                 }
                             }
                         }
@@ -316,8 +357,13 @@
                                     @php
                                         $childHref = $child['href'] ?? '#';
                                         $childActivePatterns = $child['active'] ?? [];
-                                        $childIsActive = ($childHref !== '#' && $childHref !== '' && $currentUrl === $childHref)
-                                            || (!empty($childActivePatterns) && request()->routeIs(...$childActivePatterns));
+                                        $childVia = $child['via'] ?? null;
+                                        $matchesPattern = !empty($childActivePatterns) && request()->routeIs(...$childActivePatterns);
+                                        if ($childVia && $matchesPattern) {
+                                            $childIsActive = $currentVia === $childVia || (!$currentVia && $childVia === 'lms');
+                                        } else {
+                                            $childIsActive = $matchesPattern;
+                                        }
                                     @endphp
 
                                     <a
@@ -399,17 +445,21 @@
                         $hasChildren = isset($menu['children']) && is_array($menu['children']);
                         $childActive = false;
                         $menuActivePatterns = $menu['active'] ?? [];
+                        $currentVia = request()->query('via', '');
 
                         if ($hasChildren) {
                             foreach ($menu['children'] as $child) {
-                                $childHref = $child['href'] ?? '#';
                                 $childActivePatterns = $child['active'] ?? [];
-                                $matchesRoute = $childHref !== '#' && $childHref !== '' && $currentUrl === $childHref;
+                                $childVia = $child['via'] ?? null;
                                 $matchesName = !empty($childActivePatterns) && request()->routeIs(...$childActivePatterns);
 
-                                if ($matchesRoute || $matchesName) {
-                                    $childActive = true;
-                                    break;
+                                if ($matchesName) {
+                                    if ($childVia) {
+                                        $childActive = $currentVia === $childVia || (!$currentVia && $childVia === 'lms');
+                                    } else {
+                                        $childActive = true;
+                                    }
+                                    if ($childActive) break;
                                 }
                             }
                         }
@@ -463,8 +513,13 @@
                                     @php
                                         $childHref = $child['href'] ?? '#';
                                         $childActivePatterns = $child['active'] ?? [];
-                                        $childIsActive = ($childHref !== '#' && $childHref !== '' && $currentUrl === $childHref)
-                                            || (!empty($childActivePatterns) && request()->routeIs(...$childActivePatterns));
+                                        $childVia = $child['via'] ?? null;
+                                        $matchesPattern = !empty($childActivePatterns) && request()->routeIs(...$childActivePatterns);
+                                        if ($childVia && $matchesPattern) {
+                                            $childIsActive = $currentVia === $childVia || (!$currentVia && $childVia === 'lms');
+                                        } else {
+                                            $childIsActive = $matchesPattern;
+                                        }
                                     @endphp
 
                                     <a

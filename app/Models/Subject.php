@@ -13,6 +13,7 @@ class Subject extends Model
     protected $fillable = [
         'name',
         'code',
+        'type',
     ];
 
     public function schedules(): HasMany

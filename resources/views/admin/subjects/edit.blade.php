@@ -19,11 +19,11 @@
         </div>
     </x-slot>
 
-    @include('admin.students._form', [
-        'action' => route('admin.students.store'),
-        'method' => 'POST',
-        'buttonLabel' => 'Simpan Siswa',
-        'student' => null,
-        'schools' => $schools,
+    @include('admin.subjects._form', [
+        'action' => route('admin.subjects.update', $subject),
+        'method' => 'PUT',
+        'buttonLabel' => 'Perbarui',
+        'subject' => $subject,
+        'types' => $types,
     ])
 </x-app-layout>

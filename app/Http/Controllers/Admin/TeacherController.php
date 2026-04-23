@@ -71,6 +71,22 @@ class TeacherController extends Controller
         ]);
     }
 
+    public function show(Teacher $teacher): View
+    {
+        $teacher->load(['school:id,name', 'account:uuid,username,email', 'schedules.classroom', 'schedules.subject']);
+
+        return view('admin.teachers.show', [
+            'teacher' => $teacher,
+            'pageTitle' => $teacher->name,
+            'breadcrumb' => [
+                ['label' => 'Dashboard', 'url' => route('dashboard')],
+                ['label' => 'Master Data', 'url' => null],
+                ['label' => 'Guru', 'url' => route('admin.teachers.index')],
+                ['label' => 'Detail', 'url' => null],
+            ],
+        ]);
+    }
+
     public function store(StoreTeacherRequest $request): RedirectResponse
     {
         $validated = $request->validated();
