@@ -182,6 +182,11 @@
                     'active' => ['admin.schedules.*'],
                 ],
                 [
+                    'label' => 'Data Absensi',
+                    'href' => route('admin.attendances.index'),
+                    'active' => ['admin.attendances.*'],
+                ],
+                [
                     'label' => 'Daftar Kelas',
                     'href' => route('admin.classrooms.index', ['via' => 'lms']),
                     'active' => ['admin.classrooms.*'],

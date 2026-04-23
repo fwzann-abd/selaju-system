@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EplinOfficerController;
 use App\Http\Controllers\Admin\EplinViolatorController;
 use App\Http\Controllers\Admin\GenerationController;
+use App\Http\Controllers\Admin\LmsAttendanceController;
 use App\Http\Controllers\Admin\ManualTransferController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ModuleManagementController;
@@ -99,6 +100,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('subjects', SubjectController::class);
         Route::resource('schedules', ScheduleController::class)->except('show');
         Route::post('schedules/check-conflict', [ScheduleController::class, 'checkConflict'])->name('schedules.check-conflict');
+        Route::get('attendances', [LmsAttendanceController::class, 'index'])->name('attendances.index');
     });
 });
 
