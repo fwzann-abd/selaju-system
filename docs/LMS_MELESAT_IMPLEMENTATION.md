@@ -1,256 +1,184 @@
 # LMS Melesat Module - Implementation Summary
 
 ## Overview
-Modul LMS Melesat telah berhasil diintegrasikan ke dalam dashboard admin "Selaju Team". Implementasi mencakup UI slicing, API integration, dan real-time notification setup menggunakan Laravel Reverb.
+Modul LMS Melesat telah berhasil diintegrasikan ke dalam dashboard admin "Selaju Team". Implementasi mencakup full CRUD admin dashboard, detail pages, via-aware navigation, dan real-time notification setup menggunakan Laravel Reverb.
 
 ## Completed Tasks
 
 ### 1. Sidebar Integration ✅
 - **File**: `resources/views/layouts/sidebar.blade.php`
-- **Icon**: `book-open` dari Lucide/FontAwesome
+- **Icon**: `book-open` dari FontAwesome
 - **Menu Structure**:
-  - Main: LMS Melesat
+  - Main: LMS Melesat (collapsible accordion)
   - Sub-menus:
-    - Daftar Kelas → `/admin/lms/classrooms`
-    - Data Guru → `/admin/lms/teachers`
-    - Data Siswa → `/admin/lms/students`
-    - Jadwal KBM → `/admin/lms/schedules`
-- **Style**: Mengikuti pattern sidebar existing (active state, hover effects, dark mode)
+    - Daftar Kelas → `/admin/classrooms?via=lms`
+    - Data Guru → `/admin/teachers?via=lms`
+    - Data Siswa → `/admin/students?via=lms`
+    - Mata Pelajaran → `/admin/subjects`
+    - Jadwal KBM → `/admin/schedules`
+- **Via-aware Active State**: Menu yang di-share dengan "Sekolah" menggunakan `?via=` query parameter untuk menentukan konteks aktif, mencegah double-active pada sidebar
+- **Auto-expand**: Accordion LMS Melesat otomatis terbuka saat child route sedang aktif (dihitung server-side via `$defaultOpenAccordion`)
 
-### 2. UI Slicing - Halaman Daftar Kelas ✅
-- **File**: `resources/views/admin/lms/classrooms/index.blade.php`
-- **Features**:
-  - Search bar dengan filter real-time untuk: Nama Kelas, Tingkat, Jurusan, Wali Kelas
-  - Table dengan columns: No, Nama Kelas, Tingkat, Jurusan, Wali Kelas, Aksi
-  - Tombol "+ Tambah Kelas" (placeholder untuk fitur berikutnya)
-  - Aksi: Edit dan Delete dengan konfirmasi
-  - Empty state: "Belum ada data kelas"
-  - Loading skeleton screen saat fetch data
-  - Styling: Konsisten dengan halaman Daftar Peserta
+### 2. Admin Controllers (Resource-based) ✅
 
-### 3. API Implementation ✅
+Controllers menggunakan `Admin\` namespace langsung (bukan `Admin\Lms\`):
+
+| Controller | Model | CRUD | Show |
+|------------|-------|------|------|
+| `TeacherController` | Teacher | ✅ | ✅ (schedules, account) |
+| `StudentController` | Student | ✅ | ✅ (classrooms, account) |
+| `ClassroomController` | Classroom | ✅ | ✅ (students, teacher) |
+| `SubjectController` | Subject | ✅ | ✅ (schedules, statistics) |
+| `ScheduleController` | Schedule | ✅ | — |
+
+### 3. Routes ✅
+
+```php
+// routes/web.php (admin group)
+Route::resource('teachers', TeacherController::class);
+Route::resource('students', StudentController::class);
+Route::resource('classrooms', ClassroomController::class);
+Route::resource('subjects', SubjectController::class);
+Route::resource('schedules', ScheduleController::class);
+```
+
+### 4. Views — Index Pages ✅
+
+Semua index views menggunakan `<x-app-layout>` (bukan `@extends`).
+
+| Module | File | Features |
+|--------|------|----------|
+| Teachers | `admin/teachers/index.blade.php` | Table, clickable name → show, edit/delete actions |
+| Students | `admin/students/index.blade.php` | Table, search, clickable name → show |
+| Classrooms | `admin/classrooms/index.blade.php` | Table, show/edit/delete |
+| Subjects | `admin/subjects/index.blade.php` | Table, type badge (Umum/Jurusan), clickable name → show |
+| Schedules | `admin/schedules/index.blade.php` | Table, filter (kelas/guru/hari), day badge, room badge |
+
+### 5. Views — Show/Detail Pages ✅
+
+| Module | File | Content |
+|--------|------|---------|
+| Teacher | `admin/teachers/show.blade.php` | Info guru, akun, jadwal mengajar (table) |
+| Student | `admin/students/show.blade.php` | Info siswa, akun, kelas yang diikuti (table) |
+| Subject | `admin/subjects/show.blade.php` | Info mapel, statistik (jumlah jadwal, guru pengajar), jadwal terkait |
+| Classroom | `admin/classrooms/show.blade.php` | Info kelas, daftar siswa |
+
+### 6. Views — Create/Edit Forms ✅
+
+| Module | File | Style |
+|--------|------|-------|
+| Teacher | `admin/teachers/create.blade.php` + `edit.blade.php` | Dedicated page |
+| Student | `admin/students/create.blade.php` + `edit.blade.php` | Dedicated page with `_form.blade.php` partial |
+| Classroom | `admin/classrooms/create.blade.php` + `edit.blade.php` | Dedicated page with `_form.blade.php` partial |
+| Subject | `admin/subjects/create.blade.php` + `edit.blade.php` | Dedicated page |
+| Schedule | `admin/schedules/create.blade.php` + `edit.blade.php` | Dedicated page with `_form.blade.php` partial |
+
+### 7. Subject Type Migration ✅
+- **Migration**: `2026_04_22_235228_add_type_to_subjects_table.php`
+- Menambahkan kolom `type` (string, nullable) ke tabel `subjects`
+- Digunakan untuk klasifikasi: Umum, Jurusan, dll.
+
+### 8. API Endpoints (Existing) ✅
 - **File**: `app/Http/Controllers/Api/ClassroomController.php`
-- **Methods Implemented**:
-  - `index()`: Fetch all classrooms dengan eager load teacher
-  - `store()`: Create new classroom dengan validation
-  - `show()`: Get specific classroom dengan relationships
-  - `update()`: Update classroom dengan validation
-  - `destroy()`: Delete classroom
-- **Response Format**: JSON dengan structure `{data: [], total: 0}`
-- **Authentication**: Middleware `auth:sanctum`
-- **Authorization**: Middleware `role:super_admin`
+- REST API untuk SPA/mobile clients via Sanctum auth
+- Endpoint: `GET/POST/PUT/DELETE /api/lms/classrooms`
 
-### 4. Web Routes & Controllers ✅
-- **Files Created**:
-  - `app/Http/Controllers/Admin/Lms/ClassroomController.php`
-  - `app/Http/Controllers/Admin/Lms/TeacherController.php`
-  - `app/Http/Controllers/Admin/Lms/StudentController.php`
-  - `app/Http/Controllers/Admin/Lms/ScheduleController.php`
-- **Routes**:
-  ```php
-  Route::prefix('lms')->name('lms.')->group(function () {
-      Route::get('classrooms', [LmsClassroomController::class, 'index'])->name('classrooms.index');
-      Route::get('teachers', [LmsTeacherController::class, 'index'])->name('teachers.index');
-      Route::get('students', [LmsStudentController::class, 'index'])->name('students.index');
-      Route::get('schedules', [LmsScheduleController::class, 'index'])->name('schedules.index');
-  });
-  ```
-
-### 5. Real-time Listener Setup ✅
+### 9. Real-time Listener Setup ✅
 - **File**: `resources/js/lms-listener.js`
-- **Functions**:
-  - `setupLmsClassroomListener(classroomId)`: Setup Echo listener untuk private channel `classroom.{classroom_id}`
-  - `cleanupLmsListener(classroomId)`: Cleanup listener ketika tidak diperlukan
-  - `setupMultipleLmsListeners(classroomIds)`: Setup multiple listeners
-  - `cleanupMultipleLmsListeners(classroomIds)`: Cleanup multiple listeners
-- **Event Handled**: `MaterialUploaded` event
-- **Notification**: Toast/Alert menggunakan SweetAlert2
-- **Info Displayed**: Guru name, Materi name, Timestamp
-
-### 6. Frontend Integration ✅
-- **File**: `resources/js/app.js`
-- **Exports**: `window.LmsUtils` object dengan helper functions
-- **Index Page** (Daftar Kelas):
-  - Alpine.js component untuk fetch & display classrooms
-  - Real-time listener setup pada saat page load
-  - Auto-cleanup listener pada page destroy
-  - Search filtering dengan live results
-  - Delete dengan confirmation modal
-  - Loading state dengan skeleton screen
+- Private channel: `classroom.{classroom_id}`
+- Event: `MaterialUploaded`
+- Notification: Toast/Alert via SweetAlert2
 
 ## Architecture & Tech Stack
 
-### Frontend
-- **Framework**: Laravel Blade Templates
-- **Interactivity**: Alpine.js
+### Frontend (Admin Dashboard)
+- **Layout**: `<x-app-layout>` component (Blade)
+- **Interactivity**: Alpine.js v3
 - **Styling**: Tailwind CSS v4 dengan dark mode support
-- **Icons**: FontAwesome/Lucide (already included)
-- **Real-time**: Laravel Echo + Pusher (Reverb)
-- **Notifications**: SweetAlert2
-- **HTTP**: Axios
+- **Icons**: FontAwesome (solid)
+- **Badges**: Tailwind UI flat badge pattern (ring-inset)
 
 ### Backend
 - **Framework**: Laravel 12
-- **PHP**: 8.2.30
-- **Authentication**: Laravel Sanctum (Bearer Token)
-- **Database**: MySQL 8.0
-- **ID Type**: UUID untuk semua resources
+- **PHP**: 8.2+
+- **Auth (Admin)**: Session-based (`auth` guard)
+- **Auth (API)**: Laravel Sanctum (Bearer Token)
+- **Database**: MySQL 8.0 (UUID primary keys)
 
-## API Endpoints
+## File Structure
 
-### Classroom Endpoints
 ```
-GET    /api/lms/classrooms              - List all classrooms
-POST   /api/lms/classrooms              - Create new classroom
-GET    /api/lms/classrooms/{id}         - Get specific classroom
-PUT    /api/lms/classrooms/{id}         - Update classroom
-DELETE /api/lms/classrooms/{id}         - Delete classroom
-```
+resources/views/admin/
+├── classrooms/
+│   ├── index.blade.php
+│   ├── show.blade.php
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   └── _form.blade.php
+├── teachers/
+│   ├── index.blade.php
+│   ├── show.blade.php
+│   ├── create.blade.php
+│   └── edit.blade.php
+├── students/
+│   ├── index.blade.php
+│   ├── show.blade.php
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   └── _form.blade.php
+├── subjects/
+│   ├── index.blade.php
+│   ├── show.blade.php
+│   ├── create.blade.php
+│   └── edit.blade.php
+└── schedules/
+    ├── index.blade.php
+    ├── create.blade.php
+    ├── edit.blade.php
+    └── _form.blade.php
 
-### Authentication
-- Semua endpoint memerlukan: `Authorization: Bearer {token}`
-- Middleware: `auth:sanctum` dan `role:super_admin`
+app/Http/Controllers/Admin/
+├── ClassroomController.php
+├── TeacherController.php
+├── StudentController.php
+├── SubjectController.php
+└── ScheduleController.php
 
-## Real-time Channels
-
-### Broadcast Channels
-```php
-// Private channel untuk setiap classroom
-private-classroom.{classroom_id}
-
-// Event: MaterialUploaded
-Data structure:
-{
-    "material": {
-        "id": "uuid",
-        "name": "Material Name",
-        "created_at": "2026-04-07T10:00:00Z"
-    },
-    "teacher": {
-        "id": "uuid",
-        "name": "Teacher Name"
-    }
-}
-```
-
-## Usage Examples
-
-### 1. Fetch Classrooms di Frontend
-```javascript
-const response = await axios.get('/api/lms/classrooms', {
-    headers: {
-        'Authorization': `Bearer ${token}`
-    }
-});
-const classrooms = response.data.data;
-```
-
-### 2. Setup Listener untuk Specific Classroom
-```javascript
-// Di halaman detail classroom
-window.LmsUtils.setupLmsClassroomListener(classroomId);
-```
-
-### 3. Handle Keyboard Close
-```javascript
-// Listener otomatis cleanup saat component destroy
-// Alpine.js handle ini secara automatic
+resources/views/layouts/
+└── sidebar.blade.php         # Via-aware + auto-expand accordion
 ```
 
 ## Styling & Consistency
 
 ### Color Scheme
-- **Primary**: Indigo-600 (#4F46E5)
-- **Background**: Slate-50/900
-- **Text**: Slate-700/200
-- **Hover**: Slate-100/800
-- **Success**: Emerald
-- **Error**: Red
+- **Primary**: Indigo-600 / Indigo-500 (dark)
+- **Background**: White / Slate-900 (dark)
+- **Cards**: `rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900`
+- **Links**: `text-indigo-600 hover:text-indigo-800 dark:text-indigo-400`
+- **Badges**: Tailwind UI flat pattern (`bg-{color}-50 ring-1 ring-{color}-600/10 ring-inset`)
 
-### Components Used
-- Table dengan hover state
-- Search input dengan icon
-- Action buttons (Edit/Delete)
-- Buttons dengan loading state
-- Modal dengan SweetAlert2
-- Status badges
-- Empty states
-
-## File Structure
-
-```
-resources/
-├── views/admin/lms/
-│   ├── classrooms/
-│   │   └── index.blade.php
-│   ├── teachers/
-│   │   └── index.blade.php
-│   ├── students/
-│   │   └── index.blade.php
-│   └── schedules/
-│       └── index.blade.php
-├── js/
-│   ├── app.js (updated)
-│   ├── bootstrap.js
-│   ├── echo.js
-│   └── lms-listener.js (new)
-└── css/
-    └── app.css (unchanged)
-
-app/Http/Controllers/
-├── Api/
-│   └── ClassroomController.php (updated)
-└── Admin/Lms/
-    ├── ClassroomController.php
-    ├── TeacherController.php
-    ├── StudentController.php
-    └── ScheduleController.php
-
-routes/
-├── web.php (updated)
-└── api.php (unchanged - uses existing routes)
-
-resources/views/layouts/
-└── sidebar.blade.php (updated)
-```
+### UI Patterns
+- Table header: `bg-slate-50 dark:bg-slate-800/60` dengan uppercase tracking-wide labels
+- Name columns: clickable link ke halaman detail (show)
+- Action buttons: icon-only dengan hover background
+- Breadcrumb: inline `<nav>` di `<x-slot name="header">`
+- Empty state: centered icon + message
 
 ## Next Steps / Future Development
 
-1. **Tambah/Edit Kelas**: Implement create & edit forms
-2. **Data Guru**: Fetch dari API `/api/lms/teachers`
-3. **Data Siswa**: Fetch dari API `/api/lms/students`
-4. **Jadwal KBM**: Fetch dari API `/api/lms/schedules`
-5. **Additional Notifications**: Untuk events lainnya (ClassroomUpdated, StudentAdded, dll)
-6. **Permissions**: Implement role-based filtering per classroom
-7. **Export Data**: Add export classrooms to CSV/Excel feature
-8. **Bulk Actions**: Add select multiple & bulk delete
-
-## Testing
-
-### Manual Testing Checklist
-- [ ] Sidebar menu muncul dan navigasi bekerja
-- [ ] Page Daftar Kelas load dengan data dari API
-- [ ] Search filter bekerja untuk semua columns
-- [ ] Delete button menampilkan confirmation
-- [ ] Toast notification muncul saat ada material upload
-- [ ] Loading skeleton muncul saat fetch
-- [ ] Empty state tampil ketika tidak ada data
-- [ ] Dark mode bekerja dengan baik
-- [ ] Responsive design di mobile/tablet
-
-### API Testing
-```bash
-# Test endpoint dengan Postman/curl
-curl -X GET http://localhost:8000/api/lms/classrooms \
-  -H "Authorization: Bearer {token}" \
-  -H "Accept: application/json"
-```
+1. **Searchable Dropdown**: Migrasi semua `<select>` ke `<x-searchable-select>` Alpine component
+2. **Reusable Components**: Migrasi views ke `<x-admin-header>`, `<x-detail-card>`, `<x-form-card>`, `<x-badge>`
+3. **Schedule Conflict Detection**: Validasi bentrok jadwal (same teacher/classroom/time)
+4. **Permissions**: Role-based access control per modul LMS
+5. **Export Data**: Export ke CSV/Excel
+6. **Bulk Actions**: Select multiple + bulk delete
+7. **Additional Notifications**: Events lainnya (ClassroomUpdated, StudentAdded, dll)
 
 ## Notes
 
-- Semua response API return JSON dengan `data` field
+- Semua views konsisten menggunakan `<x-app-layout>` — **tidak ada** `@extends('layouts.admin')`
 - UUID digunakan untuk semua ID parameters
-- CSRF protection menggunakan meta tag di Blade
-- Eager loading diterapkan untuk optimize queries
+- Eager loading diterapkan untuk optimize queries (prevent N+1)
 - Dark mode fully supported di semua pages
 - Responsive design untuk mobile/tablet/desktop
+- Sidebar navigation shared routes resolved via `?via=lms` / `?via=sekolah` parameter

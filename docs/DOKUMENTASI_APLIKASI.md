@@ -116,15 +116,24 @@ Perpustakaan digital dengan koleksi buku PDF, sistem kategori, dan hero books.
 
 ### 4. 🎓 LMS Melesat — Learning Management System
 
-Sistem manajemen pembelajaran untuk guru dan siswa.
+Sistem manajemen pembelajaran untuk guru dan siswa dengan admin dashboard lengkap.
 
-**Fitur:**
-- Manajemen kelas (classroom) per guru
-- Penjadwalan pelajaran (schedule)
-- Daftar mata pelajaran (subject)
+**Fitur Admin:**
+- **Guru** — CRUD lengkap + halaman detail (show) dengan jadwal mengajar
+- **Siswa** — CRUD lengkap + halaman detail dengan info kelas yang diikuti
+- **Kelas** — CRUD lengkap + assign siswa + detail dengan daftar siswa
+- **Mata Pelajaran** — CRUD lengkap + field `type` (Umum/Jurusan) + detail dengan statistik jadwal
+- **Jadwal KBM** — CRUD via halaman dedicated (create/edit) + filter (kelas/guru/hari)
 - Manajemen ruangan (room)
 - Materi kursus (course material)
 - Presensi siswa
+
+**Navigasi:**
+- Sidebar collapsible dengan auto-expand saat menu aktif
+- Via-aware active state: menu yang di-share antara "Sekolah" dan "LMS Melesat" menggunakan query parameter `?via=` untuk menentukan konteks aktif
+- Nama resource pada tabel index berfungsi sebagai link ke halaman detail
+
+**Layout:** Semua view menggunakan component `<x-app-layout>` (bukan `@extends`)
 
 **Model:** `Classroom`, `ClassroomStudent`, `Teacher`, `Student`, `Subject`, `Schedule`, `Room`, `CourseMaterial`, `Attendance`
 
