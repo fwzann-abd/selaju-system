@@ -59,11 +59,6 @@ class Account extends Authenticatable implements MustVerifyEmail
             ->where('is_active', true);
     }
 
-    public function sejajans(): HasMany
-    {
-        return $this->hasMany(Sejajan::class, 'account_id', 'uuid');
-    }
-
     public function student(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Student::class, 'account_id', 'uuid');

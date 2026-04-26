@@ -50,14 +50,6 @@ class Student extends Model
     }
 
     /**
-     * Get violations for this student
-     */
-    public function violations(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(EplinViolation::class);
-    }
-
-    /**
      * Check if student has registered (has account_id)
      */
     public function isRegistered(): bool

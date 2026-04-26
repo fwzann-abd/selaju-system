@@ -14,10 +14,6 @@ return new class extends Migration
     {
         // Tables that have participant_id foreign key to rename
         $tables = [
-            'sejajans',
-            'sejajan_orders',
-            'sejajan_cart_items',
-            'perpossagar_authors',
             'students',
         ];
 
@@ -51,10 +47,6 @@ return new class extends Migration
     {
         // Reverse the changes
         $tables = [
-            'sejajans',
-            'sejajan_orders',
-            'sejajan_cart_items',
-            'perpossagar_authors',
             'students',
         ];
 
