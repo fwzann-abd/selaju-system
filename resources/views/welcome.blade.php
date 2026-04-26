@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Selaju System') }} — Platform Digital Sekolah</title>
-    <meta name="description" content="Selaju System adalah platform terintegrasi untuk ekosistem digital sekolah. Marketplace pelajar, perpustakaan digital, LMS, dan manajemen kegiatan dalam satu sistem.">
+    <meta name="description" content="Selaju System adalah platform LMS terintegrasi untuk ekosistem digital sekolah. Learning Management System dengan jadwal, materi, absensi, dan manajemen akademik.">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=lexend:300,400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -114,7 +114,7 @@
             </h1>
 
             <p class="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-500 md:text-xl dark:text-slate-400">
-                Selaju System menyatukan marketplace pelajar, perpustakaan digital, LMS, manajemen ekstrakurikuler, dan sistem pelanggaran dalam satu platform terpadu.
+                Selaju System menyatukan Learning Management System, manajemen akademik, jadwal KBM, dan sistem absensi dalam satu platform terpadu.
             </p>
 
             <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -172,20 +172,16 @@
     <section id="modules" class="px-6 py-24">
         <div class="mx-auto max-w-7xl">
             <div class="mb-16 text-center fade-up">
-                <h2 class="mb-4 text-3xl font-bold text-slate-900 md:text-4xl dark:text-white">8 Modul <span class="gradient-text">Terintegrasi</span></h2>
-                <p class="mx-auto max-w-xl text-slate-500 dark:text-slate-400">Setiap modul dirancang untuk saling terhubung dan memberikan pengalaman digital yang menyeluruh.</p>
+                <h2 class="mb-4 text-3xl font-bold text-slate-900 md:text-4xl dark:text-white">Modul LMS <span class="gradient-text">Terintegrasi</span></h2>
+                <p class="mx-auto max-w-xl text-slate-500 dark:text-slate-400">Setiap modul dirancang untuk saling terhubung dan memberikan pengalaman belajar-mengajar yang menyeluruh.</p>
             </div>
 
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 @php
                     $modules = [
-                        ['icon' => 'fa-store',              'name' => 'Sejajan',        'desc' => 'Marketplace pelajar — toko, produk, keranjang, pesanan',       'from' => '#f97316', 'to' => '#fbbf24'],
-                        ['icon' => 'fa-hand-holding-heart',  'name' => 'Donasi',         'desc' => 'Galang dana & donasi dengan integrasi DOKU QRIS',             'from' => '#ec4899', 'to' => '#f43f5e'],
-                        ['icon' => 'fa-book-open',           'name' => 'Perpossagar',    'desc' => 'Perpustakaan digital — katalog, kategori, bahasa',            'from' => '#06b6d4', 'to' => '#3b82f6'],
-                        ['icon' => 'fa-graduation-cap',      'name' => 'LMS Melesat',    'desc' => 'Learning Management — jadwal, materi, absensi',               'from' => '#136dec', 'to' => '#818cf8'],
-                        ['icon' => 'fa-people-group',        'name' => 'Webex Ekskul',   'desc' => 'Manajemen ekstrakurikuler — peserta, presensi',               'from' => '#10b981', 'to' => '#22c55e'],
-                        ['icon' => 'fa-gavel',               'name' => 'Eplin',          'desc' => 'Sistem pelanggaran — petugas, pencatatan, poin',              'from' => '#ef4444', 'to' => '#f97316'],
-                        ['icon' => 'fa-newspaper',           'name' => 'Artikel',        'desc' => 'Manajemen konten — kategori, penerbitan, editor',             'from' => '#0ea5e9', 'to' => '#3b82f6'],
+                        ['icon' => 'fa-graduation-cap',      'name' => 'LMS Melesat',    'desc' => 'Learning Management — jadwal, materi, absensi, nilai',        'from' => '#136dec', 'to' => '#818cf8'],
+                        ['icon' => 'fa-calendar-days',       'name' => 'Jadwal KBM',     'desc' => 'Manajemen jadwal kegiatan belajar mengajar otomatis',         'from' => '#f97316', 'to' => '#fbbf24'],
+                        ['icon' => 'fa-clipboard-check',     'name' => 'Absensi',        'desc' => 'Pencatatan kehadiran siswa dan guru secara digital',          'from' => '#10b981', 'to' => '#22c55e'],
                         ['icon' => 'fa-users-gear',          'name' => 'Akun & Peran',   'desc' => 'Autentikasi, RBAC, profil, sesi management',                  'from' => '#64748b', 'to' => '#475569'],
                     ];
                 @endphp
@@ -214,9 +210,9 @@
             <div class="grid grid-cols-2 gap-5 md:grid-cols-4">
                 @php
                     $stats = [
-                        ['value' => '8',   'label' => 'Modul',        'color' => '#136dec'],
-                        ['value' => '50+', 'label' => 'API Endpoint', 'color' => '#8b5cf6'],
-                        ['value' => '49',  'label' => 'Tests Passing','color' => '#10b981'],
+                        ['value' => '4',   'label' => 'Modul',        'color' => '#136dec'],
+                        ['value' => '185', 'label' => 'Routes',       'color' => '#8b5cf6'],
+                        ['value' => 'API', 'label' => 'First Design', 'color' => '#10b981'],
                         ['value' => 'L12', 'label' => 'Laravel',      'color' => '#f59e0b'],
                     ];
                 @endphp
