@@ -9,11 +9,7 @@ Perubahan dari `participants` menjadi `accounts` dengan penambahan device sessio
 - `participants` → `accounts`
 
 ### 2. Renamed Columns (Foreign Keys)
-Di semua tabel berikut, `participant_id` telah diubah menjadi `account_id`:
-- `sejajans`
-- `sejajan_orders`
-- `sejajan_cart_items`
-- `perpossagar_authors`
+Di tabel berikut, `participant_id` telah diubah menjadi `account_id`:
 - `students`
 
 ### 3. New Table: `device_sessions`
@@ -55,10 +51,6 @@ CREATE TABLE device_sessions (
 
 ### Updated Models
 Models berikut telah diupdate untuk menggunakan `account_id` dan relationship ke `Account`:
-- `Sejajan`
-- `SejajanOrder`
-- `SejajanCartItem`
-- `PerpossagarAuthor`
 - `Student`
 
 ### Backward Compatibility
@@ -130,8 +122,6 @@ Semua validasi yang menggunakan `participants` table telah diupdate ke `accounts
 - `api.php` routes - `/me` endpoint validation
 
 ### Updated Column References
-- `SejajanProductController` - menggunakan `account_id`
-- `SejajanController` - menggunakan `account` relationship
 - `RegisterController` - update student `account_id`
 
 ## Migration Files
@@ -159,13 +149,13 @@ php artisan tinker
 \App\Models\Account::count();
 
 // Check foreign keys updated
-$sejajan = \App\Models\Sejajan::first();
-$sejajan->account_id; // Should show UUID
+$student = \App\Models\Student::first();
+$student->account_id; // Should show UUID
 
 // Check relationships work
 $account = \App\Models\Account::first();
 $account->school->name;
-$account->sejajans;
+$account->student;
 
 // Check backward compatibility
 $participant = \App\Models\Participant::first();

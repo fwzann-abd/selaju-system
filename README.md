@@ -1,17 +1,17 @@
-# Selaju System API
+# Selaju LMS System API
 
-**Selaju System** adalah backend API untuk ekosistem aplikasi Selaju - platform terintegrasi yang menyediakan berbagai layanan digital untuk kampus dan pelajar. System ini dibangun dengan Laravel 12 dan menyediakan berbagai modul seperti marketplace pelajar (Sejajan), manajemen konten, sistem autentikasi, dan role-based access control.
+**Selaju LMS System** adalah backend API untuk Learning Management System — platform terintegrasi yang menyediakan layanan manajemen pembelajaran untuk sekolah. System ini dibangun dengan Laravel 12 dan menyediakan modul LMS lengkap meliputi jadwal KBM, materi pembelajaran, presensi siswa, dan manajemen akademik.
 
-Proyek ini merupakan sistem backend yang melayani berbagai aplikasi frontend melalui RESTful API dengan real-time capabilities menggunakan Laravel Reverb untuk notifikasi dan update data secara langsung.
+Proyek ini merupakan sistem backend yang melayani berbagai aplikasi frontend melalui RESTful API dengan real-time capabilities menggunakan Laravel Reverb.
 
 ## ✨ Fitur Utama
 
-- **Sejajan Marketplace**: Marketplace khusus pelajar dengan fitur toko, produk, keranjang, dan pemesanan real-time
-- **Real-time Notifications**: Notifikasi langsung untuk pesanan baru dan update status menggunakan WebSocket
+- **LMS Melesat**: Learning Management System lengkap — jadwal, materi, absensi, dan manajemen akademik
+- **Multi-Role API**: Endpoint terpisah untuk Super Admin, Teacher, dan Student
 - **Authentication & Authorization**: Sistem autentikasi berbasis token (Sanctum) dengan role-based permissions
-- **Content Management**: Manajemen artikel dan kategori konten
+- **Admin Dashboard**: Blade + Alpine.js dashboard untuk manajemen data
 - **Dynamic Menu System**: Sistem menu dinamis berdasarkan permission user
-- **Broadcasting Events**: Laravel Reverb untuk komunikasi real-time antara buyer dan seller
+- **Real-time Broadcasting**: Laravel Reverb untuk notifikasi materi baru ke kelas
 
 ## 🚀 Cara Instalasi
 
@@ -21,7 +21,6 @@ Proyek ini merupakan sistem backend yang melayani berbagai aplikasi frontend mel
 - Composer
 - MySQL 8.0+
 - Node.js 18+
-- Code Editor
 
 ### Langkah Instalasi
 
@@ -36,10 +35,10 @@ Proyek ini merupakan sistem backend yang melayani berbagai aplikasi frontend mel
 
     ```bash
     composer install
+    npm install
     ```
 
 3. **Setup Environment**
-   Salin file `.env.example` ke `.env` dan sesuaikan konfigurasi database:
 
     ```bash
     cp .env.example .env
@@ -47,36 +46,19 @@ Proyek ini merupakan sistem backend yang melayani berbagai aplikasi frontend mel
     ```
 
 4. **Setup Database**
-   Jalankan migration dan seeder untuk membuat tabel dan data awal:
 
     ```bash
     php artisan migrate:fresh --seed
     ```
 
-5. **Install Laravel Reverb**
-   Install dan setup Reverb untuk fitur real-time:
+5. **Build Frontend & Jalankan**
 
     ```bash
-    php artisan install:broadcasting
-    ```
-
-6. **Jalankan Aplikasi**
-   Jalankan 3 service berikut di terminal terpisah:
-
-    ```bash
-    # Terminal 1: Laravel Server
-    composer run dev
-
-    # Terminal 2: Reverb WebSocket Server
-    php artisan reverb:start
-
-    # Terminal 3: Queue Worker
-    php artisan queue:work
+    npm run build
+    php artisan serve
     ```
 
 ## 🔑 Kredensial Default
-
-Gunakan kredensial berikut untuk login sebagai Super Admin:
 
 - **Email**: `dev@gncs.dev`
 - **Password**: `programmer123`
@@ -84,96 +66,57 @@ Gunakan kredensial berikut untuk login sebagai Super Admin:
 
 ## 📡 Dokumentasi API
 
-### Endpoint Utama
+### Authentication
 
-#### Authentication
+- `POST /api/login` — Login dan dapatkan token
+- `POST /api/register` — Registrasi akun baru
+- `POST /api/logout` — Logout user
+- `GET /api/me` — Profil user terautentikasi
+- `PATCH /api/me` — Update profil
 
-- `POST /api/register` - Registrasi user baru
-- `POST /api/login` - Login dan dapatkan token
-- `POST /api/logout` - Logout user
-- `GET /api/user` - Get data user yang sedang login
+### LMS Admin (Role: super_admin)
 
-#### Sejajan Marketplace
+- `CRUD /api/lms/classrooms` — Manajemen kelas
+- `CRUD /api/lms/teachers` — Manajemen guru
+- `CRUD /api/lms/students` — Manajemen siswa
+- `CRUD /api/lms/subjects` — Manajemen mata pelajaran
+- `CRUD /api/lms/schedules` — Manajemen jadwal KBM
+- `CRUD /api/lms/rooms` — Manajemen ruangan
+- `GET /api/lms/schools` — Daftar sekolah
+- `GET /api/lms/generations` — Daftar angkatan
+- `GET /api/lms/attendances` — Data presensi
 
-- `GET /api/sejajans` - List semua toko
-- `POST /api/sejajans` - Buat toko baru
-- `GET /api/sejajans/my-stores` - Toko milik user
-- `GET /api/sejajans/{slug}` - Detail toko
-- `PUT /api/sejajans/{id}` - Update toko
-- `DELETE /api/sejajans/{id}` - Hapus toko
+### LMS Teacher (Role: teacher)
 
-#### Products
+- `GET /api/lms/teacher/schedules` — Jadwal guru
+- `GET /api/lms/teacher/schedules/{id}/attendance-sheet` — Lembar absensi
+- `CRUD /api/lms/teacher/materials` — Materi pembelajaran
+- `CRUD /api/lms/teacher/attendances` — Presensi kelas
 
-- `GET /api/sejajans/{slug}/products` - List produk toko
-- `POST /api/sejajans/{slug}/products` - Tambah produk
-- `PUT /api/sejajans/{slug}/products/{id}` - Update produk
-- `DELETE /api/sejajans/{slug}/products/{id}` - Hapus produk
+### LMS Student (Role: student)
 
-#### Orders
-
-- `POST /api/sejajans/orders` - Buat pesanan baru
-- `GET /api/sejajans/my-orders` - Pesanan user (sebagai buyer)
-- `GET /api/sejajans/{slug}/orders` - Pesanan toko (sebagai seller)
-- `PUT /api/sejajans/{slug}/orders/{id}/status` - Update status pesanan
-
-#### Cart
-
-- `GET /api/sejajans/cart` - Get keranjang belanja
-- `POST /api/sejajans/cart` - Tambah item ke keranjang
-- `PATCH /api/sejajans/cart/{id}` - Update quantity item
-- `DELETE /api/sejajans/cart/{id}` - Hapus item dari keranjang
-
-### Broadcasting Events
-
-System menggunakan Laravel Reverb untuk real-time notifications:
-
-#### Private Channels
-
-- `orders.buyer.{userId}` - Channel untuk buyer menerima update pesanan
-- `orders.seller.{userId}` - Channel untuk seller menerima pesanan baru
-
-#### Events
-
-- `order.new` - Event ketika ada pesanan baru masuk ke toko
-- `order.status.updated` - Event ketika status pesanan diubah
-
-## 📊 Struktur Database
-
-### Entity Relationship Diagram (ERD)
-
-![ERD](erd.png)
-
-### UML Diagram
-
-![UML](uml.png)
+- `GET /api/lms/student/schedules` — Jadwal siswa
+- `GET /api/lms/student/materials` — Materi pelajaran
+- `GET /api/lms/student/materials/{id}/download` — Download materi
+- `GET /api/lms/student/attendances` — Riwayat kehadiran
 
 ## 🛠 Tech Stack
 
 - **Framework**: Laravel 12
 - **Language**: PHP 8.2+
 - **Database**: MySQL 8.0+
-- **Authentication**: Laravel Sanctum (Token-based API authentication)
-- **Real-time**: Laravel Reverb (WebSocket server untuk broadcasting)
-- **ORM**: Eloquent
-- **Caching**: Redis (opsional)
-- **Queue**: Database/Redis driver untuk async job processing
-- **Broadcasting**: Pusher protocol via Reverb
-- **File Storage**: Local filesystem dengan configurable path
-
-### Tools & Development
-
-- **Package Manager**: Composer
-- **Testing**: PHPUnit
-- **Version Control**: Git
-- **API Pattern**: RESTful API dengan resource controllers
-- **Error Handling**: Global exception handler dengan custom responses
+- **Authentication**: Laravel Sanctum (Token-based)
+- **Real-time**: Laravel Reverb (WebSocket)
+- **Admin UI**: Blade + Alpine.js + Tailwind CSS v4
+- **Testing**: PHPUnit 11 (31 tests, 117 assertions)
+- **Queue**: Database/Redis driver
 
 ## 📖 Dokumentasi Lengkap
 
-Dokumentasi lengkap aplikasi (arsitektur, semua modul, API reference, database schema, testing, deployment) tersedia di:
+Dokumentasi lengkap aplikasi tersedia di:
 
 ➡️ **[`docs/DOKUMENTASI_APLIKASI.md`](docs/DOKUMENTASI_APLIKASI.md)**
 
 ---
 
-**Status**: ✅ Active Development | Laravel 12 | PHP 8.2+
+**Status**: ✅ Active Development | Branch `dev` | Laravel 12 | PHP 8.2+

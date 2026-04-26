@@ -50,14 +50,12 @@ Sistem menu dan permissions telah berhasil diimplementasikan dengan struktur ber
 
 ### Menus (3 items)
 1. **Dashboard** - Menu untuk dashboard dan analytics
-2. **Konten** - Menu untuk artikel dan kategori artikel
+2. **Konten** - Menu untuk konten LMS
 3. **Pengaturan** - Menu untuk pengaturan sistem
 
 ### Modules (7 items)
  Dashboard Utama (`/admin`)
  Analytics (`/admin/analytics`)
- Artikel (`/admin/articles`)
- Kategori Artikel (`/admin/article-categories`)
  Manajemen Pengguna (`/admin/users`)
  Role & Permission (`/admin/roles`)
  Manajemen Menu (`/admin/menus`)
@@ -72,8 +70,7 @@ Sistem menu dan permissions telah berhasil diimplementasikan dengan struktur ber
      - Role & Permission
 
 3. **Editor**
-   - Akses hanya ke:
-     - Artikel (view, create, edit, delete)
+   - Akses terbatas ke modul tertentu
 
 ### Users (1 default user)
 - **Email**: dev@gncs.dev

@@ -1,7 +1,7 @@
 # Requirements: Selaju System
 
-**Defined:** 2026-04-23
-**Core Value:** Ekosistem digital sekolah yang utuh — akademik hingga non-akademik — diakses via mobile app
+**Defined:** 2026-04-23 | **Updated:** 2026-04-26
+**Core Value:** Sistem LMS komprehensif untuk sekolah — jadwal, materi, presensi, manajemen akademik — diakses via mobile app
 
 ## v1.0 Requirements
 
@@ -37,37 +37,19 @@ Requirements for milestone v1.0 Backend Foundation. Each maps to roadmap phases.
 ### Broadcasting
 
 - [ ] **BCAST-01**: Reverb WebSocket server can be started and accepts connections
-- [ ] **BCAST-02**: Sejajan order events (NewOrderReceived, OrderStatusUpdated) are dispatched from controllers
-- [ ] **BCAST-03**: LMS material upload event (MaterialUploaded) is dispatched when teacher uploads
-- [ ] **BCAST-04**: Broadcasting config switched from `log` to `reverb` driver
+- [ ] **BCAST-02**: LMS material upload event (MaterialUploaded) is dispatched when teacher uploads
+- [ ] **BCAST-03**: Broadcasting config switched from `log` to `reverb` driver
 
-### Payment Gateway
 
-- [ ] **PAY-01**: DOKU PHP library installed and configured with sandbox credentials
-- [ ] **PAY-02**: QRIS payment generation returns actual DOKU API response (not dummy)
-- [ ] **PAY-03**: Virtual Account payment generation returns actual DOKU API response
-- [ ] **PAY-04**: DOKU webhook receives payment notification and updates donation status
-- [ ] **PAY-05**: HMAC signature verification validates incoming DOKU webhooks
-
-### Manual Transfer Verification
-
-- [ ] **XFER-01**: Admin can view list of pending manual transfers with upload bukti
-- [ ] **XFER-02**: Admin can approve a manual transfer and mark donation as paid
-- [ ] **XFER-03**: Admin can reject a manual transfer with rejection reason
-- [ ] **XFER-04**: Donation status updates reflect in participant's donation history
 
 ## v2.0 Requirements (Deferred)
 
 ### Real-time Notifications
 - **NOTIF-01**: Student receives in-app notification when new material uploaded
-- **NOTIF-02**: Seller receives in-app notification when new order placed
-- **NOTIF-03**: Buyer receives notification when order status changes
 
 ### Admin Dashboard Enhancement
 - **DASH-01**: Admin dashboard shows module-level statistics
-- **DASH-02**: Admin can view donation management dashboard
-- **DASH-03**: Admin can view order management (Sejajan)
-- **DASH-04**: Admin can view attendance reports (LMS)
+- **DASH-02**: Admin can view attendance reports (LMS)
 
 ### Security Hardening
 - **SEC-01**: CORS configured for mobile app domains
@@ -81,8 +63,6 @@ Requirements for milestone v1.0 Backend Foundation. Each maps to roadmap phases.
 - **MOB-02**: Student can view class schedule
 - **MOB-03**: Student can view and download materials
 - **MOB-04**: Student can view attendance history
-- **MOB-05**: Student can browse Sejajan marketplace
-- **MOB-06**: Student can read books in Perpossagar
 
 ### Mobile Teacher App
 - **TEACH-01**: Teacher can login and manage profile
@@ -96,11 +76,16 @@ Requirements for milestone v1.0 Backend Foundation. Each maps to roadmap phases.
 |---------|--------|
 | Quiz / ujian online | LMS enhancement, not core MVP |
 | Forum diskusi kelas | Nice-to-have, deferred post-v3.0 |
-| Rating & review (Sejajan/Perpossagar) | Enhancement, not blocking functionality |
 | Push notifications | Requires mobile app (v3.0) first |
 | Parent/wali portal | Future scope, separate user role needed |
 | OAuth / social login | Email/password sufficient for school context |
 | Multi-language support | Indonesian only for initial release |
+| Sejajan marketplace | **REMOVED** from codebase (April 2026) |
+| Donasi / payment | **REMOVED** from codebase (April 2026) |
+| Perpossagar library | **REMOVED** from codebase (April 2026) |
+| Eplin discipline | **REMOVED** from codebase (April 2026) |
+| Webex ekskul | **REMOVED** from codebase (April 2026) |
+| Artikel CMS | **REMOVED** from codebase (April 2026) |
 
 ## Traceability
 
@@ -129,22 +114,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BCAST-01 | Phase 4 | Pending |
 | BCAST-02 | Phase 4 | Pending |
 | BCAST-03 | Phase 4 | Pending |
-| BCAST-04 | Phase 4 | Pending |
-| PAY-01 | Phase 5 | Pending |
-| PAY-02 | Phase 5 | Pending |
-| PAY-03 | Phase 5 | Pending |
-| PAY-04 | Phase 5 | Pending |
-| PAY-05 | Phase 5 | Pending |
-| XFER-01 | Phase 6 | Pending |
-| XFER-02 | Phase 6 | Pending |
-| XFER-03 | Phase 6 | Pending |
-| XFER-04 | Phase 6 | Pending |
 
 **Coverage:**
-- v1.0 requirements: 27 total
-- Mapped to phases: 27
+- v1.0 requirements: 21 total
+- Mapped to phases: 21
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-23*
-*Last updated: 2026-04-23 after initial definition*
+*Last updated: 2026-04-26 after non-LMS feature elimination*

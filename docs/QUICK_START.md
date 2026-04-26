@@ -48,18 +48,14 @@ Atau gunakan sidebar:
 ```
 ├─ Dashboard
 ├─ Pengguna
-├─ Sejajan
-├─ Perpossagar
-├─ Selaju
-├─ Webex
-├─ Eplin
-├─ Artikel
 ├─ Sekolah
-├─ LMS Melesat  ← NEW!
+├─ LMS Melesat 🎓
+│  ├─ Jadwal KBM
+│  ├─ Data Absensi
 │  ├─ Daftar Kelas
 │  ├─ Data Guru
 │  ├─ Data Siswa
-│  └─ Jadwal KBM
+│  └─ Mata Pelajaran
 └─ Pengaturan
 ```
 

@@ -16,23 +16,19 @@ app/Models/
 ├── ModuleAccess.php            # Akses spesifik (CRUD)
 ├── UserGroup.php               # Role/Group pengguna
 ├── UserGroupPermission.php     # Mapping permissions
-├── Article.php                 # (Sebelumnya)
-├── ArticleCategory.php         # (Sebelumnya)
 └── User.php                    # (Modified - added user_group_id)
 ```
 
 ### Controllers (2 files)
 ```
 app/Http/Controllers/
-├── MenuController.php          # API untuk sidebar menu
-└── ArticleController.php       # (Sebelumnya)
+└── MenuController.php          # API untuk sidebar menu
 ```
 
 ### Seeders (6 files)
 ```
 database/seeders/
 ├── SuperAdminSeeder.php        # Create super admin user
-├── ArticleSeeder.php           # Create artikel & kategori
 ├── MenuSeeder.php              # Create 3 menus
 ├── ModuleSeeder.php            # Create 7 modules
 ├── UserGroupSeeder.php         # Create groups & permissions
@@ -91,15 +87,8 @@ PERMISSIONS_DOCUMENTATION.md    # Dokumentasi lengkap sistem
 ## 📡 API Endpoints
 
 ### Public Endpoints
-- `GET /api/articles` - List artikels
-- `GET /api/articles/{slug}` - Detail artikel
-- `GET /api/articles/categories` - List kategori
-- `GET /api/articles/category/{slug}` - Artikel by kategori
-
-### Protected Endpoints (require authentication)
 - `GET /api/menus/sidebar` - ⭐ **Main endpoint untuk sidebar**
   - Return menus dengan modules yang accessible untuk user
-  
 - `GET /api/menus` - List semua menus
 - `GET /api/menus/{id}` - Detail menu
 
@@ -208,7 +197,6 @@ users (1 row)
 ✅ Role-based access control (RBAC)  
 ✅ 4 CRUD operations per module (view, create, edit, delete)  
 ✅ Multiple user groups with different access levels  
-✅ Article management with categories  
 ✅ Complete API endpoints for frontend integration  
 ✅ Easy to extend with new menus and modules  
 
