@@ -32,6 +32,7 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('lms')->group(fu
 // LMS Teacher Routes
 Route::middleware(['auth:sanctum', 'role:teacher'])->prefix('lms/teacher')->group(function () {
     Route::get('schedules', [\App\Http\Controllers\Api\Teacher\TeacherScheduleController::class, 'index']);
+    Route::get('schedules/{schedule}/attendance-sheet', [\App\Http\Controllers\Api\Teacher\TeacherAttendanceController::class, 'sheet']);
     Route::apiResource('materials', \App\Http\Controllers\Api\Teacher\TeacherMaterialController::class);
     Route::post('attendances', [\App\Http\Controllers\Api\Teacher\TeacherAttendanceController::class, 'store']);
 });

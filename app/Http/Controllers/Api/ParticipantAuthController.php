@@ -70,10 +70,17 @@ class ParticipantAuthController extends Controller
             return response()->json(null, 200);
         }
 
-        $user->load(['school', 'student']);
+        $user->load(['school', 'student.classrooms.teacher']);
 
         $payload = $user->toArray();
-        $payload['name'] = $user->name ?? ($user->student?->nama ?? $user->username ?? $user->nomor_participant ?? null);
+        $payload['name'] = $user->name ?? ($user->student?->name ?? $user->username ?? null);
+        
+        // Add classroom info for easier frontend access
+        if ($user->student && $user->student->classrooms->isNotEmpty()) {
+            $currentClassroom = $user->student->classrooms->first();
+            $payload['classroom'] = $currentClassroom;
+            $payload['classroom_id'] = $currentClassroom->id;
+        }
 
         return response()->json($payload);
     }

@@ -26,47 +26,53 @@ Proyek ini merupakan sistem backend yang melayani berbagai aplikasi frontend mel
 ### Langkah Instalasi
 
 1. **Clone Repository**
-   ```bash
-   git clone <repository-url>
-   cd selaju-system
-   ```
+
+    ```bash
+    git clone <repository-url>
+    cd selaju-system
+    ```
 
 2. **Install Dependencies**
-   ```bash
-   composer install
-   ```
+
+    ```bash
+    composer install
+    ```
 
 3. **Setup Environment**
    Salin file `.env.example` ke `.env` dan sesuaikan konfigurasi database:
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
+
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
 
 4. **Setup Database**
    Jalankan migration dan seeder untuk membuat tabel dan data awal:
-   ```bash
-   php artisan migrate:fresh --seed
-   ```
+
+    ```bash
+    php artisan migrate:fresh --seed
+    ```
 
 5. **Install Laravel Reverb**
    Install dan setup Reverb untuk fitur real-time:
-   ```bash
-   php artisan install:broadcasting
-   ```
+
+    ```bash
+    php artisan install:broadcasting
+    ```
 
 6. **Jalankan Aplikasi**
    Jalankan 3 service berikut di terminal terpisah:
-   ```bash
-   # Terminal 1: Laravel Server
-   composer run dev
-   
-   # Terminal 2: Reverb WebSocket Server
-   php artisan reverb:start
-   
-   # Terminal 3: Queue Worker
-   php artisan queue:work
-   ```
+
+    ```bash
+    # Terminal 1: Laravel Server
+    composer run dev
+
+    # Terminal 2: Reverb WebSocket Server
+    php artisan reverb:start
+
+    # Terminal 3: Queue Worker
+    php artisan queue:work
+    ```
 
 ## 🔑 Kredensial Default
 
@@ -81,12 +87,14 @@ Gunakan kredensial berikut untuk login sebagai Super Admin:
 ### Endpoint Utama
 
 #### Authentication
+
 - `POST /api/register` - Registrasi user baru
 - `POST /api/login` - Login dan dapatkan token
 - `POST /api/logout` - Logout user
 - `GET /api/user` - Get data user yang sedang login
 
 #### Sejajan Marketplace
+
 - `GET /api/sejajans` - List semua toko
 - `POST /api/sejajans` - Buat toko baru
 - `GET /api/sejajans/my-stores` - Toko milik user
@@ -95,18 +103,21 @@ Gunakan kredensial berikut untuk login sebagai Super Admin:
 - `DELETE /api/sejajans/{id}` - Hapus toko
 
 #### Products
+
 - `GET /api/sejajans/{slug}/products` - List produk toko
 - `POST /api/sejajans/{slug}/products` - Tambah produk
 - `PUT /api/sejajans/{slug}/products/{id}` - Update produk
 - `DELETE /api/sejajans/{slug}/products/{id}` - Hapus produk
 
 #### Orders
+
 - `POST /api/sejajans/orders` - Buat pesanan baru
 - `GET /api/sejajans/my-orders` - Pesanan user (sebagai buyer)
 - `GET /api/sejajans/{slug}/orders` - Pesanan toko (sebagai seller)
 - `PUT /api/sejajans/{slug}/orders/{id}/status` - Update status pesanan
 
 #### Cart
+
 - `GET /api/sejajans/cart` - Get keranjang belanja
 - `POST /api/sejajans/cart` - Tambah item ke keranjang
 - `PATCH /api/sejajans/cart/{id}` - Update quantity item
@@ -117,10 +128,12 @@ Gunakan kredensial berikut untuk login sebagai Super Admin:
 System menggunakan Laravel Reverb untuk real-time notifications:
 
 #### Private Channels
+
 - `orders.buyer.{userId}` - Channel untuk buyer menerima update pesanan
 - `orders.seller.{userId}` - Channel untuk seller menerima pesanan baru
 
 #### Events
+
 - `order.new` - Event ketika ada pesanan baru masuk ke toko
 - `order.status.updated` - Event ketika status pesanan diubah
 
@@ -128,11 +141,11 @@ System menggunakan Laravel Reverb untuk real-time notifications:
 
 ### Entity Relationship Diagram (ERD)
 
-![ERD](docs/erd.png)
+![ERD](erd.png)
 
 ### UML Diagram
 
-![UML](docs/uml.png)
+![UML](uml.png)
 
 ## 🛠 Tech Stack
 
@@ -148,6 +161,7 @@ System menggunakan Laravel Reverb untuk real-time notifications:
 - **File Storage**: Local filesystem dengan configurable path
 
 ### Tools & Development
+
 - **Package Manager**: Composer
 - **Testing**: PHPUnit
 - **Version Control**: Git
@@ -161,4 +175,5 @@ Dokumentasi lengkap aplikasi (arsitektur, semua modul, API reference, database s
 ➡️ **[`docs/DOKUMENTASI_APLIKASI.md`](docs/DOKUMENTASI_APLIKASI.md)**
 
 ---
+
 **Status**: ✅ Active Development | Laravel 12 | PHP 8.2+
