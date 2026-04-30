@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Teacher;
 
-use App\Events\MaterialUploaded;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCourseMaterialRequest;
 use App\Http\Resources\CourseMaterialResource;
@@ -14,139 +13,169 @@ use Illuminate\Support\Facades\Storage;
 
 class TeacherMaterialController extends Controller
 {
-    /**
-     * Display a listing of materials for the authenticated teacher.
-     */
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $teacher = Teacher::where('account_id', $user->id)->firstOrFail();
+        $teacher = $request->user()->teacher;
 
-        $materials = CourseMaterial::where('teacher_id', $teacher->id)
+        if (! $teacher) {
+            return response()->json(['message' => 'Profile Guru belum dikonfigurasi.'], 403);
+        }
+
+        $query = CourseMaterial::where('teacher_id', $teacher->id)
             ->with(['teacher', 'classroom', 'schedule'])
-            ->latest()
-            ->paginate(15);
+            ->latest();
+
+        // Filter by category
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        $materials = $query->paginate(15);
 
         return response()->json([
             'data' => CourseMaterialResource::collection($materials),
-            'meta' => $materials->toArray()['meta'] ?? null,
+            'meta' => [
+                'current_page' => $materials->currentPage(),
+                'last_page' => $materials->lastPage(),
+                'total' => $materials->total(),
+            ],
         ]);
     }
 
-    /**
-     * Store a newly created material in storage.
-     */
     public function store(StoreCourseMaterialRequest $request): JsonResponse
     {
-        $user = $request->user();
-        $teacher = Teacher::where('account_id', $user->id)->firstOrFail();
+        $teacher = $request->user()->teacher;
 
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $filePath = $file->store('materials', 'public');
-
-            $material = CourseMaterial::create([
-                'teacher_id' => $teacher->id,
-                'classroom_id' => $request->classroom_id,
-                'schedule_id' => $request->schedule_id,
-                'title' => $request->title,
-                'description' => $request->description,
-                'file_path' => $filePath,
-                'original_filename' => $file->getClientOriginalName(),
-                'file_size' => $file->getSize(),
-                'file_type' => $file->getMimeType(),
-                'is_published' => $request->is_published ?? true,
-            ]);
-
-            // Load relations for event broadcast
-            $material->load(['teacher', 'classroom']);
-
-            // Broadcast event to notify students in real-time
-            MaterialUploaded::dispatch($material);
-
-            return response()->json(
-                new CourseMaterialResource($material),
-                201
-            );
+        if (! $teacher) {
+            return response()->json(['message' => 'Profile Guru belum dikonfigurasi.'], 403);
         }
 
-        return response()->json(['error' => 'File upload failed'], 400);
+        if (! $request->hasFile('file')) {
+            return response()->json(['message' => 'File materi wajib diunggah.'], 400);
+        }
+
+        $file = $request->file('file');
+        $mimeType = $file->getMimeType();
+        $category = CourseMaterial::resolveCategory($mimeType);
+
+        // Store file in category-based subdirectory
+        $filePath = $file->store("materials/{$category}", 'public');
+
+        $materialData = [
+            'teacher_id' => $teacher->id,
+            'classroom_id' => $request->classroom_id,
+            'schedule_id' => $request->schedule_id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'file_path' => $filePath,
+            'original_filename' => $file->getClientOriginalName(),
+            'file_size' => $file->getSize(),
+            'file_type' => $mimeType,
+            'category' => $category,
+            'is_published' => $request->is_published ?? true,
+        ];
+
+        // Handle subtitle upload for video materials
+        if ($category === 'video' && $request->hasFile('subtitle')) {
+            $subtitle = $request->file('subtitle');
+            $subtitlePath = $subtitle->store('materials/subtitles', 'public');
+            $materialData['subtitle_path'] = $subtitlePath;
+        }
+
+        $material = CourseMaterial::create($materialData);
+        $material->load(['teacher', 'classroom']);
+
+        return response()->json([
+            'data' => new CourseMaterialResource($material),
+            'message' => 'Materi berhasil diunggah.',
+        ], 201);
     }
 
-    /**
-     * Display the specified material.
-     */
     public function show(Request $request, CourseMaterial $material): JsonResponse
     {
-        $user = $request->user();
-        $teacher = Teacher::where('account_id', $user->id)->firstOrFail();
+        $teacher = $request->user()->teacher;
 
-        if ($material->teacher_id !== $teacher->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if (! $teacher || $material->teacher_id !== $teacher->id) {
+            return response()->json(['message' => 'Akses ditolak.'], 403);
         }
 
         $material->load(['teacher', 'classroom', 'schedule']);
 
-        return response()->json(new CourseMaterialResource($material));
+        return response()->json(['data' => new CourseMaterialResource($material)]);
     }
 
-    /**
-     * Update the specified material in storage.
-     */
     public function update(StoreCourseMaterialRequest $request, CourseMaterial $material): JsonResponse
     {
-        $user = $request->user();
-        $teacher = Teacher::where('account_id', $user->id)->firstOrFail();
+        $teacher = $request->user()->teacher;
 
-        if ($material->teacher_id !== $teacher->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if (! $teacher || $material->teacher_id !== $teacher->id) {
+            return response()->json(['message' => 'Akses ditolak.'], 403);
         }
 
-        // Handle file update
+        // Handle file replacement
         if ($request->hasFile('file')) {
             // Delete old file
-            if (Storage::disk('public')->exists($material->file_path)) {
+            if ($material->file_path && Storage::disk('public')->exists($material->file_path)) {
                 Storage::disk('public')->delete($material->file_path);
             }
 
             $file = $request->file('file');
-            $filePath = $file->store('materials', 'public');
+            $mimeType = $file->getMimeType();
+            $category = CourseMaterial::resolveCategory($mimeType);
+            $filePath = $file->store("materials/{$category}", 'public');
 
             $material->update([
                 'file_path' => $filePath,
                 'original_filename' => $file->getClientOriginalName(),
                 'file_size' => $file->getSize(),
-                'file_type' => $file->getMimeType(),
+                'file_type' => $mimeType,
+                'category' => $category,
             ]);
+
+            // Clear subtitle if category changed from video
+            if ($category !== 'video' && $material->subtitle_path) {
+                Storage::disk('public')->delete($material->subtitle_path);
+                $material->update(['subtitle_path' => null]);
+            }
         }
 
-        // Update other fields
-        $material->update($request->only(['title', 'description', 'classroom_id', 'schedule_id', 'is_published']));
+        // Handle subtitle update
+        if ($request->hasFile('subtitle') && $material->category === 'video') {
+            if ($material->subtitle_path && Storage::disk('public')->exists($material->subtitle_path)) {
+                Storage::disk('public')->delete($material->subtitle_path);
+            }
+            $subtitle = $request->file('subtitle');
+            $material->update(['subtitle_path' => $subtitle->store('materials/subtitles', 'public')]);
+        }
 
+        // Update metadata
+        $material->update($request->only(['title', 'description', 'classroom_id', 'schedule_id', 'is_published']));
         $material->load(['teacher', 'classroom', 'schedule']);
 
-        return response()->json(new CourseMaterialResource($material));
+        return response()->json([
+            'data' => new CourseMaterialResource($material),
+            'message' => 'Materi berhasil diperbarui.',
+        ]);
     }
 
-    /**
-     * Remove the specified material from storage.
-     */
     public function destroy(Request $request, CourseMaterial $material): JsonResponse
     {
-        $user = $request->user();
-        $teacher = Teacher::where('account_id', $user->id)->firstOrFail();
+        $teacher = $request->user()->teacher;
 
-        if ($material->teacher_id !== $teacher->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if (! $teacher || $material->teacher_id !== $teacher->id) {
+            return response()->json(['message' => 'Akses ditolak.'], 403);
         }
 
-        // Delete file
-        if (Storage::disk('public')->exists($material->file_path)) {
+        // Delete files
+        if ($material->file_path && Storage::disk('public')->exists($material->file_path)) {
             Storage::disk('public')->delete($material->file_path);
+        }
+        if ($material->subtitle_path && Storage::disk('public')->exists($material->subtitle_path)) {
+            Storage::disk('public')->delete($material->subtitle_path);
         }
 
         $material->delete();
 
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Materi berhasil dihapus.']);
     }
 }
