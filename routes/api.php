@@ -31,6 +31,7 @@ Route::middleware(['auth:sanctum', 'role:teacher', 'throttle:60,1'])->prefix('lm
     // Materials
     Route::apiResource('materials', \App\Http\Controllers\Api\Teacher\TeacherMaterialController::class);
     Route::post('materials/batch', [\App\Http\Controllers\Api\Teacher\TeacherMaterialController::class, 'storeBatch']);
+    Route::get('materials/{material}/content', [\App\Http\Controllers\Api\Teacher\TeacherMaterialController::class, 'content']);
 
     // Attendance
     Route::post('attendances', [\App\Http\Controllers\Api\Teacher\TeacherAttendanceController::class, 'store']);

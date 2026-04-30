@@ -234,4 +234,33 @@ class TeacherMaterialController extends Controller
             'message' => count($created) . ' materi berhasil diunggah.',
         ], 201);
     }
+
+    /**
+     * Get raw text content for previewable text files.
+     */
+    public function content(Request $request, CourseMaterial $material): JsonResponse
+    {
+        $ext = strtolower(pathinfo($material->original_filename, PATHINFO_EXTENSION));
+        $allowed = ['txt', 'md', 'markdown', 'csv', 'json', 'xml', 'html', 'css', 'js'];
+
+        if (!in_array($ext, $allowed)) {
+            return response()->json(['error' => 'Preview not available for this file type'], 422);
+        }
+
+        if (!Storage::disk('public')->exists($material->file_path)) {
+            return response()->json(['error' => 'File not found on disk'], 404);
+        }
+
+        $content = Storage::disk('public')->get($material->file_path);
+
+        if (strlen($content) > 512000) {
+            $content = substr($content, 0, 512000) . "\n\n--- File terlalu besar, hanya menampilkan 500KB pertama ---";
+        }
+
+        return response()->json([
+            'content' => $content,
+            'filename' => $material->original_filename,
+            'extension' => $ext,
+        ]);
+    }
 }
