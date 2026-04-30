@@ -48,6 +48,6 @@ class Schedule extends Model
 
     public function materials(): HasMany
     {
-        return $this->hasMany(Material::class);
+        return $this->hasMany(CourseMaterial::class);
     }
 }

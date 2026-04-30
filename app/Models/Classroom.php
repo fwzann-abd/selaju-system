@@ -50,9 +50,9 @@ class Classroom extends Model
 
     protected $fillable = [
         'name',
-        'tingkat',
-        'jurusan',
-        'rombel',
+        'level',
+        'major',
+        'group_number',
         'slug',
         'teacher_id',
         'academic_year',
