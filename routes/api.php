@@ -8,6 +8,13 @@ Route::prefix('lms')->middleware('throttle:30,1')->group(function () {
     Route::middleware('auth:sanctum')->post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
 });
 
+// ── LMS Notifications (shared, user-scoped) ──────────────────────────────────
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('lms/notifications')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::patch('{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markRead']);
+    Route::post('read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllRead']);
+});
+
 // ── LMS Super Admin ──────────────────────────────────────────────────────────
 Route::middleware(['auth:sanctum', 'role:super_admin', 'throttle:120,1'])->prefix('lms')->group(function () {
     Route::apiResource('accounts', \App\Http\Controllers\Api\AccountController::class);
