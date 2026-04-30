@@ -54,16 +54,31 @@ return new class extends Migration
 
             \DB::statement('PRAGMA foreign_keys=on');
         } else {
-            \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS participants_school_id_foreign');
-            \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS participants_generation_id_foreign');
-            \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS accounts_school_id_foreign');
-            \DB::statement('ALTER TABLE accounts DROP CONSTRAINT IF EXISTS accounts_generation_id_foreign');
+            // PostgreSQL / MySQL — safely drop constraints and columns
+            $constraintsToDrop = [
+                'participants_school_id_foreign',
+                'participants_generation_id_foreign',
+                'accounts_school_id_foreign',
+                'accounts_generation_id_foreign',
+            ];
+
+            foreach ($constraintsToDrop as $constraint) {
+                try {
+                    \DB::statement("ALTER TABLE accounts DROP CONSTRAINT IF EXISTS {$constraint}");
+                } catch (\Exception $e) {
+                    // Constraint may not exist, ignore
+                }
+            }
 
             Schema::table('accounts', function (Blueprint $table) {
-                $columns = Schema::getColumnListing('accounts');
-                $toDrop = array_intersect(['school_id', 'generation_id'], $columns);
-                if (! empty($toDrop)) {
-                    $table->dropColumn($toDrop);
+                if (Schema::hasColumn('accounts', 'school_id')) {
+                    $table->dropColumn('school_id');
+                }
+            });
+
+            Schema::table('accounts', function (Blueprint $table) {
+                if (Schema::hasColumn('accounts', 'generation_id')) {
+                    $table->dropColumn('generation_id');
                 }
             });
         }
