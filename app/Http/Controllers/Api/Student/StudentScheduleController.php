@@ -16,7 +16,7 @@ class StudentScheduleController extends Controller {
         // Get classids the student is in
         $classroom_ids = $student->classrooms()->pluck('classrooms.id');
         
-        $schedules = Schedule::with(['classroom', 'teacher', 'subject'])
+        $schedules = Schedule::with(['classroom', 'teacher', 'subject', 'room'])
              ->whereIn('classroom_id', $classroom_ids)
              ->latest()
              ->get();

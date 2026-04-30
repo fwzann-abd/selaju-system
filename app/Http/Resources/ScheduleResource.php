@@ -12,6 +12,11 @@ class ScheduleResource extends JsonResource {
             'classroom' => new ClassroomResource($this->whenLoaded('classroom')),
             'teacher' => new TeacherResource($this->whenLoaded('teacher')),
             'subject' => new SubjectResource($this->whenLoaded('subject')),
+            'room' => $this->whenLoaded('room', fn () => [
+                'id' => $this->room->id,
+                'name' => $this->room->name,
+                'building' => $this->room->building,
+            ]),
         ];
     }
 }

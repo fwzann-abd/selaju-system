@@ -13,7 +13,7 @@ class TeacherScheduleController extends Controller {
             return response()->json(['message' => 'Profile Teacher belum dikonfigurasi.'], 403);
         }
 
-        $schedules = Schedule::with(['classroom', 'subject'])
+        $schedules = Schedule::with(['classroom', 'subject', 'room'])
              ->where('teacher_id', $teacher->id)
              ->latest()
              ->get();
