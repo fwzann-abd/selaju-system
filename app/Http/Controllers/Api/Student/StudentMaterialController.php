@@ -128,4 +128,50 @@ class StudentMaterialController extends Controller
             'meta' => $materials->toArray()['meta'] ?? null,
         ]);
     }
+
+    /**
+     * Get raw text content for previewable text files (txt, md, csv).
+     */
+    public function content(Request $request, CourseMaterial $material): JsonResponse
+    {
+        $user = $request->user();
+        $student = Student::where('account_id', $user->id)->first();
+
+        if (!$student) {
+            return response()->json(['error' => 'Student not found'], 404);
+        }
+
+        $isInClassroom = $student->classrooms()
+            ->where('classrooms.id', $material->classroom_id)
+            ->exists();
+
+        if (!$isInClassroom || !$material->is_published) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        // Only allow text-based files
+        $ext = strtolower(pathinfo($material->original_filename, PATHINFO_EXTENSION));
+        $allowedExtensions = ['txt', 'md', 'markdown', 'csv', 'json', 'xml', 'html', 'css', 'js'];
+
+        if (!in_array($ext, $allowedExtensions)) {
+            return response()->json(['error' => 'Preview not available for this file type'], 422);
+        }
+
+        if (!Storage::disk('public')->exists($material->file_path)) {
+            return response()->json(['error' => 'File not found'], 404);
+        }
+
+        $content = Storage::disk('public')->get($material->file_path);
+
+        // Limit to 500KB for safety
+        if (strlen($content) > 512000) {
+            $content = substr($content, 0, 512000) . "\n\n--- File terlalu besar, hanya menampilkan 500KB pertama ---";
+        }
+
+        return response()->json([
+            'content' => $content,
+            'filename' => $material->original_filename,
+            'extension' => $ext,
+        ]);
+    }
 }

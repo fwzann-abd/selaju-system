@@ -178,4 +178,60 @@ class TeacherMaterialController extends Controller
 
         return response()->json(['message' => 'Materi berhasil dihapus.']);
     }
+
+    /**
+     * Batch upload multiple files at once.
+     */
+    public function storeBatch(Request $request): JsonResponse
+    {
+        $teacher = $request->user()->teacher;
+
+        if (! $teacher) {
+            return response()->json(['message' => 'Profile Guru belum dikonfigurasi.'], 403);
+        }
+
+        $request->validate([
+            'files' => 'required|array|min:1|max:20',
+            'files.*' => 'required|file|max:204800', // 200MB each
+            'classroom_id' => 'required|uuid|exists:classrooms,id',
+            'title' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $created = [];
+
+        foreach ($request->file('files') as $index => $file) {
+            $mimeType = $file->getMimeType();
+            $category = CourseMaterial::resolveCategory($mimeType);
+            $filePath = $file->store("materials/{$category}", 'public');
+            $originalName = $file->getClientOriginalName();
+            $baseName = pathinfo($originalName, PATHINFO_FILENAME);
+
+            // Use provided title with index suffix, or fallback to filename
+            $title = $request->title
+                ? ($request->title . (count($request->file('files')) > 1 ? ' (' . ($index + 1) . ')' : ''))
+                : $baseName;
+
+            $material = CourseMaterial::create([
+                'teacher_id' => $teacher->id,
+                'classroom_id' => $request->classroom_id,
+                'title' => $title,
+                'description' => $request->description,
+                'file_path' => $filePath,
+                'original_filename' => $originalName,
+                'file_size' => $file->getSize(),
+                'file_type' => $mimeType,
+                'category' => $category,
+                'is_published' => true,
+            ]);
+
+            $material->load(['teacher', 'classroom']);
+            $created[] = new CourseMaterialResource($material);
+        }
+
+        return response()->json([
+            'data' => $created,
+            'message' => count($created) . ' materi berhasil diunggah.',
+        ], 201);
+    }
 }
