@@ -12,8 +12,13 @@ class StudentAnnouncementController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $student = Student::where('account_id', $request->user()->uuid)->firstOrFail();
-        $classroomIds = $student->classrooms()->pluck('classroom_id')->toArray();
+        $student = $request->user()->student;
+
+        if (! $student) {
+            return response()->json(['message' => 'Profile Siswa belum dikonfigurasi.'], 403);
+        }
+
+        $classroomIds = $student->classrooms()->pluck('classrooms.id')->toArray();
 
         $announcements = Announcement::forClassrooms($classroomIds)
             ->with(['author', 'classroom'])

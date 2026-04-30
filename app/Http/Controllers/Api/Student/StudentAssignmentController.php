@@ -13,8 +13,11 @@ class StudentAssignmentController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $student = Student::where('account_id', $request->user()->uuid)->firstOrFail();
-        $classroomIds = $student->classrooms()->pluck('classroom_id');
+        $student = $request->user()->student;
+        if (! $student) {
+            return response()->json(['message' => 'Profile Siswa belum dikonfigurasi.'], 403);
+        }
+        $classroomIds = $student->classrooms()->pluck('classrooms.id');
 
         $assignments = Assignment::whereIn('classroom_id', $classroomIds)
             ->where('is_published', true)
@@ -45,8 +48,11 @@ class StudentAssignmentController extends Controller
 
     public function show(Request $request, Assignment $assignment): JsonResponse
     {
-        $student = Student::where('account_id', $request->user()->uuid)->firstOrFail();
-        $isInClassroom = $student->classrooms()->where('classroom_id', $assignment->classroom_id)->exists();
+        $student = $request->user()->student;
+        if (! $student) {
+            return response()->json(['message' => 'Profile Siswa belum dikonfigurasi.'], 403);
+        }
+        $isInClassroom = $student->classrooms()->where('classrooms.id', $assignment->classroom_id)->exists();
 
         if (! $isInClassroom || ! $assignment->is_published) {
             return response()->json(['message' => 'Tugas tidak ditemukan.'], 404);
@@ -65,8 +71,11 @@ class StudentAssignmentController extends Controller
 
     public function submit(Request $request, Assignment $assignment): JsonResponse
     {
-        $student = Student::where('account_id', $request->user()->uuid)->firstOrFail();
-        $isInClassroom = $student->classrooms()->where('classroom_id', $assignment->classroom_id)->exists();
+        $student = $request->user()->student;
+        if (! $student) {
+            return response()->json(['message' => 'Profile Siswa belum dikonfigurasi.'], 403);
+        }
+        $isInClassroom = $student->classrooms()->where('classrooms.id', $assignment->classroom_id)->exists();
 
         if (! $isInClassroom) {
             return response()->json(['message' => 'Akses ditolak.'], 403);

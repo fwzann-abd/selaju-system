@@ -15,17 +15,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         $this->call(SuperAdminSeeder::class);
         $this->call(MenuSeeder::class);
         $this->call(ModuleSeeder::class);
         $this->call(UserGroupSeeder::class);
 
-        // LMS Specific Seeder
-        $this->call(LmsSeeder::class);
-        $this->call(ScheduleSeeder::class);
+        // LMS — handles school, teachers, students, classrooms,
+        // schedules, rooms, materials, attendance, assignments, announcements
         $this->call(SchoolSeeder::class);
+        $this->call(ScheduleSeeder::class);
+        $this->call(LmsSeeder::class);
         $this->call(CourseMaterialSeeder::class);
     }
 }
