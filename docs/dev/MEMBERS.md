@@ -8,7 +8,7 @@ backend
 
 frontend
 - obyyif  | mkamalabdulkarim@gmail.com
-- ???  |  syamharisss7@gmail.com
+- syam  |  syamharisss7@gmail.com
 - mauludfajarp-prog | mauludfajarp@gmail.com
 - ninoraffy12 |  raffyninofabian@gmail.com
 - ⁠Asti35 |  astinuryansyah01@gmail.com
