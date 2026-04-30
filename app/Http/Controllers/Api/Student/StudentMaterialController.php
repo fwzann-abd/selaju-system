@@ -18,10 +18,14 @@ class StudentMaterialController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $student = Student::where('account_id', $user->id)->firstOrFail();
+        $student = Student::where('account_id', $user->id)->first();
 
-        // Get all classrooms for this student
-        $classroomIds = $student->classrooms()->pluck('classroom_id');
+        if (!$student) {
+            return response()->json(['data' => []]);
+        }
+
+        // Get all classroom IDs for this student via pivot table
+        $classroomIds = $student->classrooms()->pluck('classrooms.id');
 
         $materials = CourseMaterial::whereIn('classroom_id', $classroomIds)
             ->where('is_published', true)
@@ -41,7 +45,11 @@ class StudentMaterialController extends Controller
     public function show(Request $request, CourseMaterial $material): JsonResponse
     {
         $user = $request->user();
-        $student = Student::where('account_id', $user->id)->firstOrFail();
+        $student = Student::where('account_id', $user->id)->first();
+
+        if (!$student) {
+            return response()->json(['error' => 'Student record not found'], 404);
+        }
 
         // Check if student is in the classroom
         $isInClassroom = $student->classrooms()
@@ -63,7 +71,11 @@ class StudentMaterialController extends Controller
     public function download(Request $request, CourseMaterial $material)
     {
         $user = $request->user();
-        $student = Student::where('account_id', $user->id)->firstOrFail();
+        $student = Student::where('account_id', $user->id)->first();
+
+        if (!$student) {
+            return response()->json(['error' => 'Student record not found'], 404);
+        }
 
         // Check if student is in the classroom
         $isInClassroom = $student->classrooms()
@@ -90,7 +102,11 @@ class StudentMaterialController extends Controller
     public function byClassroom(Request $request, $classroomId): JsonResponse
     {
         $user = $request->user();
-        $student = Student::where('account_id', $user->id)->firstOrFail();
+        $student = Student::where('account_id', $user->id)->first();
+
+        if (!$student) {
+            return response()->json(['error' => 'Student record not found'], 404);
+        }
 
         // Verify student is in this classroom
         $isInClassroom = $student->classrooms()
