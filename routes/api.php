@@ -6,13 +6,13 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 // LMS Authentication Routes
-Route::prefix('lms')->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
+Route::prefix('lms')->middleware('throttle:30,1')->group(function () {
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 });
 
 // LMS Super Admin Master Data Routes
-Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('lms')->group(function () {
+Route::middleware(['auth:sanctum', 'role:super_admin', 'throttle:120,1'])->prefix('lms')->group(function () {
     Route::apiResource('accounts', \App\Http\Controllers\Api\AccountController::class);
     Route::apiResource('teachers', \App\Http\Controllers\Api\TeacherController::class);
     Route::apiResource('students', \App\Http\Controllers\Api\StudentController::class);
@@ -20,12 +20,13 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('lms')->group(fu
     Route::apiResource('subjects', \App\Http\Controllers\Api\SubjectController::class);
     Route::apiResource('student-positions', \App\Http\Controllers\Api\StudentPositionController::class);
     Route::apiResource('schedules', \App\Http\Controllers\Api\ScheduleController::class);
+    Route::apiResource('rooms', \App\Http\Controllers\Api\RoomController::class);
 
     Route::post('classrooms/assign-student', [\App\Http\Controllers\Api\ClassroomAssignmentController::class, 'assignStudent']);
 });
 
 // LMS Teacher Routes
-Route::middleware(['auth:sanctum', 'role:teacher'])->prefix('lms/teacher')->group(function () {
+Route::middleware(['auth:sanctum', 'role:teacher', 'throttle:60,1'])->prefix('lms/teacher')->group(function () {
     Route::get('schedules', [\App\Http\Controllers\Api\Teacher\TeacherScheduleController::class, 'index']);
     Route::get('schedules/{schedule}/attendance-sheet', [\App\Http\Controllers\Api\Teacher\TeacherAttendanceController::class, 'sheet']);
     Route::apiResource('materials', \App\Http\Controllers\Api\Teacher\TeacherMaterialController::class);
@@ -33,7 +34,7 @@ Route::middleware(['auth:sanctum', 'role:teacher'])->prefix('lms/teacher')->grou
 });
 
 // LMS Student Routes
-Route::middleware(['auth:sanctum', 'role:student'])->prefix('lms/student')->group(function () {
+Route::middleware(['auth:sanctum', 'role:student', 'throttle:60,1'])->prefix('lms/student')->group(function () {
     Route::get('schedules', [\App\Http\Controllers\Api\Student\StudentScheduleController::class, 'index']);
     Route::get('materials', [\App\Http\Controllers\Api\Student\StudentMaterialController::class, 'index']);
     Route::get('materials/classrooms/{classroomId}', [\App\Http\Controllers\Api\Student\StudentMaterialController::class, 'byClassroom']);
@@ -42,15 +43,15 @@ Route::middleware(['auth:sanctum', 'role:student'])->prefix('lms/student')->grou
     Route::get('attendances', [\App\Http\Controllers\Api\Student\StudentAttendanceController::class, 'index']);
 });
 
-Route::middleware(['api'])->group(function () {
+Route::middleware(['api', 'throttle:60,1'])->group(function () {
     // Public auth
-    Route::post('/login', [\App\Http\Controllers\Api\ParticipantAuthController::class, 'login']);
+    Route::post('/login', [\App\Http\Controllers\Api\ParticipantAuthController::class, 'login'])->middleware('throttle:5,1');
 
     Route::options('/check-nisn', function () {
         return response('', 200);
     });
     Route::post('/check-nisn', [RegisterController::class, 'checkNisn']);
-    Route::post('/register', [RegisterController::class, 'register']);
+    Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:10,1');
     Route::get('/students', [StudentController::class, 'index']);
     Route::get('/students/{student}', [StudentController::class, 'show']);
     Route::patch('/register/{participant}/school', [RegisterController::class, 'updateSchool']);
@@ -61,7 +62,7 @@ Route::middleware(['api'])->group(function () {
         Route::post('/logout', [\App\Http\Controllers\Api\ParticipantAuthController::class, 'logout']);
         Route::patch('/me', [\App\Http\Controllers\Api\ParticipantAuthController::class, 'updateProfile']);
         Route::get('/username/check', [\App\Http\Controllers\Api\ParticipantAuthController::class, 'checkUsername']);
-        Route::post('/email/verification-notification', [\App\Http\Controllers\Api\ParticipantAuthController::class, 'sendVerificationEmail']);
+        Route::post('/email/verification-notification', [\App\Http\Controllers\Api\ParticipantAuthController::class, 'sendVerificationEmail'])->middleware('throttle:3,1');
         Route::post('/email/verify', [\App\Http\Controllers\Api\ParticipantAuthController::class, 'verifyEmail']);
     });
 });
