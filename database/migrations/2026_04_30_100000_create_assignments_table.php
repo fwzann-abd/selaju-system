@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('assignments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teacher_id')->constrained('teachers')->cascadeOnDelete();
+            $table->foreignUuid('teacher_id')->constrained('teachers')->cascadeOnDelete();
             $table->foreignUuid('classroom_id')->constrained('classrooms')->cascadeOnDelete();
             $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
             $table->string('title');
