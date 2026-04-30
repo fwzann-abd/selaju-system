@@ -32,7 +32,9 @@ return [
         'https://www.selangkahlebihmaju.web.id',
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#https://.*\.trycloudflare\.com#',
+    ],
 
     'allowed_headers' => ['*'],
 
