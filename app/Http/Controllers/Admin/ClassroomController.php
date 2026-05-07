@@ -23,15 +23,15 @@ class ClassroomController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('name', 'like', "%{$search}%")
-                        ->orWhere('tingkat', 'like', "%{$search}%")
-                        ->orWhere('jurusan', 'like', "%{$search}%")
+                        ->orWhere('level', 'like', "%{$search}%") // Ubah tingkat ke level
+                        ->orWhere('major', 'like', "%{$search}%") // Ubah jurusan ke major
                         ->orWhere('academic_year', 'like', "%{$search}%");
                 });
             })
             ->with(['teacher:id,name'])
             ->orderBy('academic_year', 'desc')
-            ->orderBy('tingkat')
-            ->orderBy('jurusan')
+            ->orderBy('level') // Ubah tingkat ke level
+            ->orderBy('major') // Ubah jurusan ke major
             ->orderBy('name')
             ->paginate(20);
 

@@ -8,6 +8,7 @@ use App\Models\Account;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -62,5 +63,55 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logout berhasil',
         ], 200);
+    }
+
+    /**
+     * Update the authenticated account's profile (name and email).
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        /** @var Account $account */
+        $account = $request->user();
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:100',
+            'email' => ['sometimes', 'email', 'max:191', Rule::unique('accounts', 'email')->ignore($account->uuid, 'uuid')],
+        ]);
+
+        // Update name on the related profile (teacher or student)
+        if (isset($validated['name'])) {
+            if ($account->teacher()->exists()) {
+                $account->teacher()->update(['name' => $validated['name']]);
+            } elseif ($account->student()->exists()) {
+                $account->student()->update(['name' => $validated['name']]);
+            }
+        }
+
+        // Update email on the account itself
+        if (isset($validated['email'])) {
+            $account->update(['email' => $validated['email']]);
+        }
+
+        $account->refresh()->load(['teacher', 'student']);
+
+        $name = $account->username ?? $account->email;
+        if ($account->teacher) {
+            $name = $account->teacher->name;
+        } elseif ($account->student) {
+            $name = $account->student->name;
+        }
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui.',
+            'user' => [
+                'id' => $account->uuid,
+                'name' => $name,
+                'email' => $account->email,
+                'username' => $account->username,
+                'nisn' => $account->student?->national_id,
+                'nip' => $account->teacher?->nip,
+                'photo' => $account->photo,
+            ],
+        ]);
     }
 }

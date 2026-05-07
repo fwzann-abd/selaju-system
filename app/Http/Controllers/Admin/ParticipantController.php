@@ -18,18 +18,27 @@ class ParticipantController extends Controller
 
         $participants = Participant::query()
             ->when($search, function ($query) use ($search) {
-                $query->where('email', 'like', "%{$search}%")
-                    ->orWhere('username', 'like', "%{$search}%")
-                    ->orWhereHas('student', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
+                $query->where(function ($sub) use ($search) {
+                    // Gunakan nama tabel secara eksplisit untuk menghindari ambiguitas
+                    $sub->where('participants.email', 'ilike', "%{$search}%")
+                        ->orWhere('participants.username', 'ilike', "%{$search}%")
+                        ->orWhereHas('student', function ($q) use ($search) {
+                            $q->where('name', 'ilike', "%{$search}%");
+                        });
+                });
             })
-            ->with(['student' => function ($q) {
-                $q->select('id', 'account_id', 'school_id', 'name')
-                    ->with(['school' => function ($sq) {
-                        $sq->select('schools.id', 'schools.name', 'schools.slug');
-                    }]);
-            }])
+            ->with([
+                'student' => function ($q) {
+                    // Pastikan kolom yang diperlukan untuk relasi (id, account_id, school_id) ikut terpilih
+                    $q->select('id', 'account_id', 'school_id', 'name')
+                        ->with([
+                            'school' => function ($sq) {
+                                $sq->select('id', 'name', 'slug');
+                            },
+                        ]);
+                },
+            ])
+            ->orderBy('participants.created_at', 'desc') // Tambahkan urutan agar data tidak acak
             ->paginate(15);
 
         return view('admin.participants.index', [

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('lms')->middleware('throttle:30,1')->group(function () {
     Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::middleware('auth:sanctum')->post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
+    Route::middleware('auth:sanctum')->patch('/me', [\App\Http\Controllers\Api\AuthController::class, 'updateProfile']);
 });
 
 // ── LMS Notifications (shared, user-scoped) ──────────────────────────────────
@@ -35,6 +36,9 @@ Route::middleware(['auth:sanctum', 'role:teacher', 'throttle:60,1'])->prefix('lm
     Route::get('schedules', [\App\Http\Controllers\Api\Teacher\TeacherScheduleController::class, 'index']);
     Route::get('schedules/{schedule}/attendance-sheet', [\App\Http\Controllers\Api\Teacher\TeacherAttendanceController::class, 'sheet']);
 
+    // Stats
+    Route::get('stats', [\App\Http\Controllers\Api\Teacher\TeacherStatsController::class, 'index']);
+
     // Materials
     Route::apiResource('materials', \App\Http\Controllers\Api\Teacher\TeacherMaterialController::class);
     Route::post('materials/batch', [\App\Http\Controllers\Api\Teacher\TeacherMaterialController::class, 'storeBatch']);
@@ -55,6 +59,9 @@ Route::middleware(['auth:sanctum', 'role:teacher', 'throttle:60,1'])->prefix('lm
 Route::middleware(['auth:sanctum', 'role:student', 'throttle:60,1'])->prefix('lms/student')->group(function () {
     // Schedules
     Route::get('schedules', [\App\Http\Controllers\Api\Student\StudentScheduleController::class, 'index']);
+
+    // Stats
+    Route::get('stats', [\App\Http\Controllers\Api\Student\StudentStatsController::class, 'index']);
 
     // Materials
     Route::get('materials', [\App\Http\Controllers\Api\Student\StudentMaterialController::class, 'index']);
