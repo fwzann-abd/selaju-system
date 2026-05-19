@@ -26,13 +26,16 @@ class StudentAssignmentController extends Controller
             ->latest('due_date')
             ->paginate(15);
 
-        // Attach current student's submission status
-        $submissionMap = AssignmentSubmission::where('student_id', $student->id)
+        // Attach current student's submission status and score
+        $submissions = AssignmentSubmission::where('student_id', $student->id)
             ->whereIn('assignment_id', $assignments->pluck('id'))
-            ->pluck('status', 'assignment_id');
+            ->get()
+            ->keyBy('assignment_id');
 
-        $data = $assignments->through(function ($item) use ($submissionMap) {
-            $item->my_status = $submissionMap[$item->id] ?? 'pending';
+        $data = $assignments->through(function ($item) use ($submissions) {
+            $submission = $submissions->get($item->id);
+            $item->my_status = $submission?->status ?? 'pending';
+            $item->my_score = $submission?->score ?? null;
 
             return $item;
         });
