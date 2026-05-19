@@ -7,7 +7,6 @@ use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
 use App\Models\Classroom;
-use App\Models\CourseMaterial;
 use App\Models\Schedule;
 use App\Models\Student;
 use App\Models\StudentPosition;

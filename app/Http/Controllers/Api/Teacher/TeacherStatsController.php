@@ -9,6 +9,7 @@ use App\Models\CourseMaterial;
 use App\Models\Schedule;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TeacherStatsController extends Controller
 {
@@ -45,14 +46,34 @@ class TeacherStatsController extends Controller
         // Total assignments created by this teacher
         $totalAssignments = Assignment::where('teacher_id', $teacher->id)->count();
 
-        // Attendance summary across all teacher's schedules (current month)
-        $currentMonth = now()->format('Y-m');
-        $attendanceCounts = Attendance::whereIn('schedule_id', $scheduleIds)
-            ->whereRaw("TO_CHAR(date, 'YYYY-MM') = ?", [$currentMonth])
-            ->selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
+        $currentDate = now();
 
+        // Attendance summary across all teacher's schedules (current month)
+        $attendanceCounts = Attendance::whereIn('schedule_id', $scheduleIds)
+            ->whereYear('date', $currentDate->year)
+            ->whereMonth('date', $currentDate->month)
+            ->selectRaw('LOWER(status) as status, COUNT(*) as total')
+            ->groupBy(DB::raw('LOWER(status)'))
+            ->pluck('total', 'status')
+            ->reduce(function (array $counts, $total, $status) {
+                $mappedStatus = match ($status) {
+                    'present', 'hadir', 'late' => 'present',
+                    'permit', 'izin', 'excused' => 'permit',
+                    'sick', 'sakit' => 'sick',
+                    'absent', 'alpa' => 'absent',
+                    default => null,
+                };
+
+                if ($mappedStatus === null) {
+                    return $counts;
+                }
+
+                $counts[$mappedStatus] = ($counts[$mappedStatus] ?? 0) + $total;
+
+                return $counts;
+            }, []);
+
+        $attendanceCounts = collect($attendanceCounts);
         $attendanceTotal = $attendanceCounts->sum();
         $presentCount = $attendanceCounts->get('present', 0);
         $attendanceRate = $attendanceTotal > 0
@@ -67,11 +88,11 @@ class TeacherStatsController extends Controller
                 'total_assignments' => $totalAssignments,
                 'attendance' => [
                     'rate_percent' => $attendanceRate,
-                    'period' => $currentMonth,
+                    'period' => $currentDate->format('Y-m'),
                     'present' => (int) $presentCount,
+                    'permit' => (int) $attendanceCounts->get('permit', 0),
+                    'sick' => (int) $attendanceCounts->get('sick', 0),
                     'absent' => (int) $attendanceCounts->get('absent', 0),
-                    'late' => (int) $attendanceCounts->get('late', 0),
-                    'excused' => (int) $attendanceCounts->get('excused', 0),
                     'total' => $attendanceTotal,
                 ],
             ],

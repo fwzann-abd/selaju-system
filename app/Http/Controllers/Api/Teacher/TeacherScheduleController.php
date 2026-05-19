@@ -18,6 +18,9 @@ class TeacherScheduleController extends Controller
         }
 
         $schedules = Schedule::with(['classroom.students', 'teacher', 'subject', 'room'])
+            ->withCount(['attendances as today_attendance_count' => function ($query) {
+                $query->whereDate('date', today());
+            }])
             ->where('teacher_id', $teacher->id)
             ->latest()
             ->get();

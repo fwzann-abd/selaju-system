@@ -56,7 +56,7 @@ class RoomController extends Controller
     public function update(Request $request, Room $room): JsonResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:rooms,name,' . $room->id,
+            'name' => 'required|string|max:100|unique:rooms,name,'.$room->id,
             'capacity' => 'nullable|integer|min:1',
         ]);
 

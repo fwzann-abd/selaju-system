@@ -9,7 +9,7 @@ class ClassroomStudent extends Pivot
 {
     protected $table = 'classroom_students';
 
-    public $incrementing = true;    
+    public $incrementing = true;
 
     protected $fillable = [
         'classroom_id',

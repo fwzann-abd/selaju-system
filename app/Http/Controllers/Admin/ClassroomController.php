@@ -23,28 +23,26 @@ class ClassroomController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('name', 'like', "%{$search}%")
-                        ->orWhere('level', 'like', "%{$search}%") // Ubah tingkat ke level
-                        ->orWhere('major', 'like', "%{$search}%") // Ubah jurusan ke major
+                        ->orWhere('level', 'like', "%{$search}%")
+                        ->orWhere('major', 'like', "%{$search}%")
                         ->orWhere('academic_year', 'like', "%{$search}%");
                 });
             })
-            ->with(['teacher:id,name'])
+            ->with(['teacher:id,name', 'school'])
             ->orderBy('academic_year', 'desc')
-            ->orderBy('level') // Ubah tingkat ke level
-            ->orderBy('major') // Ubah jurusan ke major
+            ->orderBy('level')
+            ->orderBy('major')
             ->orderBy('name')
-            ->paginate(20);
+            ->paginate(10);
 
-        return view('admin.classrooms.index', [
-            'classrooms' => $classrooms,
-            'search' => $search,
-            'pageTitle' => 'Daftar Kelas',
-            'breadcrumb' => [
-                ['label' => 'Dashboard', 'url' => route('dashboard')],
-                ['label' => 'Master Data', 'url' => null],
-                ['label' => 'Kelas', 'url' => null],
-            ],
-        ]);
+        $pageTitle = 'Daftar Kelas';
+        $breadcrumb = [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Master Data', 'url' => null],
+            ['label' => 'Kelas', 'url' => null],
+        ];
+
+        return view('admin.classrooms.index', compact('classrooms', 'search', 'pageTitle', 'breadcrumb'));
     }
 
     public function create(): View
@@ -132,7 +130,7 @@ class ClassroomController extends Controller
         ];
 
         return view('admin.classrooms.edit', [
-            'classroom' => $classroom->load('teacher:id,name'),
+            'classroom' => $classroom->load(['teacher:id,name', 'school']),
             'teachers' => $teachers,
             'academicYears' => $academicYears,
             'tingkatan' => $tingkatan,
@@ -159,7 +157,7 @@ class ClassroomController extends Controller
 
     public function show(Classroom $classroom): View
     {
-        $classroom->load(['teacher:id,name', 'classroomStudents.student', 'classroomStudents.position']);
+        $classroom->load(['teacher:id,name', 'school', 'classroomStudents.student', 'classroomStudents.position']);
 
         $assignedStudentIds = $classroom->classroomStudents->pluck('student_id')->toArray();
 

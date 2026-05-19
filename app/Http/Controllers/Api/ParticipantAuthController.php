@@ -74,7 +74,7 @@ class ParticipantAuthController extends Controller
 
         $payload = $user->toArray();
         $payload['name'] = $user->name ?? ($user->student?->name ?? $user->username ?? null);
-        
+
         // Add classroom info for easier frontend access
         if ($user->student && $user->student->classrooms->isNotEmpty()) {
             $currentClassroom = $user->student->classrooms->first();

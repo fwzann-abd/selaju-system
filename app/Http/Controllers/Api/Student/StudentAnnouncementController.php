@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
-use App\Models\Student;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

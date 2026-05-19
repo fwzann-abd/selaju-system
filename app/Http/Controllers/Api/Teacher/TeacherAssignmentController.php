@@ -120,7 +120,7 @@ class TeacherAssignmentController extends Controller
         }
 
         $validated = $request->validate([
-            'score' => 'required|integer|min:0|max:' . $submission->assignment->max_score,
+            'score' => 'required|integer|min:0|max:'.$submission->assignment->max_score,
         ]);
 
         $submission->update([

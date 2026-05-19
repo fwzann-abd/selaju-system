@@ -14,14 +14,11 @@ class ClassroomController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $classrooms = Classroom::with('teacher')
+        $classrooms = Classroom::with(['teacher', 'school'])
             ->latest()
-            ->get();
+            ->paginate(10);
 
-        return response()->json([
-            'data' => $classrooms,
-            'total' => $classrooms->count(),
-        ]);
+        return response()->json($classrooms);
     }
 
     /**

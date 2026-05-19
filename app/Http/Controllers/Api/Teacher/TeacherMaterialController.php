@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCourseMaterialRequest;
 use App\Http\Resources\CourseMaterialResource;
 use App\Models\CourseMaterial;
-use App\Models\Teacher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -209,7 +208,7 @@ class TeacherMaterialController extends Controller
 
             // Use provided title with index suffix, or fallback to filename
             $title = $request->title
-                ? ($request->title . (count($request->file('files')) > 1 ? ' (' . ($index + 1) . ')' : ''))
+                ? ($request->title.(count($request->file('files')) > 1 ? ' ('.($index + 1).')' : ''))
                 : $baseName;
 
             $material = CourseMaterial::create([
@@ -231,7 +230,7 @@ class TeacherMaterialController extends Controller
 
         return response()->json([
             'data' => $created,
-            'message' => count($created) . ' materi berhasil diunggah.',
+            'message' => count($created).' materi berhasil diunggah.',
         ], 201);
     }
 
@@ -243,18 +242,18 @@ class TeacherMaterialController extends Controller
         $ext = strtolower(pathinfo($material->original_filename, PATHINFO_EXTENSION));
         $allowed = ['txt', 'md', 'markdown', 'csv', 'json', 'xml', 'html', 'css', 'js'];
 
-        if (!in_array($ext, $allowed)) {
+        if (! in_array($ext, $allowed)) {
             return response()->json(['error' => 'Preview not available for this file type'], 422);
         }
 
-        if (!Storage::disk('public')->exists($material->file_path)) {
+        if (! Storage::disk('public')->exists($material->file_path)) {
             return response()->json(['error' => 'File not found on disk'], 404);
         }
 
         $content = Storage::disk('public')->get($material->file_path);
 
         if (strlen($content) > 512000) {
-            $content = substr($content, 0, 512000) . "\n\n--- File terlalu besar, hanya menampilkan 500KB pertama ---";
+            $content = substr($content, 0, 512000)."\n\n--- File terlalu besar, hanya menampilkan 500KB pertama ---";
         }
 
         return response()->json([

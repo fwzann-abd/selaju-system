@@ -138,8 +138,8 @@ class TeacherAttendanceController extends Controller
                 'recorded_count' => $savedAttendances->count(),
                 'present_count' => $savedAttendances->where('status', 'present')->count(),
                 'absent_count' => $savedAttendances->where('status', 'absent')->count(),
-                'late_count' => $savedAttendances->where('status', 'late')->count(),
-                'excused_count' => $savedAttendances->where('status', 'excused')->count(),
+                'permit_count' => $savedAttendances->where('status', 'permit')->count(),
+                'sick_count' => $savedAttendances->where('status', 'sick')->count(),
             ],
         ]);
     }

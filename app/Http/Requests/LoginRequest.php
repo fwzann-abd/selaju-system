@@ -18,7 +18,7 @@ class LoginRequest extends FormRequest
             'password' => 'required|string',
         ];
     }
-    
+
     public function messages(): array
     {
         return [

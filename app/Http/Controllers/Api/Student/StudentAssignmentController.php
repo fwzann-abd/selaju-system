@@ -33,6 +33,7 @@ class StudentAssignmentController extends Controller
 
         $data = $assignments->through(function ($item) use ($submissionMap) {
             $item->my_status = $submissionMap[$item->id] ?? 'pending';
+
             return $item;
         });
 

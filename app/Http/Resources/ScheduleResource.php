@@ -42,6 +42,7 @@ class ScheduleResource extends JsonResource
                 'name' => $this->room->name,
                 'building' => $this->room->building,
             ]),
+            'is_attended' => (bool) ($this->today_attendance_count ?? false),
         ];
     }
 }

@@ -20,7 +20,7 @@ class StudentMaterialController extends Controller
         $user = $request->user();
         $student = Student::where('account_id', $user->id)->first();
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['data' => []]);
         }
 
@@ -47,7 +47,7 @@ class StudentMaterialController extends Controller
         $user = $request->user();
         $student = Student::where('account_id', $user->id)->first();
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['error' => 'Student record not found'], 404);
         }
 
@@ -73,7 +73,7 @@ class StudentMaterialController extends Controller
         $user = $request->user();
         $student = Student::where('account_id', $user->id)->first();
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['error' => 'Student record not found'], 404);
         }
 
@@ -104,7 +104,7 @@ class StudentMaterialController extends Controller
         $user = $request->user();
         $student = Student::where('account_id', $user->id)->first();
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['error' => 'Student record not found'], 404);
         }
 
@@ -137,7 +137,7 @@ class StudentMaterialController extends Controller
         $user = $request->user();
         $student = Student::where('account_id', $user->id)->first();
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['error' => 'Student not found'], 404);
         }
 
@@ -145,7 +145,7 @@ class StudentMaterialController extends Controller
             ->where('classrooms.id', $material->classroom_id)
             ->exists();
 
-        if (!$isInClassroom || !$material->is_published) {
+        if (! $isInClassroom || ! $material->is_published) {
             return response()->json(['error' => 'Access denied'], 403);
         }
 
@@ -153,11 +153,11 @@ class StudentMaterialController extends Controller
         $ext = strtolower(pathinfo($material->original_filename, PATHINFO_EXTENSION));
         $allowedExtensions = ['txt', 'md', 'markdown', 'csv', 'json', 'xml', 'html', 'css', 'js'];
 
-        if (!in_array($ext, $allowedExtensions)) {
+        if (! in_array($ext, $allowedExtensions)) {
             return response()->json(['error' => 'Preview not available for this file type'], 422);
         }
 
-        if (!Storage::disk('public')->exists($material->file_path)) {
+        if (! Storage::disk('public')->exists($material->file_path)) {
             return response()->json(['error' => 'File not found'], 404);
         }
 
@@ -165,7 +165,7 @@ class StudentMaterialController extends Controller
 
         // Limit to 500KB for safety
         if (strlen($content) > 512000) {
-            $content = substr($content, 0, 512000) . "\n\n--- File terlalu besar, hanya menampilkan 500KB pertama ---";
+            $content = substr($content, 0, 512000)."\n\n--- File terlalu besar, hanya menampilkan 500KB pertama ---";
         }
 
         return response()->json([

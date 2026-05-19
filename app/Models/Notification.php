@@ -11,6 +11,7 @@ class Notification extends Model
     use HasUuids;
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -32,19 +33,24 @@ class Notification extends Model
     ];
 
     // ── Notification Types ──────────────────────────────────────────
-    public const TYPE_ASSIGNMENT_NEW        = 'assignment_new';
-    public const TYPE_ASSIGNMENT_GRADED     = 'assignment_graded';
-    public const TYPE_ATTENDANCE_RECORDED   = 'attendance_recorded';
-    public const TYPE_MATERIAL_UPLOADED     = 'material_uploaded';
-    public const TYPE_ANNOUNCEMENT          = 'announcement';
-    public const TYPE_SUBMISSION_RECEIVED   = 'submission_received';
+    public const TYPE_ASSIGNMENT_NEW = 'assignment_new';
+
+    public const TYPE_ASSIGNMENT_GRADED = 'assignment_graded';
+
+    public const TYPE_ATTENDANCE_RECORDED = 'attendance_recorded';
+
+    public const TYPE_MATERIAL_UPLOADED = 'material_uploaded';
+
+    public const TYPE_ANNOUNCEMENT = 'announcement';
+
+    public const TYPE_SUBMISSION_RECEIVED = 'submission_received';
 
     public static array $icons = [
-        'assignment_new'      => '📝',
-        'assignment_graded'   => '✅',
+        'assignment_new' => '📝',
+        'assignment_graded' => '✅',
         'attendance_recorded' => '📋',
-        'material_uploaded'   => '📁',
-        'announcement'        => '📢',
+        'material_uploaded' => '📁',
+        'announcement' => '📢',
         'submission_received' => '📨',
     ];
 
@@ -62,11 +68,11 @@ class Notification extends Model
     {
         return static::create([
             'account_id' => $accountId,
-            'type'    => $type,
-            'title'   => $title,
-            'body'    => $body,
-            'link'    => $link,
-            'data'    => array_merge(['icon' => static::$icons[$type] ?? '🔔'], $extra),
+            'type' => $type,
+            'title' => $title,
+            'body' => $body,
+            'link' => $link,
+            'data' => array_merge(['icon' => static::$icons[$type] ?? '🔔'], $extra),
         ]);
     }
 

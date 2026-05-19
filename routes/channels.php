@@ -8,7 +8,9 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 
 // LMS - Notifikasi materi ke kelas
 Broadcast::channel('classroom.{id}', function ($user, $id) {
-    if (!$user->student) return false;
-    
+    if (! $user->student) {
+        return false;
+    }
+
     return $user->student->classrooms()->where('classrooms.id', $id)->exists();
 });

@@ -37,7 +37,7 @@ class Announcement extends Model
     {
         return $query->where(function ($q) use ($classroomIds) {
             $q->whereIn('classroom_id', $classroomIds)
-              ->orWhereNull('classroom_id'); // global announcements
+                ->orWhereNull('classroom_id'); // global announcements
         });
     }
 }

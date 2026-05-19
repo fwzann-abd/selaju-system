@@ -25,8 +25,8 @@ class NotificationController extends Controller
             'data' => $notifications->items(),
             'meta' => [
                 'current_page' => $notifications->currentPage(),
-                'last_page'    => $notifications->lastPage(),
-                'total'        => $notifications->total(),
+                'last_page' => $notifications->lastPage(),
+                'total' => $notifications->total(),
                 'unread_count' => Notification::where('account_id', $accountId)
                     ->whereNull('read_at')
                     ->count(),
