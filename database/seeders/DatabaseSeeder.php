@@ -22,8 +22,7 @@ class DatabaseSeeder extends Seeder
         // LMS — handles school, teachers, students, classrooms,
         // schedules, rooms, materials, attendance, assignments, announcements
         $this->call(SchoolSeeder::class);
-        $this->call(ScheduleSeeder::class);
-        $this->call(LmsSeeder::class);
+        $this->call(MassSchoolSeeder::class);
         $this->call(CourseMaterialSeeder::class);
         $this->call(NotificationSeeder::class);
     }
