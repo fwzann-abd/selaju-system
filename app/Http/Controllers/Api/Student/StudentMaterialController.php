@@ -18,14 +18,17 @@ class StudentMaterialController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $student = Student::where('account_id', $user->id)->first();
-
-        if (! $student) {
-            return response()->json(['data' => []]);
-        }
+        $student = Student::where('account_id', $user->id)->firstOrFail();
 
         // Get all classroom IDs for this student via pivot table
-        $classroomIds = $student->classrooms()->pluck('classrooms.id');
+        $classroomIds = $student->classrooms()->pluck('classroom_id');
+
+        if ($classroomIds->isEmpty()) {
+            return response()->json([
+                'data' => [],
+                'meta' => null,
+            ]);
+        }
 
         $materials = CourseMaterial::whereIn('classroom_id', $classroomIds)
             ->where('is_published', true)
@@ -142,7 +145,7 @@ class StudentMaterialController extends Controller
         }
 
         $isInClassroom = $student->classrooms()
-            ->where('classrooms.id', $material->classroom_id)
+            ->where('classroom_id', $material->classroom_id)
             ->exists();
 
         if (! $isInClassroom || ! $material->is_published) {
