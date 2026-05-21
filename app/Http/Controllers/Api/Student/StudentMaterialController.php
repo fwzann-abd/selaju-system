@@ -17,28 +17,29 @@ class StudentMaterialController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $student = Student::where('account_id', $user->id)->firstOrFail();
+        // Get the authenticated student safely: NEVER throw 404
+        $student = auth()->user()?->student;
 
-        // Get all classroom IDs for this student via pivot table
+        if (! $student) {
+            return response()->json(['data' => []]);
+        }
+
+        // Get the IDs of the classrooms the student is enrolled in
         $classroomIds = $student->classrooms()->pluck('classroom_id');
 
         if ($classroomIds->isEmpty()) {
-            return response()->json([
-                'data' => [],
-                'meta' => null,
-            ]);
+            return response()->json(['data' => []]);
         }
 
+        // Fetch the materials
         $materials = CourseMaterial::whereIn('classroom_id', $classroomIds)
-            ->where('is_published', true)
-            ->with(['teacher', 'classroom', 'schedule'])
+            ->with(['teacher', 'classroom'])
             ->latest()
-            ->paginate(20);
+            ->get();
 
+        // Return the JSON response properly
         return response()->json([
             'data' => CourseMaterialResource::collection($materials),
-            'meta' => $materials->toArray()['meta'] ?? null,
         ]);
     }
 
@@ -47,23 +48,24 @@ class StudentMaterialController extends Controller
      */
     public function show(Request $request, CourseMaterial $material): JsonResponse
     {
-        $user = $request->user();
-        $student = Student::where('account_id', $user->id)->first();
+        $student = auth()->user()?->student;
 
         if (! $student) {
             return response()->json(['error' => 'Student record not found'], 404);
         }
 
-        // Check if student is in the classroom
-        $isInClassroom = $student->classrooms()
-            ->where('classroom_id', $material->classroom_id)
-            ->exists();
+        // Get enrolled classroom IDs
+        $classroomIds = $student->classrooms()->pluck('classroom_id');
 
-        if (! $isInClassroom || ! $material->is_published) {
+        // Safely ensure the requested material belongs to one of the student's classrooms
+        $material = CourseMaterial::whereIn('classroom_id', $classroomIds)
+            ->where('id', $material->id)
+            ->with(['teacher', 'classroom'])
+            ->first();
+
+        if (! $material) {
             return response()->json(['error' => 'Material not found or access denied'], 404);
         }
-
-        $material->load(['teacher', 'classroom', 'schedule']);
 
         return response()->json(new CourseMaterialResource($material));
     }
